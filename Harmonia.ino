@@ -6,6 +6,9 @@
 
 
 
+//#include <Adafruit_Sensor.h>
+//#include <Adafruit_BNO055.h>
+
 #include <GravityRtc.h>
 #include "Wire.h"
 #include <Servo.h>
@@ -49,7 +52,7 @@ void setup() {
 	delay(5000);//need this delay to allow ESC to register neutral value (90=center of RC stick)
 	//ProgramESC();
 
-	Serial.begin(9600);
+	Serial1.begin(9600);
 	// put your setup code here, to run once:
 	//pinMode(motor1pin1, OUTPUT);
 	//pinMode(motor1pin2, OUTPUT);
@@ -105,10 +108,10 @@ void loop() {
 	//analogWrite(m_intPumpPinPWM, 0);
 
 	boolean blnParamHit = false;
-	while (Serial.available()) {
+	while (Serial1.available()) {
 		delay(10);
-		if (Serial.available() > 0) {
-			char c = Serial.read();  //gets one byte from serial buffer
+		if (Serial1.available() > 0) {
+			char c = Serial1.read();  //gets one byte from serial buffer
 			if (c == ',') { 
 				blnParamHit = true; 
 			}
@@ -124,35 +127,40 @@ void loop() {
 	}
 
 	if (m_strRemoteCommand.length() > 0) {
-		Serial.println("command: " + m_strRemoteCommand);  //so you can see the captured string 
+		Serial1.println("command: " + m_strRemoteCommand);  //so you can see the captured string 
 		if (m_strRemoteParam.length() > 0) { 
 			//m_strRemoteParam += '\0';
-			Serial.println("param: " + m_strRemoteParam);
-			Serial.println(m_strRemoteParam.toInt());
+			Serial1.println("param: " + m_strRemoteParam);
+			Serial1.println(m_strRemoteParam.toInt());
 		}
 											 									
 		if (m_strRemoteCommand == "INFLATE") {
-			Serial.println("{inflating: now}");
+			Serial1.println("{inflating: now}");
 			digitalWrite(m_intPumpPinDir, HIGH);
 			analogWrite(m_intPumpPinPWM, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "DEFLATE") {
-			Serial.println("deflating");
+			Serial1.println("deflating");
 			digitalWrite(m_intPumpPinDir, LOW);
 			analogWrite(m_intPumpPinPWM, m_strRemoteParam.toInt());
 		}
+		else if (m_strRemoteCommand == "PUMPOFF") {
+			Serial1.println("pump OFF");
+			digitalWrite(m_intPumpPinDir, LOW);
+			analogWrite(m_intPumpPinPWM, 0);
+		}
 		else if (m_strRemoteCommand == "FORWARD") {
-			Serial.println("forward");
+			Serial1.println("forward");
 			digitalWrite(m_intPushRodPinDir, HIGH);
 			analogWrite(m_intPushRodPinPWM, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "REVERSE") {
-			Serial.println("reverse");
+			Serial1.println("reverse");
 			digitalWrite(m_intPushRodPinDir, LOW);
 			analogWrite(m_intPushRodPinPWM, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "PROPELL") {
-			Serial.println("propell");
+			Serial1.println("propell");
 			m_servoMainMotor.write(m_strRemoteParam.toInt());
 		}
 
