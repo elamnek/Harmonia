@@ -14,7 +14,7 @@
 #include <Servo.h>
 
 //note rtc on mega need to use ports D20 and D21 by default - so connect the two SDA and SCL wires to these ports
-GravityRtc rtc;     //RTC Initialization
+GravityRtc rtc;     //RTC Initialization nhkjh
 
 int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
