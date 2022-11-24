@@ -9,12 +9,13 @@
 //#include <Adafruit_Sensor.h>
 //#include <Adafruit_BNO055.h>
 
+
 #include <GravityRtc.h>
 #include "Wire.h"
 #include <Servo.h>
 
 //note rtc on mega need to use ports D20 and D21 by default - so connect the two SDA and SCL wires to these ports
-GravityRtc rtc;     //RTC Initialization nhkjh
+GravityRtc rtc;     //RTC Initialization
 
 int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
