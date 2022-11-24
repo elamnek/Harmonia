@@ -23,8 +23,8 @@ int m_intPumpPinPWM = 2;
 int m_intMotorPinPWM = 6;
 
 int m_intFwdDiveServoPin = 13;
-int m_intAftDiveServoPin = 4;
-int m_intAftRudderServoPin = 5;
+int m_intAftDiveServoPin = 5;
+int m_intAftRudderServoPin = 4;
 
 Servo m_servoFwdDive;
 Servo m_servoAftDive;
@@ -32,18 +32,20 @@ Servo m_servoAftRudder;
 Servo m_servoMainMotor;
 
 String m_strRemoteCommand; //string to be captured from serial port
-String m_strRemoteParam;
-const unsigned int MAX_MESSAGE_LENGTH = 6;
+String m_strRemoteParam; //numeric parameter
+
+int m_intFwdWaterSensorPin = 31;
+int m_intAftWaterSensorPin = 33;
 
 void setup() {
 
 	
-	/*m_servoFwdDive.attach(m_intFwdDiveServoPin);
+	m_servoFwdDive.attach(m_intFwdDiveServoPin);
 	m_servoAftDive.attach(m_intAftDiveServoPin);
 	m_servoAftRudder.attach(m_intAftRudderServoPin);
 	
-	m_servoFwdDive.write(90);
-	m_servoAftDive.write(90);
+	//m_servoFwdDive.write(90);
+	/*m_servoAftDive.write(90);
 	m_servoAftRudder.write(90);*/
 
 	m_servoMainMotor.attach(m_intMotorPinPWM);
@@ -63,7 +65,10 @@ void setup() {
 	pinMode(m_intPushRodPinPWM, OUTPUT);
 	pinMode(m_intPumpPinDir, OUTPUT);
 	pinMode(m_intPumpPinPWM, OUTPUT);
-	//pinMode(m_intMotorPinPWM, OUTPUT);
+	
+	pinMode(m_intFwdWaterSensorPin, INPUT);
+	pinMode(m_intAftWaterSensorPin, INPUT);
+
 
 	//rtc.setup();
 	//Set the RTC time automatically: Calibrate RTC time by your computer time
@@ -75,14 +80,10 @@ void setup() {
 
 void loop() {
 
-
-	//delay(2000);
-
+	if (digitalRead(m_intFwdWaterSensorPin) == 0 || digitalRead(m_intAftWaterSensorPin) == 0) {
+		Serial1.println("ALARM!!!!!!");
+	}
 	
-
-	
-
-
 	//rtc.read();
 	////*************************Time********************************
 	//Serial.print("   Year = ");//year
@@ -144,11 +145,6 @@ void loop() {
 			digitalWrite(m_intPumpPinDir, LOW);
 			analogWrite(m_intPumpPinPWM, m_strRemoteParam.toInt());
 		}
-		else if (m_strRemoteCommand == "PUMPOFF") {
-			Serial1.println("pump OFF");
-			digitalWrite(m_intPumpPinDir, LOW);
-			analogWrite(m_intPumpPinPWM, 0);
-		}
 		else if (m_strRemoteCommand == "FORWARD") {
 			Serial1.println("forward");
 			digitalWrite(m_intPushRodPinDir, HIGH);
@@ -162,6 +158,18 @@ void loop() {
 		else if (m_strRemoteCommand == "PROPELL") {
 			Serial1.println("propell");
 			m_servoMainMotor.write(m_strRemoteParam.toInt());
+		}
+		else if (m_strRemoteCommand == "SERVOFWDDIVE") {
+			Serial1.println("servo forward dive");
+			m_servoFwdDive.write(m_strRemoteParam.toInt());
+		}
+		else if (m_strRemoteCommand == "SERVOAFTDIVE") {
+			Serial1.println("servo aft dive");
+			m_servoAftDive.write(m_strRemoteParam.toInt());
+		}
+		else if (m_strRemoteCommand == "SERVOAFTRUDDER") {
+			Serial1.println("servo aft rudder");
+			m_servoAftRudder.write(m_strRemoteParam.toInt());
 		}
 
 		m_strRemoteCommand = "";
