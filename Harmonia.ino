@@ -81,9 +81,9 @@ void setup() {
 
 void loop() {
 
-	if (digitalRead(m_intFwdWaterSensorPin) == 0 || digitalRead(m_intAftWaterSensorPin) == 0) {
+	/*if (digitalRead(m_intFwdWaterSensorPin) == 0 || digitalRead(m_intAftWaterSensorPin) == 0) {
 		Serial1.println("ALARM!!!!!!");
-	}
+	}*/
 	
 	//rtc.read();
 	////*************************Time********************************
@@ -157,7 +157,7 @@ void loop() {
 			analogWrite(m_intPushRodPinPWM, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "PROPELL") {
-			Serial1.println("propell");
+			Serial1.println("propelling main motor");
 			m_servoMainMotor.write(m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "SERVOFWDDIVE") {

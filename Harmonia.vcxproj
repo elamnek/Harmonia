@@ -114,11 +114,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="NewFolder1\sensor_leak.h" />
     <ClInclude Include="__vm\.Harmonia.vsarduino.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="NewFolder1\sensor_leak.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
