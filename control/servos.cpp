@@ -22,6 +22,7 @@ void init_servos() {
 	m_servoFwdDive.write(120);
 	m_servoAftDive.write(120);
 	m_servoAftRudder.write(120);
+	//asdfahsfdkj
 }
 
 void CommandServo(String strCommand,int intValue) {
