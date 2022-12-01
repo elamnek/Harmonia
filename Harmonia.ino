@@ -10,12 +10,13 @@
 //#include <Adafruit_BNO055.h>
 
 
+#include "control\servos.h"
+#include "sensors\RTC.h"
 #include <GravityRtc.h>
 #include "Wire.h"
 #include <Servo.h>
 
-//note rtc on mega need to use ports D20 and D21 by default - so connect the two SDA and SCL wires to these ports
-GravityRtc rtc;     //RTC Initialization
+
 
 int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
@@ -23,13 +24,9 @@ int m_intPumpPinDir = 3;
 int m_intPumpPinPWM = 2;
 int m_intMotorPinPWM = 6;
 
-int m_intFwdDiveServoPin = 13;
-int m_intAftDiveServoPin = 5;
-int m_intAftRudderServoPin = 4;
 
-Servo m_servoFwdDive;
-Servo m_servoAftDive;
-Servo m_servoAftRudder;
+
+
 Servo m_servoMainMotor;
 
 String m_strRemoteCommand; //string to be captured from serial port
@@ -40,14 +37,8 @@ int m_intAftWaterSensorPin = 33;
 
 void setup() {
 
-	
-	m_servoFwdDive.attach(m_intFwdDiveServoPin);
-	m_servoAftDive.attach(m_intAftDiveServoPin);
-	m_servoAftRudder.attach(m_intAftRudderServoPin);
-	
-	//m_servoFwdDive.write(90);
-	/*m_servoAftDive.write(90);
-	m_servoAftRudder.write(90);*/
+	init_rtc();
+	init_servos();
 
 	m_servoMainMotor.attach(m_intMotorPinPWM);
 	delay(1);
@@ -56,6 +47,7 @@ void setup() {
 	//ProgramESC();
 
 	Serial1.begin(9600);
+	Serial1.println("Harmonia is awake - time is: " + GetRTCTime());
 	// put your setup code here, to run once:
 	//pinMode(motor1pin1, OUTPUT);
 	//pinMode(motor1pin2, OUTPUT);
@@ -70,12 +62,6 @@ void setup() {
 	pinMode(m_intFwdWaterSensorPin, INPUT);
 	pinMode(m_intAftWaterSensorPin, INPUT);
 
-
-	//rtc.setup();
-	//Set the RTC time automatically: Calibrate RTC time by your computer time
-	//rtc.adjustRtc(F(__DATE__), F(__TIME__));
-	//rtc.adjustRtc(2017, 6, 19, 1, 12, 7, 0);  //Set time: 2017/6/19, Monday, 12:07:00
-
 }
 
 
@@ -85,22 +71,7 @@ void loop() {
 		Serial1.println("ALARM!!!!!!");
 	}*/
 	
-	//rtc.read();
-	////*************************Time********************************
-	//Serial.print("   Year = ");//year
-	//Serial.print(rtc.year);
-	//Serial.print("   Month = ");//month
-	//Serial.print(rtc.month);
-	//Serial.print("   Day = ");//day
-	//Serial.print(rtc.day);
-	//Serial.print("   Week = ");//week
-	//Serial.print(rtc.week);
-	//Serial.print("   Hour = ");//hour
-	//Serial.print(rtc.hour);
-	//Serial.print("   Minute = ");//minute
-	//Serial.print(rtc.minute);
-	//Serial.print("   Second = ");//second
-	//Serial.println(rtc.second);
+	
 	
 	
 	//digitalWrite(m_intPushRodPinDir, HIGH);
@@ -162,7 +133,8 @@ void loop() {
 		}
 		else if (m_strRemoteCommand == "SERVOFWDDIVE") {
 			Serial1.println("servo forward dive");
-			m_servoFwdDive.write(m_strRemoteParam.toInt());
+			
+			CommandServo(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "SERVOAFTDIVE") {
 			Serial1.println("servo aft dive");

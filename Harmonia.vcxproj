@@ -114,7 +114,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="sensors\RTC.h" />
+    <ClInclude Include="control\servos.h" />
     <ClInclude Include="__vm\.Harmonia.vsarduino.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="sensors\RTC.cpp" />
+    <ClCompile Include="control\servos.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
