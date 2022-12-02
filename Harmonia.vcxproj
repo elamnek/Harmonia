@@ -114,13 +114,15 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="sensors\GroveWaterSensor.h" />
+    <ClInclude Include="control\pumps.h" />
+    <ClInclude Include="sensors\water_sensors.h" />
     <ClInclude Include="sensors\RTC.h" />
     <ClInclude Include="control\servos.h" />
     <ClInclude Include="__vm\.Harmonia.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="sensors\GroveWaterSensor.cpp" />
+    <ClCompile Include="control\pumps.cpp" />
+    <ClCompile Include="sensors\water_sensors.cpp" />
     <ClCompile Include="sensors\RTC.cpp" />
     <ClCompile Include="control\servos.cpp" />
   </ItemGroup>

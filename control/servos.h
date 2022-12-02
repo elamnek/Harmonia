@@ -11,7 +11,7 @@
 
 void init_servos();
 
-void CommandServo(String strCommand, int intValue);
+void command_servo(String strCommand, int intValue);
 
 
 #endif

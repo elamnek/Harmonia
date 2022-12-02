@@ -27,7 +27,10 @@
     <ClInclude Include="control\servos.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sensors\GroveWaterSensor.h">
+    <ClInclude Include="sensors\water_sensors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="control\pumps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,7 +41,10 @@
     <ClCompile Include="control\servos.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sensors\GroveWaterSensor.cpp">
+    <ClCompile Include="sensors\water_sensors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="control\pumps.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

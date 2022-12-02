@@ -2,19 +2,19 @@
 // 
 // 
 
-#include "GroveWaterSensor.h"
+#include "water_sensors.h"
 
 int m_intFwdWaterSensorPin = 49;
 int m_intAftWaterSensorPin = 33;
 
-void init_watersensor() {
+void init_watersensors() {
 
 	pinMode(m_intFwdWaterSensorPin, INPUT);
 	pinMode(m_intAftWaterSensorPin, INPUT);
 
 }
 
-boolean Leak() {
+boolean leak_detected() {
 
 	if (digitalRead(m_intFwdWaterSensorPin) == 0) {
 		//|| digitalRead(m_intAftWaterSensorPin) == 0

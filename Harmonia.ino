@@ -4,13 +4,12 @@
  Author:	eugene
 */
 
-
-
 //#include <Adafruit_Sensor.h>
 //#include <Adafruit_BNO055.h>
 
 
-#include "sensors\GroveWaterSensor.h"
+#include "control\pumps.h"
+#include "sensors\water_sensors.h"
 #include "control\servos.h"
 #include "sensors\RTC.h"
 #include <GravityRtc.h>
@@ -19,17 +18,13 @@
 
 int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
-int m_intPumpPinDir = 3;
-int m_intPumpPinPWM = 2;
 int m_intMotorPinPWM = 6;
-
-
 Servo m_servoMainMotor;
+
+
 
 String m_strRemoteCommand; //string to be captured from serial port
 String m_strRemoteParam; //numeric parameter
-
-
 
 //FSM states
 enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM } state;
@@ -40,6 +35,8 @@ void setup() {
 
 	init_rtc();
 	init_servos();
+	init_pumps();
+	init_watersensors();
 
 	m_servoMainMotor.attach(m_intMotorPinPWM);
 	delay(1);
@@ -49,17 +46,10 @@ void setup() {
 
 	Serial1.begin(9600);
 	Serial1.println("Harmonia is awake - time is: " + GetRTCTime());
-	// put your setup code here, to run once:
-	//pinMode(motor1pin1, OUTPUT);
-	//pinMode(motor1pin2, OUTPUT);
-	//pinMode(motor2pin1, OUTPUT);
-	//pinMode(motor2pin2, OUTPUT);
-
+	
 	pinMode(m_intPushRodPinDir, OUTPUT);
 	pinMode(m_intPushRodPinPWM, OUTPUT);
-	pinMode(m_intPumpPinDir, OUTPUT);
-	pinMode(m_intPumpPinPWM, OUTPUT);
-	
+		
 }
 
 
@@ -68,7 +58,7 @@ void loop() {
 	int intStartState = state;
 	switch (state) {
 	case IDLE:
-		if (Leak()) { state = ALARM;}
+		if (leak_detected()) { state = ALARM;}
 
 
 		break;
@@ -90,22 +80,12 @@ void loop() {
 		break;
 	}
 
-	//check for state change and send to remote
+	//check for state change and send to remote - move this 2 the 1s timer event
 	if (intStartState != state) {
-		//note errors occure at remote end if we send a message via RF serial every iteration of the loop - so need to
+		//note errors occur at remote end if we send a message via RF serial every iteration of the loop - so need to
 		//only send when necessary
 		Serial1.println("STATE=" + String(state));
 	}
-
-
-
-
-	
-	//digitalWrite(m_intPushRodPinDir, HIGH);
-	//analogWrite(m_intPushRodPinPWM, 100);
-
-	//digitalWrite(m_intPumpPinDir, HIGH);
-	//analogWrite(m_intPumpPinPWM, 0);
 
 	boolean blnParamHit = false;
 	while (Serial1.available()) {
@@ -136,13 +116,11 @@ void loop() {
 											 									
 		if (m_strRemoteCommand == "INFLATE") {
 			Serial1.println("{inflating: now}");
-			digitalWrite(m_intPumpPinDir, HIGH);
-			analogWrite(m_intPumpPinPWM, m_strRemoteParam.toInt());
+			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt())
 		}
 		else if (m_strRemoteCommand == "DEFLATE") {
 			Serial1.println("deflating");
-			digitalWrite(m_intPumpPinDir, LOW);
-			analogWrite(m_intPumpPinPWM, m_strRemoteParam.toInt());
+			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt())
 		}
 		else if (m_strRemoteCommand == "FORWARD") {
 			Serial1.println("forward");
@@ -160,29 +138,20 @@ void loop() {
 		}
 		else if (m_strRemoteCommand == "SERVOFWDDIVE") {
 			Serial1.println("servo forward dive");		
-			CommandServo(m_strRemoteCommand, m_strRemoteParam.toInt());
+			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "SERVOAFTDIVE") {
 			Serial1.println("servo aft dive");
-			CommandServo(m_strRemoteCommand, m_strRemoteParam.toInt());
+			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "SERVOAFTRUDDER") {
 			Serial1.println("servo aft rudder");
-			CommandServo(m_strRemoteCommand, m_strRemoteParam.toInt());
+			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 
 		m_strRemoteCommand = "";
 		m_strRemoteParam = "";
 	}
-	/*else {
-		Serial.println("no RC");
-	}*/
-
-
-	
-
-
-
 	
 	/*Motor.write(120);
 	delay(1000);

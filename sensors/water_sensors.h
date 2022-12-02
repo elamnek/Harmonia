@@ -9,9 +9,9 @@
 	#include "WProgram.h"
 #endif
 
-void init_watersensor();
+void init_watersensors();
 
-boolean Leak();
+boolean leak_detected();
 
 #endif
 

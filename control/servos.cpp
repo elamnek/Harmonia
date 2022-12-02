@@ -25,7 +25,7 @@ void init_servos() {
 	
 }
 
-void CommandServo(String strCommand,int intValue) {
+void command_servo(String strCommand,int intValue) {
 
 	if (strCommand == "SERVOFWDDIVE") {
 		m_servoFwdDive.write(intValue);
