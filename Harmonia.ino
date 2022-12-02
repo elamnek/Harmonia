@@ -10,13 +10,12 @@
 //#include <Adafruit_BNO055.h>
 
 
+#include "sensors\GroveWaterSensor.h"
 #include "control\servos.h"
 #include "sensors\RTC.h"
 #include <GravityRtc.h>
 #include "Wire.h"
 #include <Servo.h>
-
-
 
 int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
@@ -25,17 +24,19 @@ int m_intPumpPinPWM = 2;
 int m_intMotorPinPWM = 6;
 
 
-
-
 Servo m_servoMainMotor;
 
 String m_strRemoteCommand; //string to be captured from serial port
 String m_strRemoteParam; //numeric parameter
 
-int m_intFwdWaterSensorPin = 31;
-int m_intAftWaterSensorPin = 33;
+
+
+//FSM states
+enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM } state;
 
 void setup() {
+
+	state = IDLE;
 
 	init_rtc();
 	init_servos();
@@ -59,20 +60,46 @@ void setup() {
 	pinMode(m_intPumpPinDir, OUTPUT);
 	pinMode(m_intPumpPinPWM, OUTPUT);
 	
-	pinMode(m_intFwdWaterSensorPin, INPUT);
-	pinMode(m_intAftWaterSensorPin, INPUT);
-
 }
 
 
 void loop() {
 
-	/*if (digitalRead(m_intFwdWaterSensorPin) == 0 || digitalRead(m_intAftWaterSensorPin) == 0) {
-		Serial1.println("ALARM!!!!!!");
-	}*/
-	
-	
-	
+	int intStartState = state;
+	switch (state) {
+	case IDLE:
+		if (Leak()) { state = ALARM;}
+
+
+		break;
+	case STATIC_TRIM:
+		
+
+		break;
+	case DYNAMIC_TRIM:
+		
+
+		break;
+	case RUN:
+		
+
+		break;
+	case ALARM:
+		
+
+		break;
+	}
+
+	//check for state change and send to remote
+	if (intStartState != state) {
+		//note errors occure at remote end if we send a message via RF serial every iteration of the loop - so need to
+		//only send when necessary
+		Serial1.println("STATE=" + String(state));
+	}
+
+
+
+
 	
 	//digitalWrite(m_intPushRodPinDir, HIGH);
 	//analogWrite(m_intPushRodPinPWM, 100);
@@ -132,17 +159,16 @@ void loop() {
 			m_servoMainMotor.write(m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "SERVOFWDDIVE") {
-			Serial1.println("servo forward dive");
-			
+			Serial1.println("servo forward dive");		
 			CommandServo(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "SERVOAFTDIVE") {
 			Serial1.println("servo aft dive");
-			m_servoAftDive.write(m_strRemoteParam.toInt());
+			CommandServo(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "SERVOAFTRUDDER") {
 			Serial1.println("servo aft rudder");
-			m_servoAftRudder.write(m_strRemoteParam.toInt());
+			CommandServo(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 
 		m_strRemoteCommand = "";

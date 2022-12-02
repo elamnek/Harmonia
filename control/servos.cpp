@@ -22,13 +22,19 @@ void init_servos() {
 	m_servoFwdDive.write(120);
 	m_servoAftDive.write(120);
 	m_servoAftRudder.write(120);
-	//asdfahsfdkj
+	
 }
 
 void CommandServo(String strCommand,int intValue) {
 
 	if (strCommand == "SERVOFWDDIVE") {
 		m_servoFwdDive.write(intValue);
+	}
+	else if (strCommand == "SERVOAFTDIVE"){
+		m_servoAftDive.write(intValue);
+	}
+	else if (strCommand == "SERVOAFTRUDDER"){
+		m_servoAftRudder.write(intValue);
 	}
 	
 }

@@ -114,11 +114,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="sensors\GroveWaterSensor.h" />
     <ClInclude Include="sensors\RTC.h" />
     <ClInclude Include="control\servos.h" />
     <ClInclude Include="__vm\.Harmonia.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="sensors\GroveWaterSensor.cpp" />
     <ClCompile Include="sensors\RTC.cpp" />
     <ClCompile Include="control\servos.cpp" />
   </ItemGroup>

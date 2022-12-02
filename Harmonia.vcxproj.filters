@@ -27,12 +27,18 @@
     <ClInclude Include="control\servos.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sensors\GroveWaterSensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sensors\RTC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="control\servos.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sensors\GroveWaterSensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
