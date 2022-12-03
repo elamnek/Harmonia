@@ -4,7 +4,7 @@
 
 #include "water_sensors.h"
 
-int m_intFwdWaterSensorPin = 49;
+int m_intFwdWaterSensorPin = 5; //49
 int m_intAftWaterSensorPin = 33;
 
 void init_watersensors() {
@@ -22,4 +22,16 @@ boolean leak_detected() {
 		return true;	
 	}
 	return false;
+}
+boolean leak_detected2() {
+
+	if (analogRead(m_intFwdWaterSensorPin) < 80) {
+		//|| digitalRead(m_intAftWaterSensorPin) == 0
+
+		return true;
+	}
+	return false;
+}
+uint8_t leak_read() {
+	return analogRead(m_intFwdWaterSensorPin);
 }

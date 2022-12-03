@@ -8,6 +8,7 @@
 //#include <Adafruit_BNO055.h>
 
 
+#include <arduino-timer.h>
 #include "control\pumps.h"
 #include "sensors\water_sensors.h"
 #include "control\servos.h"
@@ -22,14 +23,29 @@ int m_intMotorPinPWM = 6;
 Servo m_servoMainMotor;
 
 
+auto timer1Hz = timer_create_default();
+
+
 
 String m_strRemoteCommand; //string to be captured from serial port
 String m_strRemoteParam; //numeric parameter
 
 //FSM states
 enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM } state;
+String  GetState() {
+	switch (state) {
+	case IDLE: return "IDLE";
+	case STATIC_TRIM: return "STATIC_TRIM";
+	case DYNAMIC_TRIM: return "DYNAMIC_TRIM";
+	case RUN: return "RUN";
+	case ALARM: return "ALARM";
+	};
+}
+
 
 void setup() {
+
+	timer1Hz.every(1000, timer1Hz_interrupt);
 
 	state = IDLE;
 
@@ -52,13 +68,23 @@ void setup() {
 		
 }
 
+bool timer1Hz_interrupt(void*) {
+	
+	Serial1.println(GetState() + "," + String(leak_read()));
+
+	return true;
+}
+
+
 
 void loop() {
+
+	timer1Hz.tick();
 
 	int intStartState = state;
 	switch (state) {
 	case IDLE:
-		if (leak_detected()) { state = ALARM;}
+		if (leak_detected2()) { state = ALARM;}
 
 
 		break;
@@ -75,17 +101,17 @@ void loop() {
 
 		break;
 	case ALARM:
-		
+		if (!leak_detected2()) { state = IDLE; }
 
 		break;
 	}
 
 	//check for state change and send to remote - move this 2 the 1s timer event
-	if (intStartState != state) {
-		//note errors occur at remote end if we send a message via RF serial every iteration of the loop - so need to
-		//only send when necessary
-		Serial1.println("STATE=" + String(state));
-	}
+	//if (intStartState != state) {
+	//	//note errors occur at remote end if we send a message via RF serial every iteration of the loop - so need to
+	//	//only send when necessary
+	//	Serial1.println("STATE=" + String(state));
+	//}
 
 	boolean blnParamHit = false;
 	while (Serial1.available()) {
@@ -116,11 +142,11 @@ void loop() {
 											 									
 		if (m_strRemoteCommand == "INFLATE") {
 			Serial1.println("{inflating: now}");
-			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt())
+			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "DEFLATE") {
 			Serial1.println("deflating");
-			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt())
+			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "FORWARD") {
 			Serial1.println("forward");
