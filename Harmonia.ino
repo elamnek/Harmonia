@@ -84,7 +84,7 @@ void loop() {
 	int intStartState = state;
 	switch (state) {
 	case IDLE:
-		if (leak_detected2()) { state = ALARM;}
+		if (leak_detected()) { state = ALARM;}
 
 
 		break;
@@ -101,7 +101,7 @@ void loop() {
 
 		break;
 	case ALARM:
-		if (!leak_detected2()) { state = IDLE; }
+		if (!leak_detected()) { state = IDLE; }
 
 		break;
 	}
