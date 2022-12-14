@@ -8,6 +8,8 @@
 //#include <Adafruit_BNO055.h>
 
 
+#include <MS5837.h>
+#include "pressure_sensor.h"
 #include <arduino-timer.h>
 #include "control\pumps.h"
 #include "sensors\water_sensors.h"
@@ -31,7 +33,7 @@ String m_strRemoteCommand; //string to be captured from serial port
 String m_strRemoteParam; //numeric parameter
 
 //FSM states
-enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM } state;
+enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
 String  GetState() {
 	switch (state) {
 	case IDLE: return "IDLE";
@@ -53,6 +55,11 @@ void setup() {
 	init_servos();
 	init_pumps();
 	init_watersensors();
+
+	String msg = init_presssuresensor(997);
+	if (msg.length() > 0) {
+		Serial1.println(msg);
+	}
 
 	m_servoMainMotor.attach(m_intMotorPinPWM);
 	delay(1);
