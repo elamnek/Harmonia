@@ -8,6 +8,8 @@
 //#include <Adafruit_BNO055.h>
 
 
+#include "IMU.h"
+#include "rpm_sensor.h"
 #include <MS5837.h>
 #include "pressure_sensor.h"
 #include <arduino-timer.h>

@@ -115,6 +115,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="control\pumps.h" />
+    <ClInclude Include="sensors\IMU.h" />
+    <ClInclude Include="sensors\rpm_sensor.h" />
     <ClInclude Include="sensors\pressure_sensor.h" />
     <ClInclude Include="sensors\water_sensors.h" />
     <ClInclude Include="sensors\RTC.h" />
@@ -123,6 +125,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="control\pumps.cpp" />
+    <ClCompile Include="sensors\IMU.cpp" />
+    <ClCompile Include="sensors\rpm_sensor.cpp" />
     <ClCompile Include="sensors\pressure_sensor.cpp" />
     <ClCompile Include="sensors\water_sensors.cpp" />
     <ClCompile Include="sensors\RTC.cpp" />
