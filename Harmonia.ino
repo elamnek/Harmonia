@@ -8,10 +8,10 @@
 //#include <Adafruit_BNO055.h>
 
 
-#include "IMU.h"
-#include "rpm_sensor.h"
+//#include "sensors\IMU.h"
+//#include "sensors\rpm_sensor.h"
 #include <MS5837.h>
-#include "pressure_sensor.h"
+#include "sensors\pressure_sensor.h"
 #include <arduino-timer.h>
 #include "control\pumps.h"
 #include "sensors\water_sensors.h"
@@ -43,7 +43,7 @@ String  GetState() {
 	case DYNAMIC_TRIM: return "DYNAMIC_TRIM";
 	case RUN: return "RUN";
 	case ALARM: return "ALARM";
-	};
+	}
 }
 
 
@@ -58,10 +58,7 @@ void setup() {
 	init_pumps();
 	init_watersensors();
 
-	String msg = init_presssuresensor(997);
-	if (msg.length() > 0) {
-		Serial1.println(msg);
-	}
+	
 
 	m_servoMainMotor.attach(m_intMotorPinPWM);
 	delay(1);
@@ -72,6 +69,15 @@ void setup() {
 	Serial1.begin(9600);
 	Serial1.println("Harmonia is awake - time is: " + GetRTCTime());
 	
+	String msg = init_presssuresensor(997);
+	if (msg.length() > 0) {
+		Serial1.println(msg);
+	}
+	else {
+		Serial1.println("pressure sensor OK!!");
+	}
+
+
 	pinMode(m_intPushRodPinDir, OUTPUT);
 	pinMode(m_intPushRodPinPWM, OUTPUT);
 		
@@ -79,48 +85,47 @@ void setup() {
 
 bool timer1Hz_interrupt(void*) {
 	
-	Serial1.println(GetState() + "," + String(leak_read()));
+	Serial1.println(GetState() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_pressure()));
 
 	return true;
 }
-
 
 
 void loop() {
 
 	timer1Hz.tick();
 
+
 	int intStartState = state;
 	switch (state) {
 	case IDLE:
-		if (leak_detected()) { state = ALARM;}
-
+		if (leak_detected()) {
+			state = ALARM;
+		}
 
 		break;
 	case STATIC_TRIM:
-		
-
 		break;
 	case DYNAMIC_TRIM:
-		
-
 		break;
 	case RUN:
-		
-
 		break;
 	case ALARM:
-		if (!leak_detected()) { state = IDLE; }
-
+		if (!leak_detected()) {
+			state = IDLE;
+		}
+		
 		break;
 	}
+	
+	
 
 	//check for state change and send to remote - move this 2 the 1s timer event
-	//if (intStartState != state) {
-	//	//note errors occur at remote end if we send a message via RF serial every iteration of the loop - so need to
-	//	//only send when necessary
-	//	Serial1.println("STATE=" + String(state));
-	//}
+	if (intStartState != state) {
+		//note errors occur at remote end if we send a message via RF serial every iteration of the loop - so need to
+		//only send when necessary
+		Serial1.println("STATE=" + String(state));
+	}
 
 	boolean blnParamHit = false;
 	while (Serial1.available()) {

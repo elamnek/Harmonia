@@ -26,21 +26,25 @@ String init_presssuresensor(int intFluidDensity) {
 
 //returns depth in meters
 float get_depth() {
+    sensor.read();
     return sensor.depth();
 }
 
 //returns pressure in mbars
 float get_pressure() {
+    sensor.read();
     return sensor.pressure();
 }
 
 //returns temp in deg C
 float get_temperature() {
+    sensor.read();
     return sensor.temperature();
 }
 
 //returns altitude in m above SL
 float get_altitude() {
+    sensor.read();
     return sensor.altitude();
 }
 
