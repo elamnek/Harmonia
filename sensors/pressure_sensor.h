@@ -13,9 +13,9 @@ String init_presssuresensor(int intFluidDensity);
 
 float get_depth();
 
-float get_pressure();
+float get_waterpressure();
 
-float get_temperature();
+float get_watertemperature();
 
 //returns altitude in m above SL
 float get_altitude();

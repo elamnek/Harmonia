@@ -31,13 +31,13 @@ float get_depth() {
 }
 
 //returns pressure in mbars
-float get_pressure() {
+float get_waterpressure() {
     sensor.read();
     return sensor.pressure();
 }
 
 //returns temp in deg C
-float get_temperature() {
+float get_watertemperature() {
     sensor.read();
     return sensor.temperature();
 }

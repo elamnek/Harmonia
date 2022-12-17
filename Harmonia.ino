@@ -10,6 +10,8 @@
 
 //#include "sensors\IMU.h"
 //#include "sensors\rpm_sensor.h"
+#include <SPL06-007.h>
+#include "sensors\air_pressure_sensor.h"
 #include <MS5837.h>
 #include "sensors\pressure_sensor.h"
 #include <arduino-timer.h>
@@ -18,7 +20,7 @@
 #include "control\servos.h"
 #include "sensors\RTC.h"
 #include <GravityRtc.h>
-#include "Wire.h"
+//#include "Wire.h"
 #include <Servo.h>
 
 int m_intPushRodPinDir = 11;
@@ -53,12 +55,29 @@ void setup() {
 
 	state = IDLE;
 
+	Serial1.begin(9600);
+	Serial1.println("Harmonia is awake - time is: " + GetRTCTime());
+
 	init_rtc();
 	init_servos();
 	init_pumps();
 	init_watersensors();
 
-	
+	String msg = init_presssuresensor(997);
+	if (msg.length() > 0) {
+		Serial1.println(msg);
+	}
+	else {
+		Serial1.println("water pressure sensor OK!!");
+	}
+	msg = init_airpresssuresensor();
+	if (msg.length() > 0) {
+		Serial1.println(msg);
+	}
+	else {
+		Serial1.println("air pressure sensor OK!!");
+	}
+
 
 	m_servoMainMotor.attach(m_intMotorPinPWM);
 	delay(1);
@@ -66,16 +85,9 @@ void setup() {
 	delay(5000);//need this delay to allow ESC to register neutral value (90=center of RC stick)
 	//ProgramESC();
 
-	Serial1.begin(9600);
-	Serial1.println("Harmonia is awake - time is: " + GetRTCTime());
 	
-	String msg = init_presssuresensor(997);
-	if (msg.length() > 0) {
-		Serial1.println(msg);
-	}
-	else {
-		Serial1.println("pressure sensor OK!!");
-	}
+	
+	
 
 
 	pinMode(m_intPushRodPinDir, OUTPUT);
@@ -85,7 +97,7 @@ void setup() {
 
 bool timer1Hz_interrupt(void*) {
 	
-	Serial1.println(GetState() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_pressure()));
+	Serial1.println(GetState() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + String(get_airpressure()));
 
 	return true;
 }

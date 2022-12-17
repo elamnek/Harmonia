@@ -42,6 +42,9 @@
     <ClInclude Include="sensors\IMU.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sensors\air_pressure_sensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sensors\RTC.cpp">
@@ -63,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sensors\IMU.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sensors\air_pressure_sensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
