@@ -9,6 +9,8 @@
 	#include "WProgram.h"
 #endif
 
+String init_imu();
 
+float get_imuorientationx();
 #endif
 

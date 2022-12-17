@@ -16,7 +16,7 @@ void init_rtc() {
 	//rtc.adjustRtc(2017, 6, 19, 1, 12, 7, 0);  //Set time: 2017/6/19, Monday, 12:07:00
 }
 
-String GetRTCTime() {
+String get_rtctime() {
 
 	rtc.read();
 

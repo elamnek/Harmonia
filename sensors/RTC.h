@@ -11,7 +11,7 @@
 
 void init_rtc();
 
-String GetRTCTime();
+String get_rtctime();
 
 #endif
 

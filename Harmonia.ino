@@ -4,11 +4,11 @@
  Author:	eugene
 */
 
-//#include <Adafruit_Sensor.h>
-//#include <Adafruit_BNO055.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
 
 
-//#include "sensors\IMU.h"
+#include "sensors\IMU.h"
 //#include "sensors\rpm_sensor.h"
 #include <SPL06-007.h>
 #include "sensors\air_pressure_sensor.h"
@@ -56,27 +56,40 @@ void setup() {
 	state = IDLE;
 
 	Serial1.begin(9600);
-	Serial1.println("Harmonia is awake - time is: " + GetRTCTime());
+	
 
 	init_rtc();
+	Serial1.println("Harmonia is awake - time is: " + get_rtctime());
+
 	init_servos();
 	init_pumps();
 	init_watersensors();
 
-	String msg = init_presssuresensor(997);
-	if (msg.length() > 0) {
-		Serial1.println(msg);
-	}
-	else {
-		Serial1.println("water pressure sensor OK!!");
-	}
-	msg = init_airpresssuresensor();
+	String msg = init_airpresssuresensor();
 	if (msg.length() > 0) {
 		Serial1.println(msg);
 	}
 	else {
 		Serial1.println("air pressure sensor OK!!");
 	}
+
+	msg = init_imu();
+	if (msg.length() > 0) {
+		Serial1.println(msg);
+	}
+	else {
+		Serial1.println("IMU sensor OK!!");
+	}
+
+
+	msg = init_presssuresensor(997);
+	if (msg.length() > 0) {
+		Serial1.println(msg);
+	}
+	else {
+		Serial1.println("water pressure sensor OK!!");
+	}
+	
 
 
 	m_servoMainMotor.attach(m_intMotorPinPWM);
@@ -97,7 +110,7 @@ void setup() {
 
 bool timer1Hz_interrupt(void*) {
 	
-	Serial1.println(GetState() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + String(get_airpressure()));
+	Serial1.println(GetState() + "," + get_rtctime() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + String(get_airpressure()) + "," + String(get_imuorientationx()));
 
 	return true;
 }
