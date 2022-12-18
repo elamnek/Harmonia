@@ -9,8 +9,13 @@
 	#include "WProgram.h"
 #endif
 
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
+
 String init_imu();
 
-float get_imuorientationx();
+sensors_vec_t get_imuorientation();
+
+
 #endif
 

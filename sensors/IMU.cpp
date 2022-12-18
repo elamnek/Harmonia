@@ -24,10 +24,11 @@ String init_imu() {
 
 }
 
-//returns pressure in pascals
- float get_imuorientationx() {
+
+ sensors_vec_t get_imuorientation() {
     sensors_event_t event;
     bno.getEvent(&event);
-    return event.orientation.x;
+    return event.orientation;
 }
+ 
 
