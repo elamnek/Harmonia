@@ -6,6 +6,9 @@ https://github.com/elamnek/Harmonia/wiki
 Related projects are: 
 
 HarmoniaRemote - windows desktop software to control operation of submarine (via RF transciever) and collect sensor data and forward to PostgreSQL database
+https://github.com/elamnek/HarmoniaRemote
+
 
 HarmoniaSlave - a secondary microprocessor that sits in the aft section of the sub and acts as a sensor slave to pass RPM and internal pressure sensor data to main microprocessor
+https://github.com/elamnek/HarmoniaSlave
 
