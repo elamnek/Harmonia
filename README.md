@@ -12,4 +12,4 @@ https://github.com/elamnek/HarmoniaRemote
 HarmoniaSlave - a secondary microprocessor that sits in the aft section of the sub and acts as a sensor slave to pass RPM and internal pressure sensor data to main microprocessor
 https://github.com/elamnek/HarmoniaSlave
 
-Note: the Harmonia submarine is part of a University research project being carried out between mid 2022 and mid 2023 - this repository will be continually updated over the next few months with the latest code as it is developed. Final deployment version will be available in mid 2023
+Note: the Harmonia submarine is part of a University of Adelaide research project being carried out between mid 2022 and mid 2023 - this repository will be continually updated over the next few months with the latest code as it is developed. Final release package will be available in mid 2023.
