@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.32228.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Harmonia", "Harmonia.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HarmoniaSlave", "..\HarmoniaSlave\HarmoniaSlave.vcxproj", "{7B996E33-FECF-4B51-BA78-7D6792E9468D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -15,6 +17,10 @@ Global
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.Build.0 = Debug|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.ActiveCfg = Release|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.Build.0 = Release|Win32
+		{7B996E33-FECF-4B51-BA78-7D6792E9468D}.Debug|x86.ActiveCfg = Debug|Win32
+		{7B996E33-FECF-4B51-BA78-7D6792E9468D}.Debug|x86.Build.0 = Debug|Win32
+		{7B996E33-FECF-4B51-BA78-7D6792E9468D}.Release|x86.ActiveCfg = Release|Win32
+		{7B996E33-FECF-4B51-BA78-7D6792E9468D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
