@@ -7,7 +7,6 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 
-
 #include "sensors\IMU.h"
 //#include "sensors\rpm_sensor.h"
 #include <SPL06-007.h>
@@ -97,9 +96,13 @@ void setup() {
 	}
 
 
+	//this reports on addresses of all connected I2C devices
+	//had issues with connecting multiple pressure sensors
+	//bluerobotics underwater sensor only support default I2C address
+	//so does the internal pressure/temp sensor - so this is why it was moved
+	//to the aft leonardo uC
 	scan_i2c();
-	
-	
+		
 	m_servoMainMotor.attach(m_intMotorPinPWM);
 	delay(1);
 	m_servoMainMotor.write(90);
