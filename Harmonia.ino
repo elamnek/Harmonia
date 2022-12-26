@@ -36,6 +36,9 @@ auto timer1Hz = timer_create_default();
 String m_strRemoteCommand; //string to be captured from serial port
 String m_strRemoteParam; //numeric parameter
 
+String m_strLeonardo1;
+String m_strLeonardo2;
+
 //FSM states
 enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
 String  GetState() {
@@ -55,7 +58,10 @@ void setup() {
 
 	state = IDLE;
 
+	//data from HarmoniaRemote (RF)
 	Serial1.begin(9600);
+
+	Serial2.begin(9600);
 	
 
 	init_rtc();
@@ -108,8 +114,10 @@ void setup() {
 
 bool timer1Hz_interrupt(void*) {
 	
-	Serial1.println(GetState() + "," + get_rtctime() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + 
-		String(get_airpressure()) + "," + String(get_imuorientation().x) + "," + String(get_imuorientation().y) + "," + String(get_imuorientation().z));
+	//Serial1.println(GetState() + "," + get_rtctime() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + 
+	//	String(get_airpressure()) + "," + String(get_imuorientation().x) + "," + String(get_imuorientation().y) + "," + String(get_imuorientation().z) + "," + m_strLeonardo1);
+
+		Serial1.println(m_strLeonardo1 + "," + m_strLeonardo2);
 
 	return true;
 }
@@ -143,6 +151,30 @@ void loop() {
 	}
 	
 	
+	//read data from leonardo (serial 2)
+	boolean blnCommaHit = false;
+	String strLeonardo1 = "";
+	String strLeonardo2 = "";
+	while (Serial2.available()) {
+		delay(10);
+		if (Serial2.available() > 0) {
+			char c = Serial2.read();  //gets one byte from serial buffer
+			if (c == ',') {
+				blnCommaHit = true;
+			}
+			else {
+				if (!blnCommaHit) {
+					strLeonardo1 += c; //makes readstring from the single bytes
+				}
+				else {
+					strLeonardo2 += c;
+				}
+			}
+		}
+	}
+	if (strLeonardo1.length() > 0) {m_strLeonardo1 = strLeonardo1;}
+	if (strLeonardo2.length() > 0) {m_strLeonardo2 = strLeonardo2; }
+
 
 	//check for state change and send to remote - move this 2 the 1s timer event
 	if (intStartState != state) {
