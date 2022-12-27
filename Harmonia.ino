@@ -35,12 +35,13 @@ auto timer1Hz = timer_create_default();
 String m_strRemoteCommand; //string to be captured from serial port
 String m_strRemoteParam; //numeric parameter
 
-String m_strLeonardo1;
-String m_strLeonardo2;
+String m_strLeonardoRPM;
+String m_strLeonardoPressure;
+String m_strLeonardoTemp;
 
 //FSM states
 enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
-String  GetState() {
+String  get_state() {
 	switch (state) {
 	case IDLE: return "IDLE";
 	case STATIC_TRIM: return "STATIC_TRIM";
@@ -117,8 +118,8 @@ void setup() {
 
 bool timer1Hz_interrupt(void*) {
 	
-	//Serial1.println(GetState() + "," + get_rtctime() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + 
-	//	String(get_airpressure()) + "," + String(get_imuorientation().x) + "," + String(get_imuorientation().y) + "," + String(get_imuorientation().z) + "," + m_strLeonardo1);
+	Serial1.println(get_state() + "," + get_rtctime() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + 
+		String(get_airpressure()) + "," + String(get_imuorientation().x) + "," + String(get_imuorientation().y) + "," + String(get_imuorientation().z) + "," + m_strLeonardo1);
 
 		Serial1.println(m_strLeonardo1 + "," + m_strLeonardo2);
 
@@ -154,30 +155,29 @@ void loop() {
 	}
 	
 	
-	//read data from leonardo (serial 2)
-	boolean blnCommaHit = false;
-	String strLeonardo1 = "";
-	String strLeonardo2 = "";
+	//read data from leonardo using serial2 port
+	//format is RPM,pressure,temp
+	int intValueIndex = 0; //this denotes the csv index of the value being read
+	String strLeonardoRPM = "";
+	String strLeonardoPressure = "";
+	String strLeonardoTemp = "";
 	while (Serial2.available()) {
 		delay(10);
 		if (Serial2.available() > 0) {
 			char c = Serial2.read();  //gets one byte from serial buffer
 			if (c == ',') {
-				blnCommaHit = true;
+				intValueIndex++;
 			}
 			else {
-				if (!blnCommaHit) {
-					strLeonardo1 += c; //makes readstring from the single bytes
-				}
-				else {
-					strLeonardo2 += c;
-				}
+				if (intValueIndex == 0) {strLeonardoRPM += c;}
+				else if (intValueIndex == 1){strLeonardoPressure += c;}
+				else if (intValueIndex == 2) { strLeonardoTemp += c; }
 			}
 		}
 	}
-	if (strLeonardo1.length() > 0) {m_strLeonardo1 = strLeonardo1;}
-	if (strLeonardo2.length() > 0) {m_strLeonardo2 = strLeonardo2; }
-
+	if (strLeonardoRPM.length() > 0) {m_strLeonardoRPM = strLeonardoRPM;}
+	if (strLeonardoPressure.length() > 0) {m_strLeonardoPressure = strLeonardoPressure; }
+	if (strLeonardoTemp.length() > 0) { m_strLeonardoTemp = strLeonardoTemp; }
 
 	//check for state change and send to remote - move this 2 the 1s timer event
 	if (intStartState != state) {
