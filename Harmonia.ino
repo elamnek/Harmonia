@@ -8,9 +8,8 @@
 #include <Adafruit_BNO055.h>
 
 #include "sensors\IMU.h"
-//#include "sensors\rpm_sensor.h"
 #include <SPL06-007.h>
-#include "sensors\air_pressure_sensor.h"
+#include "sensors\leonardo_sensors.h"
 #include <MS5837.h>
 #include "sensors\pressure_sensor.h"
 #include <arduino-timer.h>
@@ -22,22 +21,18 @@
 #include "Wire.h"
 #include <Servo.h>
 
+//this serial will be used to communicate in 2 directions with the desktop software and digital twin
+#define serialRF Serial1
+
 int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
 int m_intMotorPinPWM = 6;
 Servo m_servoMainMotor;
 
-
 auto timer1Hz = timer_create_default();
-
-
 
 String m_strRemoteCommand; //string to be captured from serial port
 String m_strRemoteParam; //numeric parameter
-
-String m_strLeonardoRPM;
-String m_strLeonardoPressure;
-String m_strLeonardoTemp;
 
 //FSM states
 enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
@@ -59,41 +54,30 @@ void setup() {
 	state = IDLE;
 
 	//data from HarmoniaRemote (RF)
-	Serial1.begin(9600);
-
-	Serial2.begin(9600);
-	
+	serialRF.begin(9600);
 
 	init_rtc();
-	Serial1.println("Harmonia is awake - time is: " + get_rtctime());
+	serialRF.println("Harmonia is awake - time is: " + get_rtctime());
 
 	init_servos();
 	init_pumps();
 	init_watersensors();
+	init_leonardo_sensors();
 
-	String msg = init_airpresssuresensor();
+	String msg = init_imu();
 	if (msg.length() > 0) {
-		Serial1.println(msg);
+		serialRF.println(msg);
 	}
 	else {
-		Serial1.println("air pressure sensor OK!!");
+		serialRF.println("IMU sensor OK!!");
 	}
-
-	msg = init_imu();
-	if (msg.length() > 0) {
-		Serial1.println(msg);
-	}
-	else {
-		Serial1.println("IMU sensor OK!!");
-	}
-
 
 	msg = init_presssuresensor(997);
 	if (msg.length() > 0) {
-		Serial1.println(msg);
+		serialRF.println(msg);
 	}
 	else {
-		Serial1.println("water pressure sensor OK!!");
+		serialRF.println("water pressure sensor OK!!");
 	}
 
 
@@ -118,10 +102,8 @@ void setup() {
 
 bool timer1Hz_interrupt(void*) {
 	
-	Serial1.println(get_state() + "," + get_rtctime() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + 
-		String(get_airpressure()) + "," + String(get_imuorientation().x) + "," + String(get_imuorientation().y) + "," + String(get_imuorientation().z) + "," + m_strLeonardo1);
-
-		Serial1.println(m_strLeonardo1 + "," + m_strLeonardo2);
+	serialRF.println(get_state() + "," + get_rtctime() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + String(get_leonardo_rpm()) + "," +
+		String(get_leonardo_pressure()) + "," + String(get_leonardo_temp()) + "," + String(get_imuorientation().x) + "," + String(get_imuorientation().y) + "," + String(get_imuorientation().z));
 
 	return true;
 }
@@ -131,6 +113,7 @@ void loop() {
 
 	timer1Hz.tick();
 
+	read_leonardo();
 
 	int intStartState = state;
 	switch (state) {
@@ -155,42 +138,18 @@ void loop() {
 	}
 	
 	
-	//read data from leonardo using serial2 port
-	//format is RPM,pressure,temp
-	int intValueIndex = 0; //this denotes the csv index of the value being read
-	String strLeonardoRPM = "";
-	String strLeonardoPressure = "";
-	String strLeonardoTemp = "";
-	while (Serial2.available()) {
-		delay(10);
-		if (Serial2.available() > 0) {
-			char c = Serial2.read();  //gets one byte from serial buffer
-			if (c == ',') {
-				intValueIndex++;
-			}
-			else {
-				if (intValueIndex == 0) {strLeonardoRPM += c;}
-				else if (intValueIndex == 1){strLeonardoPressure += c;}
-				else if (intValueIndex == 2) { strLeonardoTemp += c; }
-			}
-		}
-	}
-	if (strLeonardoRPM.length() > 0) {m_strLeonardoRPM = strLeonardoRPM;}
-	if (strLeonardoPressure.length() > 0) {m_strLeonardoPressure = strLeonardoPressure; }
-	if (strLeonardoTemp.length() > 0) { m_strLeonardoTemp = strLeonardoTemp; }
-
 	//check for state change and send to remote - move this 2 the 1s timer event
 	if (intStartState != state) {
 		//note errors occur at remote end if we send a message via RF serial every iteration of the loop - so need to
 		//only send when necessary
-		Serial1.println("STATE=" + String(state));
+		serialRF.println("STATE=" + String(state));
 	}
 
 	boolean blnParamHit = false;
-	while (Serial1.available()) {
+	while (serialRF.available()) {
 		delay(10);
-		if (Serial1.available() > 0) {
-			char c = Serial1.read();  //gets one byte from serial buffer
+		if (serialRF.available() > 0) {
+			char c = serialRF.read();  //gets one byte from serial buffer
 			if (c == ',') { 
 				blnParamHit = true; 
 			}
@@ -206,15 +165,15 @@ void loop() {
 	}
 
 	if (m_strRemoteCommand.length() > 0) {
-		Serial1.println("command: " + m_strRemoteCommand);  //so you can see the captured string 
+		serialRF.println("command: " + m_strRemoteCommand);  //so you can see the captured string 
 		if (m_strRemoteParam.length() > 0) { 
 			//m_strRemoteParam += '\0';
-			Serial1.println("param: " + m_strRemoteParam);
-			Serial1.println(m_strRemoteParam.toInt());
+			serialRF.println("param: " + m_strRemoteParam);
+			serialRF.println(m_strRemoteParam.toInt());
 		}
 											 									
 		if (m_strRemoteCommand == "INFLATE") {
-			Serial1.println("{inflating: now}");
+			serialRF.println("{inflating: now}");
 			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "DEFLATE") {
@@ -222,29 +181,29 @@ void loop() {
 			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "FORWARD") {
-			Serial1.println("forward");
+			serialRF.println("forward");
 			digitalWrite(m_intPushRodPinDir, HIGH);
 			analogWrite(m_intPushRodPinPWM, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "REVERSE") {
-			Serial1.println("reverse");
+			serialRF.println("reverse");
 			digitalWrite(m_intPushRodPinDir, LOW);
 			analogWrite(m_intPushRodPinPWM, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "PROPELL") {
-			Serial1.println("propelling main motor");
+			serialRF.println("propelling main motor");
 			m_servoMainMotor.write(m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "SERVOFWDDIVE") {
-			Serial1.println("servo forward dive");		
+			serialRF.println("servo forward dive");
 			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "SERVOAFTDIVE") {
-			Serial1.println("servo aft dive");
+			serialRF.println("servo aft dive");
 			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "SERVOAFTRUDDER") {
-			Serial1.println("servo aft rudder");
+			serialRF.println("servo aft rudder");
 			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 
@@ -274,7 +233,7 @@ void scan_i2c() {
 	byte error, address; //variable for error and I2C address
 	int nDevices;
 
-	Serial1.println("Scanning I2C...");
+	serialRF.println("Scanning I2C...");
 
 	nDevices = 0;
 	for (address = 1; address < 127; address++)
@@ -287,25 +246,25 @@ void scan_i2c() {
 
 		if (error == 0)
 		{
-			Serial1.print("I2C device found at address 0x");
+			serialRF.print("I2C device found at address 0x");
 			if (address < 16)
-				Serial1.print("0");
-			Serial1.print(address, HEX);
-			Serial1.println("  !");
+				serialRF.print("0");
+			serialRF.print(address, HEX);
+			serialRF.println("  !");
 			nDevices++;
 		}
 		else if (error == 4)
 		{
-			Serial1.print("Unknown error at address 0x");
+			serialRF.print("Unknown error at address 0x");
 			if (address < 16)
-				Serial1.print("0");
-			Serial1.println(address, HEX);
+				serialRF.print("0");
+			serialRF.println(address, HEX);
 		}
 	}
 	if (nDevices == 0)
-		Serial1.println("No I2C devices found\n");
+		serialRF.println("No I2C devices found\n");
 	else
-		Serial1.println("done\n");
+		serialRF.println("done\n");
 
 
 }
