@@ -137,8 +137,8 @@ void loop() {
 	case STATIC_TRIM:
 
 		//this is a non-blocking function that checks sensors and makes adjustments to trim
+		//must be non-blocking so that main loop is always running and checking for leaks or new commands from remote
 		adjust_static_trim();
-
 
 		break;
 	case DYNAMIC_TRIM:
