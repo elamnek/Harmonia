@@ -4,35 +4,42 @@
  Author:	eugene lamnek
 */
 
-#include "rf_comms.h"
+//installed libraries
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
-#include "sensors\IMU.h"
 #include <SPL06-007.h>
-#include "sensors\leonardo_sensors.h"
 #include <MS5837.h>
-#include "sensors\pressure_sensor.h"
 #include <arduino-timer.h>
-#include "control\pumps.h"
-#include "sensors\water_sensors.h"
-#include "control\servos.h"
-#include "sensors\RTC.h"
 #include <GravityRtc.h>
 #include "Wire.h"
 #include <Servo.h>
 
+//harmonia libraries
+#include "states\state_manual.h"
+#include "comms\rf_comms.h"
+#include "control\pumps.h"
+#include "control\main_motor.h"
+#include "control\servos.h"
+#include "control\pitch.h"
+#include "sensors\water_sensors.h"
+#include "sensors\RTC.h"
+#include "sensors\IMU.h"
+#include "sensors\leonardo_sensors.h"
+#include "sensors\pressure_sensor.h"
+
 int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
-int m_intMotorPinPWM = 6;
-Servo m_servoMainMotor;
+
 
 auto timer1Hz = timer_create_default();
 
 //FSM states
-enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
+enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
+//function used to return text description of current state
 String  get_state() {
 	switch (state) {
 	case IDLE: return "IDLE";
+	case MANUAL: return "MANUAL";
 	case STATIC_TRIM: return "STATIC_TRIM";
 	case DYNAMIC_TRIM: return "DYNAMIC_TRIM";
 	case RUN: return "RUN";
@@ -53,6 +60,7 @@ void setup() {
 
 	init_servos();
 	init_pumps();
+	init_main_motor();
 	init_watersensors();
 	init_leonardo_sensors();
 
@@ -80,13 +88,7 @@ void setup() {
 	//to the aft leonardo uC
 	scan_i2c();
 		
-	m_servoMainMotor.attach(m_intMotorPinPWM);
-	delay(1);
-	m_servoMainMotor.write(90);
-	delay(5000);//need this delay to allow ESC to register neutral value (90=center of RC stick)
-	//ProgramESC();
-
-
+	
 	pinMode(m_intPushRodPinDir, OUTPUT);
 	pinMode(m_intPushRodPinPWM, OUTPUT);
 		
@@ -111,6 +113,16 @@ void loop() {
 	//call this on each loop - this checks for new commands coming from desktop remote
 	check_rf_comms();
 
+	//set state using commands from remote
+	String strRemoteCommand = get_remote_command();
+	if (strRemoteCommand == "IDLE") { state = IDLE; }
+	if (strRemoteCommand == "MANUAL") {state = MANUAL;}
+	if (strRemoteCommand == "STATIC_TRIM") { state = STATIC_TRIM; }
+	if (strRemoteCommand == "DYNAMIC_TRIM") { state = DYNAMIC_TRIM; }
+	if (strRemoteCommand == "RUN") { state = RUN; }
+	if (strRemoteCommand == "ALARM") { state = ALARM; }
+	clear_rf_command();
+
 	//state control
 	int intStartState = state;
 	switch (state) {
@@ -120,7 +132,17 @@ void loop() {
 		}
 
 		break;
+	case MANUAL:
+
+		//this checks for a manual command from RF remote and applies it
+		apply_manual_command();
+
+		break;
 	case STATIC_TRIM:
+
+
+
+
 		break;
 	case DYNAMIC_TRIM:
 		break;
@@ -134,77 +156,6 @@ void loop() {
 		break;
 	}
 	
-	
-	//check for state change and send to remote - move this 2 the 1s timer event
-	if (intStartState != state) {
-		//note errors occur at remote end if we send a message via RF serial every iteration of the loop - so need to
-		//only send when necessary
-		send_rf_comm("STATE=" + String(state));
-	}
-
-	
-
-	if (m_strRemoteCommand.length() > 0) {
-		serialRF.println("command: " + m_strRemoteCommand);  //so you can see the captured string 
-		if (m_strRemoteParam.length() > 0) { 
-			//m_strRemoteParam += '\0';
-			serialRF.println("param: " + m_strRemoteParam);
-			serialRF.println(m_strRemoteParam.toInt());
-		}
-											 									
-		if (m_strRemoteCommand == "INFLATE") {
-			serialRF.println("{inflating: now}");
-			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "DEFLATE") {
-			serialRF.println("deflating");
-			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "FORWARD") {
-			serialRF.println("forward");
-			digitalWrite(m_intPushRodPinDir, HIGH);
-			analogWrite(m_intPushRodPinPWM, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "REVERSE") {
-			serialRF.println("reverse");
-			digitalWrite(m_intPushRodPinDir, LOW);
-			analogWrite(m_intPushRodPinPWM, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "PROPELL") {
-			serialRF.println("propelling main motor");
-			m_servoMainMotor.write(m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "SERVOFWDDIVE") {
-			serialRF.println("servo forward dive");
-			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "SERVOAFTDIVE") {
-			serialRF.println("servo aft dive");
-			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "SERVOAFTRUDDER") {
-			serialRF.println("servo aft rudder");
-			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
-		}
-
-		m_strRemoteCommand = "";
-		m_strRemoteParam = "";
-	}
-	
-	/*Motor.write(120);
-	delay(1000);
-	Motor.write(110);
-	delay(1000);
-	Motor.write(100);
-	delay(1000);
-	Motor.write(90);
-	delay(1000);
-	Motor.write(80);
-	delay(1000);
-	Motor.write(70);
-	delay(1000);
-	Motor.write(60);
-	delay(1000);*/
 	
 }
 
@@ -252,6 +203,13 @@ void scan_i2c() {
 
 
 //dead car bodies
+
+//check for state change and send to remote - move this 2 the 1s timer event
+	//if (intStartState != state) {
+	//	//note errors occur at remote end if we send a message via RF serial every iteration of the loop - so need to
+	//	//only send when necessary
+	//	send_rf_comm("STATE=" + String(state));
+	//}
 
 //void ProgramESC() {
 //

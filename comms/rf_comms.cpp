@@ -45,7 +45,11 @@ void check_rf_comms() {
 String get_remote_command() {
 	return m_strRemoteCommand;
 }
-long get_remote_param() {
-	return m_strRemoteParam.toInt();
+String get_remote_param() {
+	return m_strRemoteParam;
+}
+void clear_rf_command() {
+	m_strRemoteCommand = "";
+	m_strRemoteParam = "";
 }
 

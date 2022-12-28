@@ -13,5 +13,13 @@ void init_rf_comms();
 
 void send_rf_comm(String strMsg);
 
+void check_rf_comms();
+
+String get_remote_command();
+
+String get_remote_param();
+
+void clear_rf_command();
+
 #endif
 
