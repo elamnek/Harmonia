@@ -142,24 +142,7 @@ void loop() {
 		send_rf_comm("STATE=" + String(state));
 	}
 
-	boolean blnParamHit = false;
-	while (serialRF.available()) {
-		delay(10);
-		if (serialRF.available() > 0) {
-			char c = serialRF.read();  //gets one byte from serial buffer
-			if (c == ',') { 
-				blnParamHit = true; 
-			}
-			else {
-				if (!blnParamHit) {
-					m_strRemoteCommand += c; //makes readstring from the single bytes
-				}
-				else {
-					m_strRemoteParam += c;
-				}	
-			}	
-		}
-	}
+	
 
 	if (m_strRemoteCommand.length() > 0) {
 		serialRF.println("command: " + m_strRemoteCommand);  //so you can see the captured string 
