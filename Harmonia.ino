@@ -44,6 +44,7 @@ String  get_state() {
 	}
 }
 
+float m_fltStaticTrimDepth;
 
 void setup() {
 
@@ -113,7 +114,10 @@ void loop() {
 	String strRemoteCommand = get_remote_command();
 	if (strRemoteCommand == "IDLE") { state = IDLE; }
 	if (strRemoteCommand == "MANUAL") {state = MANUAL;}
-	if (strRemoteCommand == "STATIC_TRIM") { state = STATIC_TRIM; }
+	if (strRemoteCommand == "STATIC_TRIM") { 
+		state = STATIC_TRIM;
+		m_fltStaticTrimDepth = get_remote_param().toFloat();
+	}
 	if (strRemoteCommand == "DYNAMIC_TRIM") { state = DYNAMIC_TRIM; }
 	if (strRemoteCommand == "RUN") { state = RUN; }
 	if (strRemoteCommand == "ALARM") { state = ALARM; }
@@ -138,7 +142,7 @@ void loop() {
 
 		//this is a non-blocking function that checks sensors and makes adjustments to trim
 		//must be non-blocking so that main loop is always running and checking for leaks or new commands from remote
-		adjust_static_trim();
+		adjust_static_trim(m_fltStaticTrimDepth);
 
 		break;
 	case DYNAMIC_TRIM:

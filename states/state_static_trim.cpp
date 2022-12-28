@@ -8,7 +8,7 @@
 //this function must be non-blocking (no pauses or time delays)
 //it gets called from the main loop and makes an adjustment to pumps and or pushrod each time it is called based
 //on current sensor readings
-void adjust_static_trim() {
+void adjust_static_trim(float fltStaticTrimDepth) {
 
 	//example calls to sensors:
 	float depth = get_depth();

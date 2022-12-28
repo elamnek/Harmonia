@@ -9,7 +9,7 @@
 	#include "WProgram.h"
 #endif
 
-void adjust_static_trim();
+void adjust_static_trim(float fltStaticTrimDepth);
 
 #endif
 
