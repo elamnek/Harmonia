@@ -1,12 +1,12 @@
 /*
  Name:		Harmonia.ino
  Created:	9/11/2022 8:06:00 AM
- Author:	eugene
+ Author:	eugene lamnek
 */
 
+#include "rf_comms.h"
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
-
 #include "sensors\IMU.h"
 #include <SPL06-007.h>
 #include "sensors\leonardo_sensors.h"
@@ -21,18 +21,12 @@
 #include "Wire.h"
 #include <Servo.h>
 
-//this serial will be used to communicate in 2 directions with the desktop software and digital twin
-#define serialRF Serial1
-
 int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
 int m_intMotorPinPWM = 6;
 Servo m_servoMainMotor;
 
 auto timer1Hz = timer_create_default();
-
-String m_strRemoteCommand; //string to be captured from serial port
-String m_strRemoteParam; //numeric parameter
 
 //FSM states
 enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
@@ -53,11 +47,9 @@ void setup() {
 
 	state = IDLE;
 
-	//data from HarmoniaRemote (RF)
-	serialRF.begin(9600);
 
 	init_rtc();
-	serialRF.println("Harmonia is awake - time is: " + get_rtctime());
+	send_rf_comm("Harmonia is awake - time is: " + get_rtctime());
 
 	init_servos();
 	init_pumps();
@@ -66,18 +58,18 @@ void setup() {
 
 	String msg = init_imu();
 	if (msg.length() > 0) {
-		serialRF.println(msg);
+		send_rf_comm(msg);
 	}
 	else {
-		serialRF.println("IMU sensor OK!!");
+		send_rf_comm("IMU sensor OK!!");
 	}
 
 	msg = init_presssuresensor(997);
 	if (msg.length() > 0) {
-		serialRF.println(msg);
+		send_rf_comm(msg);
 	}
 	else {
-		serialRF.println("water pressure sensor OK!!");
+		send_rf_comm("water pressure sensor OK!!");
 	}
 
 
@@ -102,7 +94,7 @@ void setup() {
 
 bool timer1Hz_interrupt(void*) {
 	
-	serialRF.println(get_state() + "," + get_rtctime() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + String(get_leonardo_rpm()) + "," +
+	send_rf_comm(get_state() + "," + get_rtctime() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + String(get_leonardo_rpm()) + "," +
 		String(get_leonardo_pressure()) + "," + String(get_leonardo_temp()) + "," + String(get_imuorientation().x) + "," + String(get_imuorientation().y) + "," + String(get_imuorientation().z));
 
 	return true;
@@ -113,8 +105,13 @@ void loop() {
 
 	timer1Hz.tick();
 
+	//call this on each loop - this updates sensor data coming from leonardo
 	read_leonardo();
 
+	//call this on each loop - this checks for new commands coming from desktop remote
+	check_rf_comms();
+
+	//state control
 	int intStartState = state;
 	switch (state) {
 	case IDLE:
@@ -142,7 +139,7 @@ void loop() {
 	if (intStartState != state) {
 		//note errors occur at remote end if we send a message via RF serial every iteration of the loop - so need to
 		//only send when necessary
-		serialRF.println("STATE=" + String(state));
+		send_rf_comm("STATE=" + String(state));
 	}
 
 	boolean blnParamHit = false;
@@ -177,7 +174,7 @@ void loop() {
 			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "DEFLATE") {
-			Serial1.println("deflating");
+			serialRF.println("deflating");
 			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt());
 		}
 		else if (m_strRemoteCommand == "FORWARD") {
@@ -233,7 +230,7 @@ void scan_i2c() {
 	byte error, address; //variable for error and I2C address
 	int nDevices;
 
-	serialRF.println("Scanning I2C...");
+	send_rf_comm("Scanning I2C...");
 
 	nDevices = 0;
 	for (address = 1; address < 127; address++)
@@ -246,43 +243,47 @@ void scan_i2c() {
 
 		if (error == 0)
 		{
-			serialRF.print("I2C device found at address 0x");
-			if (address < 16)
-				serialRF.print("0");
-			serialRF.print(address, HEX);
-			serialRF.println("  !");
 			nDevices++;
+			String strMsg = "I2C device found at address 0x";
+			if (address < 16){ strMsg = strMsg + "0";}
+			strMsg = strMsg + String(address, HEX);
+			send_rf_comm(strMsg);
+			
 		}
 		else if (error == 4)
 		{
-			serialRF.print("Unknown error at address 0x");
-			if (address < 16)
-				serialRF.print("0");
-			serialRF.println(address, HEX);
+			String strMsg = "Unknown error at address 0x";
+			if (address < 16) { strMsg = strMsg + "0"; }
+			strMsg = strMsg + String(address, HEX);
+			send_rf_comm(strMsg);
 		}
 	}
 	if (nDevices == 0)
-		serialRF.println("No I2C devices found\n");
+		send_rf_comm("No I2C devices found");
 	else
-		serialRF.println("done\n");
+		send_rf_comm("done");
 
 
 }
 
-void ProgramESC() {
 
-	//Motor.write(0);//set key??
-	//digitalWrite(m_intMotorPinPWM, LOW);
-	
-	m_servoMainMotor.write(100);//neutral
-	delay(1000);
-	m_servoMainMotor.write(200);//max within 2 seconds of ESC start
-	delay(1500);
-	m_servoMainMotor.write(0);//min
-	delay(1500);
-	m_servoMainMotor.write(100);//neutral
-	delay(1500);
-}
+
+//dead car bodies
+
+//void ProgramESC() {
+//
+//	//Motor.write(0);//set key??
+//	//digitalWrite(m_intMotorPinPWM, LOW);
+//	
+//	m_servoMainMotor.write(100);//neutral
+//	delay(1000);
+//	m_servoMainMotor.write(200);//max within 2 seconds of ESC start
+//	delay(1500);
+//	m_servoMainMotor.write(0);//min
+//	delay(1500);
+//	m_servoMainMotor.write(100);//neutral
+//	delay(1500);
+//}
 
 ////Check to see if anything is available in the serial receive buffer
 //while (Serial.available() > 0)

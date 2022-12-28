@@ -42,6 +42,9 @@
     <ClInclude Include="sensors\leonardo_sensors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="comms\rf_comms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sensors\RTC.cpp">
@@ -63,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sensors\leonardo_sensors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="comms\rf_comms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

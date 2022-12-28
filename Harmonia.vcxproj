@@ -114,6 +114,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="comms\rf_comms.h" />
     <ClInclude Include="sensors\leonardo_sensors.h" />
     <ClInclude Include="control\pumps.h" />
     <ClInclude Include="sensors\IMU.h" />
@@ -124,6 +125,7 @@
     <ClInclude Include="__vm\.Harmonia.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="comms\rf_comms.cpp" />
     <ClCompile Include="sensors\leonardo_sensors.cpp" />
     <ClCompile Include="control\pumps.cpp" />
     <ClCompile Include="sensors\IMU.cpp" />
