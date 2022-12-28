@@ -39,17 +39,13 @@ void check_rf_comms() {
 			}
 		}
 	}
-	if (strLeonardoRPM.length() > 0) { m_strLeonardoRPM = strLeonardoRPM; }
-	if (strLeonardoPressure.length() > 0) { m_strLeonardoPressure = strLeonardoPressure; }
-	if (strLeonardoTemp.length() > 0) { m_strLeonardoTemp = strLeonardoTemp; }
+	if (strRemoteCommand.length() > 0) { m_strRemoteCommand = strRemoteCommand; }
+	if (strRemoteParam.length() > 0) { m_strRemoteParam = strRemoteParam; }
+}
+String get_remote_command() {
+	return m_strRemoteCommand;
+}
+long get_remote_param() {
+	return m_strRemoteParam.toInt();
+}
 
-}
-float get_leonardo_rpm() {
-	return m_strLeonardoRPM.toFloat();
-}
-float get_leonardo_pressure() {
-	return m_strLeonardoPressure.toFloat();
-}
-float get_leonardo_temp() {
-	return m_strLeonardoTemp.toFloat();
-}
