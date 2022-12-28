@@ -116,7 +116,7 @@
   <ItemGroup>
     <ClInclude Include="comms\rf_comms.h" />
     <ClInclude Include="control\main_motor.h" />
-    <ClInclude Include="control\pitch.h" />
+    <ClInclude Include="control\pushrod.h" />
     <ClInclude Include="sensors\leonardo_sensors.h" />
     <ClInclude Include="control\pumps.h" />
     <ClInclude Include="sensors\IMU.h" />
@@ -125,12 +125,13 @@
     <ClInclude Include="sensors\RTC.h" />
     <ClInclude Include="control\servos.h" />
     <ClInclude Include="states\state_manual.h" />
+    <ClInclude Include="states\state_static_trim.h" />
     <ClInclude Include="__vm\.Harmonia.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="comms\rf_comms.cpp" />
     <ClCompile Include="control\main_motor.cpp" />
-    <ClCompile Include="control\pitch.cpp" />
+    <ClCompile Include="control\pushrod.cpp" />
     <ClCompile Include="sensors\leonardo_sensors.cpp" />
     <ClCompile Include="control\pumps.cpp" />
     <ClCompile Include="sensors\IMU.cpp" />
@@ -139,6 +140,7 @@
     <ClCompile Include="sensors\RTC.cpp" />
     <ClCompile Include="control\servos.cpp" />
     <ClCompile Include="states\state_manual.cpp" />
+    <ClCompile Include="states\state_static_trim.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

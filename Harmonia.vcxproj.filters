@@ -51,7 +51,10 @@
     <ClInclude Include="control\main_motor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="control\pitch.h">
+    <ClInclude Include="control\pushrod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="states\state_static_trim.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -86,7 +89,10 @@
     <ClCompile Include="control\main_motor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="control\pitch.cpp">
+    <ClCompile Include="control\pushrod.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="states\state_static_trim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

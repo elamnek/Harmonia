@@ -16,20 +16,17 @@
 
 //harmonia libraries
 #include "states\state_manual.h"
+#include "states\state_static_trim.h"
 #include "comms\rf_comms.h"
 #include "control\pumps.h"
 #include "control\main_motor.h"
 #include "control\servos.h"
-#include "control\pitch.h"
+#include "control\pushrod.h"
 #include "sensors\water_sensors.h"
 #include "sensors\RTC.h"
 #include "sensors\IMU.h"
 #include "sensors\leonardo_sensors.h"
 #include "sensors\pressure_sensor.h"
-
-int m_intPushRodPinDir = 11;
-int m_intPushRodPinPWM = 10;
-
 
 auto timer1Hz = timer_create_default();
 
@@ -54,12 +51,12 @@ void setup() {
 
 	state = IDLE;
 
-
 	init_rtc();
 	send_rf_comm("Harmonia is awake - time is: " + get_rtctime());
 
 	init_servos();
 	init_pumps();
+	init_pushrod();
 	init_main_motor();
 	init_watersensors();
 	init_leonardo_sensors();
@@ -89,8 +86,7 @@ void setup() {
 	scan_i2c();
 		
 	
-	pinMode(m_intPushRodPinDir, OUTPUT);
-	pinMode(m_intPushRodPinPWM, OUTPUT);
+	
 		
 }
 
@@ -140,7 +136,8 @@ void loop() {
 		break;
 	case STATIC_TRIM:
 
-
+		//this is a non-blocking function that checks sensors and makes adjustments to trim
+		adjust_static_trim();
 
 
 		break;

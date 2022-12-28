@@ -1,7 +1,7 @@
-// pitch.h
+// state_static_trim.h
 
-#ifndef _PITCH_h
-#define _PITCH_h
+#ifndef _STATE_STATIC_TRIM_h
+#define _STATE_STATIC_TRIM_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"

@@ -20,13 +20,11 @@ void apply_manual_command() {
 		}
 		else if (strRemoteCommand == "FORWARD") {
 			send_rf_comm("forward");
-			digitalWrite(m_intPushRodPinDir, HIGH);
-			analogWrite(m_intPushRodPinPWM, strRemoteParam.toInt());
+			command_pushrod(strRemoteCommand, strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "REVERSE") {
 			send_rf_comm("reverse");
-			digitalWrite(m_intPushRodPinDir, LOW);
-			analogWrite(m_intPushRodPinPWM, strRemoteParam.toInt());
+			command_pushrod(strRemoteCommand, strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "PROPELL") {
 			send_rf_comm("propelling main motor");
