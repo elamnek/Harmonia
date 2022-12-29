@@ -25,8 +25,8 @@ void adjust_static_trim(float fltStaticTrimDepth) {
 	command_pushrod("REVERSE", 100); //pushes battery in reverse (towards aft)
 	command_pushrod("REVERSE", 0); //stop pushrod
 
-	//if we need to set pump or pushrod going for a set amount of time we need to stor current time using millis() function
-	//and then on subsequent calls to this function (adjust_static_trim) from main loop, we need to check time diff and determine if pump pushrod has been going long enough
+	//if we need to set pump or pushrod going for a set amount of time we need to store current time using millis() function
+	//and then on subsequent calls to this function (adjust_static_trim) from main loop, we need to check time diff and determine if pump or pushrod has been going long enough
 
 
 }
