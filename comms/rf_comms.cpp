@@ -53,3 +53,28 @@ void clear_rf_command() {
 	m_strRemoteParam = "";
 }
 
+void send_operational_data_to_remote() {
+
+	/// <summary>
+	/// format of the data package is important
+	/// each data value needs an associate metadataid (these are defined in the Digital Twin database in a table called dt_data_config
+	/// each metadataid needs to have a matching record in the dt_data_config table
+	/// the metadataid tells the DT where to insert the data (ie. what table/field combination)
+	/// the first data value always has to be the rtc date/time (metadataid=13)
+	/// format to use is {metadataid1:data_value1,metadataid2:data_value2,metadataid3:data_value3, etc.}
+	/// use curly brackets either end to ensure that entire string is received at remote end
+	/// </summary>
+	send_rf_comm("{13:" + get_rtctime() + "," +
+				  "3:" + get_state() + "," +
+				  "2:" + String(leak_read()) + "," +
+				  "1:" + String(get_waterpressure()) + ","
+		          "7:" + String(get_leonardo_rpm()) + "," +
+		          "10:" + String(get_leonardo_pressure()) + "," + 
+		          "11:" + String(get_leonardo_temp()) + "," + 
+		          "14:" + String(get_imuorientation().x) + "," + 
+		          "15:" + String(get_imuorientation().y) + "," + 
+		          "16:" + String(get_imuorientation().z) + "}");
+
+
+}
+

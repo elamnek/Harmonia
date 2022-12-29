@@ -80,23 +80,19 @@ void setup() {
 		send_rf_comm("water pressure sensor OK!!");
 	}
 
-
-	//this reports on addresses of all connected I2C devices
-	//had issues with connecting multiple pressure sensors
+	//this scan reports on addresses of all connected I2C devices
+	//I had issues with connecting multiple pressure sensors
 	//bluerobotics underwater sensor only support default I2C address
-	//so does the internal pressure/temp sensor - so this is why it was moved
-	//to the aft leonardo uC
+	//so does the internal pressure/temp sensor, which resulted in 2 sensors with same address 
+	//- so this is why internal pressure sensor was moved to the aft leonardo uC
 	scan_i2c();
-		
-	
-	
-		
+				
 }
 
 bool timer1Hz_interrupt(void*) {
 	
-	send_rf_comm(get_state() + "," + get_rtctime() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + String(get_leonardo_rpm()) + "," +
-		String(get_leonardo_pressure()) + "," + String(get_leonardo_temp()) + "," + String(get_imuorientation().x) + "," + String(get_imuorientation().y) + "," + String(get_imuorientation().z));
+	//every second all opartional data needs to be sent to remote (sensors, state, control commands etc.)
+	send_operational_data_to_remote();
 
 	return true;
 }
