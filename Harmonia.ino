@@ -50,9 +50,11 @@ void setup() {
 
 	timer1Hz.every(1000, timer1Hz_interrupt);
 
+	//always start in IDLE state
 	state = IDLE;
 
 	init_rtc();
+	init_rf_comms();
 	send_rf_comm("Harmonia is awake - time is: " + get_rtctime());
 
 	init_servos();

@@ -1,11 +1,10 @@
-// 
+// links to libraries/examples:
 // https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor/arduino-code
 // 
 
 #include "IMU.h"
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
-
 
 
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
