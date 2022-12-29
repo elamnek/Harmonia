@@ -62,7 +62,7 @@ void send_operational_data_to_remote() {
 	/// the metadataid tells the DT where to insert the data (ie. what table/field combination)
 	/// the first data value always has to be the rtc date/time (metadataid=13)
 	/// format to use is {metadataid1:data_value1,metadataid2:data_value2,metadataid3:data_value3, etc.}
-	/// use curly brackets either end to ensure that entire string is received at remote end
+	/// use curly brackets either end to ensure that entire string is received at remote end and to distinguish from other messages going to remote
 	/// </summary>
 	send_rf_comm("{13:" + get_rtctime() + "," +
 				  "3:" + get_state() + "," +
