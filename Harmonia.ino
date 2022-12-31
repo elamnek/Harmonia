@@ -20,9 +20,25 @@
 #include <GravityRtc.h>
 #include "Wire.h"
 #include <Servo.h>
+#include "control\states.h"
 
 //this serial will be used to communicate in 2 directions with the desktop software and digital twin
 #define serialRF Serial1
+
+#define DEPTH_TRIMMED (1<<0)
+#define PITCH_TRIMMED (1<<1)
+
+
+t_control_error depthError = {};
+t_control_error trimError = {};
+
+float dt = 1.0;
+unsigned long tPrev= 0; 
+
+int trimmed_state = 0;
+float depthTargetDistance = 1.0;
+float depthDistance = 0.0;
+float pitchAngle = 0.0;
 
 int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
@@ -31,11 +47,13 @@ Servo m_servoMainMotor;
 
 auto timer1Hz = timer_create_default();
 
+
 String m_strRemoteCommand; //string to be captured from serial port
 String m_strRemoteParam; //numeric parameter
 
 //FSM states
 enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
+
 String  get_state() {
 	switch (state) {
 	case IDLE: return "IDLE";
@@ -52,7 +70,7 @@ void setup() {
 	timer1Hz.every(1000, timer1Hz_interrupt);
 
 	state = IDLE;
-
+	
 	//data from HarmoniaRemote (RF)
 	serialRF.begin(9600);
 
@@ -110,12 +128,13 @@ bool timer1Hz_interrupt(void*) {
 
 
 void loop() {
-
+	
 	timer1Hz.tick();
 
-	read_leonardo();
-
+	//update pitch angle and depth distance
+	
 	int intStartState = state;
+	
 	switch (state) {
 	case IDLE:
 		if (leak_detected()) {
@@ -124,6 +143,34 @@ void loop() {
 
 		break;
 	case STATIC_TRIM:
+		
+		
+		update_error((float)(depthTarget-depth_distance), dt, &depthError);
+		update_error((float)(-trim_angle) newErr, dt, &trimError);
+		
+		// Adjust the depth until the error is with in accpetable margin and has slowed to a near stop
+		if ((abs(depthError.err/depthTarget)>0.05) || (abs(depthError.errDer)>0.01)) {
+			adjust_depth(depthError);
+			trimmed_state &= ~(DEPTH_TRIMMED);
+		}
+		else {
+			trimmed_state |= DEPTH_TRIMMED;
+		}
+		
+		// Adjust the pitch angle until error is with in accpetable margin and has slowed to a near stop
+		if ((abs(pitchError.err)>0.1) || (abs(pitchError.errDer)>0.01)){
+			adjust_trim(pitchError);
+			trimmed_state &= ~(PITCH_TRIMMED);
+		}
+		else {
+			trimmed_state |= PITCH_TRIMMED;
+		}
+		
+		if (trimmed_state == (DEPTH_TRIMMED | PITCH_TRIMMED)) {
+			command_pump("INFLATE", 0);
+			state = DYNAMIC_TRIM;
+		}
+		
 		break;
 	case DYNAMIC_TRIM:
 		break;
@@ -225,7 +272,8 @@ void loop() {
 	delay(1000);
 	Motor.write(60);
 	delay(1000);*/
-	
+	dt = (float)(millis()-tPrev);
+	tPrev = millis();
 }
 
 void scan_i2c() {
