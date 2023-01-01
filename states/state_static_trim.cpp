@@ -3,6 +3,12 @@
 // 
 
 #include "state_static_trim.h"
+#include "..\sensors\pressure_sensor.h"
+#include "..\sensors\IMU.h"
+#include "..\control\pumps.h"
+#include "..\control\pushrod.h"
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
 
 
 //this function must be non-blocking (no pauses or time delays)

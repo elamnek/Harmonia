@@ -3,6 +3,7 @@
 // 
 
 #include "main_motor.h"
+#include <Servo.h>
 
 Servo m_servoMainMotor;
 int m_intMotorPinPWM = 6;

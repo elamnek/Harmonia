@@ -3,8 +3,15 @@
 // 
 
 #include "state_manual.h"
+#include "..\comms\rf_comms.h"
+#include "..\control\pumps.h"
+#include "..\control\pushrod.h"
+#include "..\control\servos.h"
+#include "..\control\main_motor.h"
 
 void apply_manual_command() {
+
+	check_rf_comms();
 
 	String strRemoteCommand = get_remote_command();
 	String strRemoteParam = get_remote_param();

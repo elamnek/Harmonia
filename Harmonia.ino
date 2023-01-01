@@ -17,7 +17,6 @@
 //harmonia libraries
 #include "states\state_manual.h"
 #include "states\state_static_trim.h"
-#include "comms\rf_comms.h"
 #include "control\pumps.h"
 #include "control\main_motor.h"
 #include "control\servos.h"
@@ -27,6 +26,7 @@
 #include "sensors\IMU.h"
 #include "sensors\leonardo_sensors.h"
 #include "sensors\pressure_sensor.h"
+#include "comms\rf_comms.h"
 
 auto timer1Hz = timer_create_default();
 
@@ -92,7 +92,7 @@ void setup() {
 bool timer1Hz_interrupt(void*) {
 	
 	//every second all opartional data needs to be sent to remote (sensors, state, control commands etc.)
-	send_operational_data_to_remote();
+	send_operational_data_to_remote(get_state());
 
 	return true;
 }

@@ -3,6 +3,11 @@
 // 
 
 #include "rf_comms.h"
+#include "..\sensors\water_sensors.h"
+#include "..\sensors\RTC.h"
+#include "..\sensors\IMU.h"
+#include "..\sensors\leonardo_sensors.h"
+#include "..\sensors\pressure_sensor.h"
 
 //this serial will be used to communicate in 2 directions with the desktop software and digital twin
 #define serialRF Serial1
@@ -53,7 +58,7 @@ void clear_rf_command() {
 	m_strRemoteParam = "";
 }
 
-void send_operational_data_to_remote() {
+void send_operational_data_to_remote(String strState) {
 
 	/// <summary>
 	/// format of the data package is important
@@ -65,7 +70,7 @@ void send_operational_data_to_remote() {
 	/// use curly brackets either end to ensure that entire string is received at remote end and to distinguish from other messages going to remote
 	/// </summary>
 	send_rf_comm("{13:" + get_rtctime() + "," +
-				  "3:" + get_state() + "," +
+				  "3:" + strState + "," +
 				  "2:" + String(leak_read()) + "," +
 				  "1:" + String(get_waterpressure()) + ","
 		          "7:" + String(get_leonardo_rpm()) + "," +
