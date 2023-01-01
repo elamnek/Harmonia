@@ -42,6 +42,21 @@
     <ClInclude Include="sensors\leonardo_sensors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="comms\rf_comms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="states\state_manual.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="control\main_motor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="control\pushrod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="states\state_static_trim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sensors\RTC.cpp">
@@ -63,6 +78,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sensors\leonardo_sensors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="comms\rf_comms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="states\state_manual.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="control\main_motor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="control\pushrod.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="states\state_static_trim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

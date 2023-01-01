@@ -9,6 +9,7 @@
 	#include "WProgram.h"
 #endif
 
+
 #define K_P_DEPTH 1.0
 #define K_I_DEPTH 1.0
 #define K_D_DEPTH 1.0
@@ -35,6 +36,8 @@ void update_error(float newErr, float dt, t_control_error* errUpdated);
 void adjust_depth(t_control_error depthError);
 
 void adjust_static_trim(t_control_error trimError);
+
+//void adjust_static_trim(float fltStaticTrimDepth);
 
 #endif
 

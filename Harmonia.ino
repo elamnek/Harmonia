@@ -1,29 +1,33 @@
 /*
  Name:		Harmonia.ino
  Created:	9/11/2022 8:06:00 AM
- Author:	eugene
+ Author:	eugene lamnek
 */
 
+//installed libraries
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
-
-#include "sensors\IMU.h"
 #include <SPL06-007.h>
-#include "sensors\leonardo_sensors.h"
 #include <MS5837.h>
-#include "sensors\pressure_sensor.h"
 #include <arduino-timer.h>
-#include "control\pumps.h"
-#include "sensors\water_sensors.h"
-#include "control\servos.h"
-#include "sensors\RTC.h"
 #include <GravityRtc.h>
 #include "Wire.h"
 #include <Servo.h>
-#include "control\states.h"
 
-//this serial will be used to communicate in 2 directions with the desktop software and digital twin
-#define serialRF Serial1
+//harmonia libraries
+#include "states\state_manual.h"
+#include "states\state_static_trim.h"
+#include "control\pumps.h"
+#include "control\main_motor.h"
+#include "control\servos.h"
+#include "control\pushrod.h"
+#include "control\states.h"
+#include "sensors\water_sensors.h"
+#include "sensors\RTC.h"
+#include "sensors\IMU.h"
+#include "sensors\leonardo_sensors.h"
+#include "sensors\pressure_sensor.h"
+#include "comms\rf_comms.h"
 
 #define DEPTH_TRIMMED (1<<0)
 #define PITCH_TRIMMED (1<<1)
@@ -41,23 +45,16 @@ float depthDistance = 0.0;
 float pitchAngle = 0.0;
 sensors_vec_t subOrientation = {};
 
-int m_intPushRodPinDir = 11;
-int m_intPushRodPinPWM = 10;
-int m_intMotorPinPWM = 6;
-Servo m_servoMainMotor;
-
 auto timer1Hz = timer_create_default();
 
 
-String m_strRemoteCommand; //string to be captured from serial port
-String m_strRemoteParam; //numeric parameter
-
 //FSM states
-enum { IDLE, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
-
+enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
+//function used to return text description of current state
 String  get_state() {
 	switch (state) {
 	case IDLE: return "IDLE";
+	case MANUAL: return "MANUAL";
 	case STATIC_TRIM: return "STATIC_TRIM";
 	case DYNAMIC_TRIM: return "DYNAMIC_TRIM";
 	case RUN: return "RUN";
@@ -65,64 +62,55 @@ String  get_state() {
 	}
 }
 
+float m_fltStaticTrimDepth;
 
 void setup() {
 
 	timer1Hz.every(1000, timer1Hz_interrupt);
 
+	//always start in IDLE state
 	state = IDLE;
-	
-	//data from HarmoniaRemote (RF)
-	serialRF.begin(9600);
-
+  
 	init_rtc();
-	serialRF.println("Harmonia is awake - time is: " + get_rtctime());
+	init_rf_comms();
+	send_rf_comm("Harmonia is awake - time is: " + get_rtctime());
 
 	init_servos();
 	init_pumps();
+	init_pushrod();
+	init_main_motor();
 	init_watersensors();
 	init_leonardo_sensors();
 
 	String msg = init_imu();
 	if (msg.length() > 0) {
-		serialRF.println(msg);
+		send_rf_comm(msg);
 	}
 	else {
-		serialRF.println("IMU sensor OK!!");
+		send_rf_comm("IMU sensor OK!!");
 	}
 
 	msg = init_presssuresensor(997);
 	if (msg.length() > 0) {
-		serialRF.println(msg);
+		send_rf_comm(msg);
 	}
 	else {
-		serialRF.println("water pressure sensor OK!!");
+		send_rf_comm("water pressure sensor OK!!");
 	}
 
-
-	//this reports on addresses of all connected I2C devices
-	//had issues with connecting multiple pressure sensors
+	//this scan reports on addresses of all connected I2C devices
+	//I had issues with connecting multiple pressure sensors
 	//bluerobotics underwater sensor only support default I2C address
-	//so does the internal pressure/temp sensor - so this is why it was moved
-	//to the aft leonardo uC
+	//so does the internal pressure/temp sensor, which resulted in 2 sensors with same address 
+	//- so this is why internal pressure sensor was moved to the aft leonardo uC
 	scan_i2c();
-		
-	m_servoMainMotor.attach(m_intMotorPinPWM);
-	delay(1);
-	m_servoMainMotor.write(90);
-	delay(5000);//need this delay to allow ESC to register neutral value (90=center of RC stick)
-	//ProgramESC();
-
-
-	pinMode(m_intPushRodPinDir, OUTPUT);
-	pinMode(m_intPushRodPinPWM, OUTPUT);
-		
+				
 }
 
 bool timer1Hz_interrupt(void*) {
 	
-	serialRF.println(get_state() + "," + get_rtctime() + "," + String(leak_read()) + "," + String(get_altitude()) + "," + String(get_waterpressure()) + "," + String(get_leonardo_rpm()) + "," +
-		String(get_leonardo_pressure()) + "," + String(get_leonardo_temp()) + "," + String(get_imuorientation().x) + "," + String(get_imuorientation().y) + "," + String(get_imuorientation().z));
+	//every second all opartional data needs to be sent to remote (sensors, state, control commands etc.)
+	send_operational_data_to_remote(get_state());
 
 	return true;
 }
@@ -137,6 +125,25 @@ void loop() {
 	subOrientation = get_imuorientation();
 	pitchAngle = orientation.x;
 
+	//call this on each loop - this updates sensor data coming from leonardo
+	read_leonardo();
+
+	//call this on each loop - this checks for new commands coming from desktop remote
+	check_rf_comms();
+
+	//set state using commands from remote
+	String strRemoteCommand = get_remote_command();
+	if (strRemoteCommand == "IDLE") { state = IDLE; }
+	if (strRemoteCommand == "MANUAL") {state = MANUAL;}
+	if (strRemoteCommand == "STATIC_TRIM") { 
+		state = STATIC_TRIM;
+		m_fltStaticTrimDepth = get_remote_param().toFloat();
+	}
+	if (strRemoteCommand == "DYNAMIC_TRIM") { state = DYNAMIC_TRIM; }
+	if (strRemoteCommand == "RUN") { state = RUN; }
+	if (strRemoteCommand == "ALARM") { state = ALARM; }
+	
+	//state control
 	int intStartState = state;
 	
 	switch (state) {
@@ -146,7 +153,14 @@ void loop() {
 		}
 
 		break;
+	case MANUAL:
+
+		//this checks for a manual command from RF remote and applies it
+		apply_manual_command();
+
+		break;
 	case STATIC_TRIM:
+
 		
 		
 		update_error((float)(depthTarget-depth_distance), dt, &depthError);
@@ -175,6 +189,13 @@ void loop() {
 			state = DYNAMIC_TRIM;
 		}
 		
+
+
+		//this is a non-blocking function that checks sensors and makes adjustments to trim
+		//must be non-blocking so that main loop is always running and checking for leaks or new commands from remote
+		//adjust_static_trim(m_fltStaticTrimDepth);
+
+
 		break;
 	case DYNAMIC_TRIM:
 		break;
@@ -187,97 +208,10 @@ void loop() {
 		
 		break;
 	}
-	
-	
-	//check for state change and send to remote - move this 2 the 1s timer event
-	if (intStartState != state) {
-		//note errors occur at remote end if we send a message via RF serial every iteration of the loop - so need to
-		//only send when necessary
-		serialRF.println("STATE=" + String(state));
-	}
 
-	boolean blnParamHit = false;
-	while (serialRF.available()) {
-		delay(10);
-		if (serialRF.available() > 0) {
-			char c = serialRF.read();  //gets one byte from serial buffer
-			if (c == ',') { 
-				blnParamHit = true; 
-			}
-			else {
-				if (!blnParamHit) {
-					m_strRemoteCommand += c; //makes readstring from the single bytes
-				}
-				else {
-					m_strRemoteParam += c;
-				}	
-			}	
-		}
-	}
-
-	if (m_strRemoteCommand.length() > 0) {
-		serialRF.println("command: " + m_strRemoteCommand);  //so you can see the captured string 
-		if (m_strRemoteParam.length() > 0) { 
-			//m_strRemoteParam += '\0';
-			serialRF.println("param: " + m_strRemoteParam);
-			serialRF.println(m_strRemoteParam.toInt());
-		}
-											 									
-		if (m_strRemoteCommand == "INFLATE") {
-			serialRF.println("{inflating: now}");
-			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "DEFLATE") {
-			Serial1.println("deflating");
-			command_pump(m_strRemoteCommand, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "FORWARD") {
-			serialRF.println("forward");
-			digitalWrite(m_intPushRodPinDir, HIGH);
-			analogWrite(m_intPushRodPinPWM, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "REVERSE") {
-			serialRF.println("reverse");
-			digitalWrite(m_intPushRodPinDir, LOW);
-			analogWrite(m_intPushRodPinPWM, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "PROPELL") {
-			serialRF.println("propelling main motor");
-			m_servoMainMotor.write(m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "SERVOFWDDIVE") {
-			serialRF.println("servo forward dive");
-			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "SERVOAFTDIVE") {
-			serialRF.println("servo aft dive");
-			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
-		}
-		else if (m_strRemoteCommand == "SERVOAFTRUDDER") {
-			serialRF.println("servo aft rudder");
-			command_servo(m_strRemoteCommand, m_strRemoteParam.toInt());
-		}
-
-		m_strRemoteCommand = "";
-		m_strRemoteParam = "";
-	}
-	
-	/*Motor.write(120);
-	delay(1000);
-	Motor.write(110);
-	delay(1000);
-	Motor.write(100);
-	delay(1000);
-	Motor.write(90);
-	delay(1000);
-	Motor.write(80);
-	delay(1000);
-	Motor.write(70);
-	delay(1000);
-	Motor.write(60);
-	delay(1000);*/
 	dt = (float)(millis()-tPrev);
 	tPrev = millis();
+
 }
 
 void scan_i2c() {
@@ -285,7 +219,7 @@ void scan_i2c() {
 	byte error, address; //variable for error and I2C address
 	int nDevices;
 
-	serialRF.println("Scanning I2C...");
+	send_rf_comm("Scanning I2C...");
 
 	nDevices = 0;
 	for (address = 1; address < 127; address++)
@@ -298,43 +232,53 @@ void scan_i2c() {
 
 		if (error == 0)
 		{
-			serialRF.print("I2C device found at address 0x");
-			if (address < 16)
-				serialRF.print("0");
-			serialRF.print(address, HEX);
-			serialRF.println("  !");
 			nDevices++;
+			String strMsg = "I2C device found at address 0x";
+			if (address < 16){ strMsg = strMsg + "0";}
+			strMsg = strMsg + String(address, HEX);
+			send_rf_comm(strMsg);
+			
 		}
 		else if (error == 4)
 		{
-			serialRF.print("Unknown error at address 0x");
-			if (address < 16)
-				serialRF.print("0");
-			serialRF.println(address, HEX);
+			String strMsg = "Unknown error at address 0x";
+			if (address < 16) { strMsg = strMsg + "0"; }
+			strMsg = strMsg + String(address, HEX);
+			send_rf_comm(strMsg);
 		}
 	}
 	if (nDevices == 0)
-		serialRF.println("No I2C devices found\n");
+		send_rf_comm("No I2C devices found");
 	else
-		serialRF.println("done\n");
+		send_rf_comm("done");
 
 
 }
 
-void ProgramESC() {
 
-	//Motor.write(0);//set key??
-	//digitalWrite(m_intMotorPinPWM, LOW);
-	
-	m_servoMainMotor.write(100);//neutral
-	delay(1000);
-	m_servoMainMotor.write(200);//max within 2 seconds of ESC start
-	delay(1500);
-	m_servoMainMotor.write(0);//min
-	delay(1500);
-	m_servoMainMotor.write(100);//neutral
-	delay(1500);
-}
+//dead car bodies
+
+//check for state change and send to remote - move this 2 the 1s timer event
+	//if (intStartState != state) {
+	//	//note errors occur at remote end if we send a message via RF serial every iteration of the loop - so need to
+	//	//only send when necessary
+	//	send_rf_comm("STATE=" + String(state));
+	//}
+
+//void ProgramESC() {
+//
+//	//Motor.write(0);//set key??
+//	//digitalWrite(m_intMotorPinPWM, LOW);
+//	
+//	m_servoMainMotor.write(100);//neutral
+//	delay(1000);
+//	m_servoMainMotor.write(200);//max within 2 seconds of ESC start
+//	delay(1500);
+//	m_servoMainMotor.write(0);//min
+//	delay(1500);
+//	m_servoMainMotor.write(100);//neutral
+//	delay(1500);
+//}
 
 ////Check to see if anything is available in the serial receive buffer
 //while (Serial.available() > 0)
