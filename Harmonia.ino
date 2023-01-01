@@ -39,6 +39,7 @@ int trimmed_state = 0;
 float depthTargetDistance = 1.0;
 float depthDistance = 0.0;
 float pitchAngle = 0.0;
+sensors_vec_t subOrientation = {};
 
 int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
@@ -132,7 +133,10 @@ void loop() {
 	timer1Hz.tick();
 
 	//update pitch angle and depth distance
-	
+	depth_distance = get_depth();
+	subOrientation = get_imuorientation();
+	pitchAngle = orientation.x;
+
 	int intStartState = state;
 	
 	switch (state) {
@@ -146,7 +150,7 @@ void loop() {
 		
 		
 		update_error((float)(depthTarget-depth_distance), dt, &depthError);
-		update_error((float)(-trim_angle) newErr, dt, &trimError);
+		update_error((float)(-pitchAngle) newErr, dt, &trimError);
 		
 		// Adjust the depth until the error is with in accpetable margin and has slowed to a near stop
 		if ((abs(depthError.err/depthTarget)>0.05) || (abs(depthError.errDer)>0.01)) {
