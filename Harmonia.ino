@@ -41,7 +41,7 @@ unsigned long tPrev= 0;
 
 int trimmed_state = 0;
 float depthTargetDistance = 1.0;
-float depthDistance = 0.0;
+float depth_distance = 0.0;
 float pitchAngle = 0.0;
 sensors_vec_t subOrientation = {};
 
@@ -123,7 +123,7 @@ void loop() {
 	//update pitch angle and depth distance
 	depth_distance = get_depth();
 	subOrientation = get_imuorientation();
-	pitchAngle = orientation.x;
+	pitchAngle = subOrientation.x;
 
 	//call this on each loop - this updates sensor data coming from leonardo
 	read_leonardo();
@@ -163,11 +163,11 @@ void loop() {
 
 		
 		
-		update_error((float)(depthTarget-depth_distance), dt, &depthError);
+		update_error((float)(depthTargetDistance-depth_distance), dt, &depthError);
 		update_error((float)(-pitchAngle) newErr, dt, &trimError);
 		
 		// Adjust the depth until the error is with in accpetable margin and has slowed to a near stop
-		if ((abs(depthError.err/depthTarget)>0.05) || (abs(depthError.errDer)>0.01)) {
+		if ((abs(depthError.err/ depthTargetDistance)>0.05) || (abs(depthError.errDer)>0.01)) {
 			adjust_depth(depthError);
 			trimmed_state &= ~(DEPTH_TRIMMED);
 		}
