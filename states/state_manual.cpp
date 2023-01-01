@@ -11,8 +11,6 @@
 
 void apply_manual_command() {
 
-	check_rf_comms();
-
 	String strRemoteCommand = get_remote_command();
 	String strRemoteParam = get_remote_param();
 
@@ -49,10 +47,7 @@ void apply_manual_command() {
 			send_rf_comm("servo aft rudder");
 			command_servo(strRemoteCommand, strRemoteParam.toInt());
 		}
-
-		clear_rf_command();
+		
 	}
-
-
 
 }

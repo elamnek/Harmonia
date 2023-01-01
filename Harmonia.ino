@@ -119,8 +119,7 @@ void loop() {
 	if (strRemoteCommand == "DYNAMIC_TRIM") { state = DYNAMIC_TRIM; }
 	if (strRemoteCommand == "RUN") { state = RUN; }
 	if (strRemoteCommand == "ALARM") { state = ALARM; }
-	clear_rf_command();
-
+	
 	//state control
 	int intStartState = state;
 	switch (state) {
@@ -154,8 +153,11 @@ void loop() {
 		
 		break;
 	}
-	
-	
+
+
+	//clear command buffer
+	clear_rf_command();
+		
 }
 
 void scan_i2c() {
