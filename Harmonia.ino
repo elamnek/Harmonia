@@ -21,6 +21,7 @@
 #include "control\main_motor.h"
 #include "control\servos.h"
 #include "control\pushrod.h"
+#include "control\states.h"
 #include "sensors\water_sensors.h"
 #include "sensors\RTC.h"
 #include "sensors\IMU.h"
@@ -28,7 +29,24 @@
 #include "sensors\pressure_sensor.h"
 #include "comms\rf_comms.h"
 
+#define DEPTH_TRIMMED (1<<0)
+#define PITCH_TRIMMED (1<<1)
+
+
+t_control_error depthError = {};
+t_control_error trimError = {};
+
+float dt = 1.0;
+unsigned long tPrev= 0; 
+
+int trimmed_state = 0;
+float depthTargetDistance = 1.0;
+float depthDistance = 0.0;
+float pitchAngle = 0.0;
+sensors_vec_t subOrientation = {};
+
 auto timer1Hz = timer_create_default();
+
 
 //FSM states
 enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
@@ -52,7 +70,7 @@ void setup() {
 
 	//always start in IDLE state
 	state = IDLE;
-
+  
 	init_rtc();
 	init_rf_comms();
 	send_rf_comm("Harmonia is awake - time is: " + get_rtctime());
@@ -99,8 +117,13 @@ bool timer1Hz_interrupt(void*) {
 
 
 void loop() {
-
+	
 	timer1Hz.tick();
+
+	//update pitch angle and depth distance
+	depth_distance = get_depth();
+	subOrientation = get_imuorientation();
+	pitchAngle = orientation.x;
 
 	//call this on each loop - this updates sensor data coming from leonardo
 	read_leonardo();
@@ -122,6 +145,7 @@ void loop() {
 	
 	//state control
 	int intStartState = state;
+	
 	switch (state) {
 	case IDLE:
 		if (leak_detected()) {
@@ -137,9 +161,40 @@ void loop() {
 		break;
 	case STATIC_TRIM:
 
+		
+		
+		update_error((float)(depthTarget-depth_distance), dt, &depthError);
+		update_error((float)(-pitchAngle) newErr, dt, &trimError);
+		
+		// Adjust the depth until the error is with in accpetable margin and has slowed to a near stop
+		if ((abs(depthError.err/depthTarget)>0.05) || (abs(depthError.errDer)>0.01)) {
+			adjust_depth(depthError);
+			trimmed_state &= ~(DEPTH_TRIMMED);
+		}
+		else {
+			trimmed_state |= DEPTH_TRIMMED;
+		}
+		
+		// Adjust the pitch angle until error is with in accpetable margin and has slowed to a near stop
+		if ((abs(pitchError.err)>0.1) || (abs(pitchError.errDer)>0.01)){
+			adjust_trim(pitchError);
+			trimmed_state &= ~(PITCH_TRIMMED);
+		}
+		else {
+			trimmed_state |= PITCH_TRIMMED;
+		}
+		
+		if (trimmed_state == (DEPTH_TRIMMED | PITCH_TRIMMED)) {
+			command_pump("INFLATE", 0);
+			state = DYNAMIC_TRIM;
+		}
+		
+
+
 		//this is a non-blocking function that checks sensors and makes adjustments to trim
 		//must be non-blocking so that main loop is always running and checking for leaks or new commands from remote
-		adjust_static_trim(m_fltStaticTrimDepth);
+		//adjust_static_trim(m_fltStaticTrimDepth);
+
 
 		break;
 	case DYNAMIC_TRIM:
@@ -153,11 +208,8 @@ void loop() {
 		
 		break;
 	}
-
-
-	//clear command buffer
-	clear_rf_command();
-		
+	
+	
 }
 
 void scan_i2c() {
@@ -200,7 +252,6 @@ void scan_i2c() {
 
 
 }
-
 
 
 //dead car bodies
