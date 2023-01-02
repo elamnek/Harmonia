@@ -43,7 +43,7 @@ void adjust_static_trim(t_control_error trimError){
 
 // Based on error passed and the timestep from the past values update the error controls
 void update_error(float newErr, float dt, t_control_error* errUpdated){
-	errUpdated->errDer = (newErr - errUpdated.err)/dt;
+	errUpdated->errDer = (newErr - errUpdated->err)/dt;
 	errUpdated->errInt += newErr*dt;
 	errUpdated->err = newErr;
 }
