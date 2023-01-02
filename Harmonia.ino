@@ -21,7 +21,6 @@
 #include "control\main_motor.h"
 #include "control\servos.h"
 #include "control\pushrod.h"
-#include "control\states.h"
 #include "sensors\water_sensors.h"
 #include "sensors\RTC.h"
 #include "sensors\IMU.h"
@@ -164,7 +163,7 @@ void loop() {
 		
 		
 		update_error((float)(depthTargetDistance-depth_distance), dt, &depthError);
-		update_error((float)(-pitchAngle) newErr, dt, &trimError);
+		update_error((float)(-pitchAngle), dt, &trimError);
 		
 		// Adjust the depth until the error is with in accpetable margin and has slowed to a near stop
 		if ((abs(depthError.err/ depthTargetDistance)>0.05) || (abs(depthError.errDer)>0.01)) {
@@ -177,7 +176,7 @@ void loop() {
 		
 		// Adjust the pitch angle until error is with in accpetable margin and has slowed to a near stop
 		if ((abs(pitchError.err)>0.1) || (abs(pitchError.errDer)>0.01)){
-			adjust_trim(pitchError);
+			adjust_static_trim(pitchError);
 			trimmed_state &= ~(PITCH_TRIMMED);
 		}
 		else {

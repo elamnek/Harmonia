@@ -37,7 +37,5 @@ void adjust_depth(t_control_error depthError);
 
 void adjust_static_trim(t_control_error trimError);
 
-//void adjust_static_trim(float fltStaticTrimDepth);
-
 #endif
 
