@@ -8,6 +8,7 @@ int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
 
 
+
 void init_pushrod() {
 
 	pinMode(m_intPushRodPinDir, OUTPUT);
@@ -26,4 +27,8 @@ void command_pushrod(String strCommand, int intValue) {
 		analogWrite(m_intPushRodPinPWM, intValue);
 	}
 
+}
+
+int get_weight_pos() {
+	return analogRead(A0);
 }

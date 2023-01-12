@@ -120,9 +120,9 @@ void loop() {
 	timer1Hz.tick();
 
 	//update pitch angle and depth distance
-	depth_distance = get_depth();
+	/*depth_distance = get_depth();
 	subOrientation = get_imuorientation();
-	pitchAngle = subOrientation.x;
+	pitchAngle = subOrientation.x;*/
 
 	//call this on each loop - this updates sensor data coming from leonardo
 	read_leonardo();
@@ -162,31 +162,31 @@ void loop() {
 
 		
 		
-		update_error((float)(depthTargetDistance-depth_distance), dt, &depthError);
-		update_error((float)(-pitchAngle), dt, &trimError);
-		
-		// Adjust the depth until the error is with in accpetable margin and has slowed to a near stop
-		if ((abs(depthError.err/ depthTargetDistance)>0.05) || (abs(depthError.errDer)>0.01)) {
-			adjust_depth(depthError);
-			trimmed_state &= ~(DEPTH_TRIMMED);
-		}
-		else {
-			trimmed_state |= DEPTH_TRIMMED;
-		}
-		
-		// Adjust the pitch angle until error is with in accpetable margin and has slowed to a near stop
-		if ((abs(pitchError.err)>0.1) || (abs(pitchError.errDer)>0.01)){
-			adjust_static_trim(pitchError);
-			trimmed_state &= ~(PITCH_TRIMMED);
-		}
-		else {
-			trimmed_state |= PITCH_TRIMMED;
-		}
-		
-		if (trimmed_state == (DEPTH_TRIMMED | PITCH_TRIMMED)) {
-			command_pump("INFLATE", 0);
-			state = DYNAMIC_TRIM;
-		}
+		//update_error((float)(depthTargetDistance-depth_distance), dt, &depthError);
+		//update_error((float)(-pitchAngle), dt, &trimError);
+		//
+		//// Adjust the depth until the error is with in accpetable margin and has slowed to a near stop
+		//if ((abs(depthError.err/ depthTargetDistance)>0.05) || (abs(depthError.errDer)>0.01)) {
+		//	adjust_depth(depthError);
+		//	trimmed_state &= ~(DEPTH_TRIMMED);
+		//}
+		//else {
+		//	trimmed_state |= DEPTH_TRIMMED;
+		//}
+		//
+		//// Adjust the pitch angle until error is with in accpetable margin and has slowed to a near stop
+		//if ((abs(pitchError.err)>0.1) || (abs(pitchError.errDer)>0.01)){
+		//	adjust_static_trim(pitchError);
+		//	trimmed_state &= ~(PITCH_TRIMMED);
+		//}
+		//else {
+		//	trimmed_state |= PITCH_TRIMMED;
+		//}
+		//
+		//if (trimmed_state == (DEPTH_TRIMMED | PITCH_TRIMMED)) {
+		//	command_pump("INFLATE", 0);
+		//	state = DYNAMIC_TRIM;
+		//}
 		
 
 

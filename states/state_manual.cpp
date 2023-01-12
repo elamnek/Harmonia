@@ -16,35 +16,35 @@ void apply_manual_command() {
 
 	if (strRemoteCommand.length() > 0) {
 		if (strRemoteCommand == "INFLATE") {
-			send_rf_comm("{inflating: now}");
+			//send_rf_comm("{inflating: now}");
 			command_pump(strRemoteCommand, strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "DEFLATE") {
-			send_rf_comm("deflating");
+			//send_rf_comm("deflating");
 			command_pump(strRemoteCommand, strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "FORWARD") {
-			send_rf_comm("forward");
+			//send_rf_comm("forward");
 			command_pushrod(strRemoteCommand, strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "REVERSE") {
-			send_rf_comm("reverse");
+			//send_rf_comm("reverse");
 			command_pushrod(strRemoteCommand, strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "PROPELL") {
-			send_rf_comm("propelling main motor");
+			//send_rf_comm("propelling main motor");
 			commmand_main_motor(strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "SERVOFWDDIVE") {
-			send_rf_comm("servo forward dive");
+			//send_rf_comm("servo forward dive");
 			command_servo(strRemoteCommand, strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "SERVOAFTDIVE") {
-			send_rf_comm("servo aft dive");
+			//send_rf_comm("servo aft dive");
 			command_servo(strRemoteCommand, strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "SERVOAFTRUDDER") {
-			send_rf_comm("servo aft rudder");
+			//send_rf_comm("servo aft rudder");
 			command_servo(strRemoteCommand, strRemoteParam.toInt());
 		}
 		

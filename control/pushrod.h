@@ -13,5 +13,7 @@ void init_pushrod();
 
 void command_pushrod(String strCommand, int intValue);
 
+int get_weight_pos();
+
 #endif
 

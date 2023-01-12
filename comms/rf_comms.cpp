@@ -8,6 +8,7 @@
 #include "..\sensors\IMU.h"
 #include "..\sensors\leonardo_sensors.h"
 #include "..\sensors\pressure_sensor.h"
+#include "..\control\pushrod.h"
 
 //this serial will be used to communicate in 2 directions with the desktop software and digital twin
 #define serialRF Serial1
@@ -76,6 +77,7 @@ void send_operational_data_to_remote(String strState) {
 		          "7:" + String(get_leonardo_rpm()) + "," +
 		          "10:" + String(get_leonardo_pressure()) + "," + 
 		          "11:" + String(get_leonardo_temp()) + "," + 
+		          "17:" + String(get_weight_pos()) + "," +
 		          "14:" + String(get_imuorientation().x) + "," + 
 		          "15:" + String(get_imuorientation().y) + "," + 
 		          "16:" + String(get_imuorientation().z) + "}");

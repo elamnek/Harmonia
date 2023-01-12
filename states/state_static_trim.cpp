@@ -34,10 +34,10 @@ void adjust_static_trim(t_control_error trimError){
 	cmd = sgn(cmd)*max(MIN_STATIC_PITCH_CMD, abs(cmd));
 	
 	if (cmd>0) {
-		command_pushrod("FORWARD", (int)(constrain(abs(cmd),0,100));
+		command_pushrod("FORWARD", (int)(constrain(abs(cmd),0,100)));
 	}
 	else {
-		command_pushrod("REVERSE", (int)(constrain(abs(cmd),0,100));
+		command_pushrod("REVERSE", (int)(constrain(abs(cmd),0,100)));
 	}
 }
 
