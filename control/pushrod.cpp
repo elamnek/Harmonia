@@ -7,6 +7,9 @@
 int m_intPushRodPinDir = 11;
 int m_intPushRodPinPWM = 10;
 
+int m_intMinPotValue = 305;
+int m_intMaxPotValue = 988;
+
 
 
 void init_pushrod() {
@@ -30,5 +33,8 @@ void command_pushrod(String strCommand, int intValue) {
 }
 
 int get_weight_pos() {
-	return analogRead(A0);
+	float fltNum = analogRead(A0) - m_intMinPotValue;
+	float fltDenom = m_intMaxPotValue - m_intMinPotValue;
+	int intPercent = 100*fltNum/ fltDenom;
+	return intPercent;
 }
