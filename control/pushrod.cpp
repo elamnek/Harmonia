@@ -32,6 +32,19 @@ void command_pushrod(String strCommand, int intValue) {
 
 }
 
+//moves the pushrod to a given percent value setpoint (100 = max forward position)
+void command_pushrod_position(int intSetpoint) {
+
+	int intCurrentPos = get_weight_pos();
+
+	int intError = intSetpoint - intCurrentPos;
+
+
+
+
+
+}
+
 int get_weight_pos() {
 	float fltNum = analogRead(A0) - m_intMinPotValue;
 	float fltDenom = m_intMaxPotValue - m_intMinPotValue;
