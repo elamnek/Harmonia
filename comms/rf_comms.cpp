@@ -77,7 +77,7 @@ void send_operational_data_to_remote(String strState) {
 		          "7:" + String(get_leonardo_rpm()) + "," +
 		          "10:" + String(get_leonardo_pressure()) + "," + 
 		          "11:" + String(get_leonardo_temp()) + "," + 
-		          "17:" + String(get_weight_pos()) + "," +
+		          "17:" + String(get_pushrod_pos()) + "," +
 		          "14:" + String(get_imuorientation().x) + "," + 
 		          "15:" + String(get_imuorientation().y) + "," + 
 		          "16:" + String(get_imuorientation().z) + "}");
