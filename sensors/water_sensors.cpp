@@ -5,7 +5,7 @@
 #include "water_sensors.h"
 
 int m_intFwdWaterSensorPin = 40;
-int m_intAftWaterSensorPin = 33;
+int m_intAftWaterSensorPin = 12;
 
 void init_watersensors() {
 

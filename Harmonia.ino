@@ -124,6 +124,9 @@ void loop() {
 	subOrientation = get_imuorientation();
 	pitchAngle = subOrientation.x;*/
 
+	//check leak sensors
+	if (leak_detected()) {state = ALARM;}
+
 	//call these on each loop
 	read_leonardo(); //this updates sensor data coming from leonardo
 	check_rf_comms(); //this checks for new commands coming from desktop remote
@@ -141,15 +144,14 @@ void loop() {
 	if (strRemoteCommand == "RUN") { state = RUN; }
 	if (strRemoteCommand == "ALARM") { state = ALARM; }
 	
-	//state control
-	int intStartState = state;
-	
+	//state control	
 	switch (state) {
 	case IDLE:
-		if (leak_detected()) {
-			state = ALARM;
-		}
 
+		//in idle state need to stop any active operation
+		command_pump("INFLATE", 0);
+		commmand_main_motor(0);
+		
 		break;
 	case MANUAL:
 
@@ -200,10 +202,14 @@ void loop() {
 	case RUN:
 		break;
 	case ALARM:
-		if (!leak_detected()) {
-			state = IDLE;
-		}
+		//once in alarm state can only exit by user changing to another state via remote software
 		
+		//inflating will help sub return to surface and also ensure it stops pumping in water if the air bag is ruptured
+		command_pump("INFLATE", 255);
+
+		//could also initiate power to surface using motor at high thrust and rudders but this would be a problem in confined space such as tank
+		//collision with walls could occur
+
 		break;
 	}
 	
