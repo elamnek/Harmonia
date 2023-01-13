@@ -32,7 +32,6 @@ void apply_manual_command() {
 			command_pushrod(strRemoteCommand, strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "PUSHROD") {
-			//send_rf_comm("reverse");
 			command_pushrod_position(strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "PROPELL") {

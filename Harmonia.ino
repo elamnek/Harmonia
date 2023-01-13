@@ -124,26 +124,39 @@ void loop() {
 	subOrientation = get_imuorientation();
 	pitchAngle = subOrientation.x;*/
 
-	//check leak sensors
-	if (leak_detected()) {state = ALARM;}
+	//check leak sensors and override any state that has been set
+	if (leak_detected()) { 
+		state = ALARM; 
+	}
+	else {
+		//ignore these if leak detected
+		read_leonardo(); //this updates sensor data coming from leonardo	
+		check_pushrod(); //adjusts position of pushrod based on latest setpoint command
+	}
 
-	//call these on each loop
-	read_leonardo(); //this updates sensor data coming from leonardo
-	check_rf_comms(); //this checks for new commands coming from desktop remote
-	check_pushrod(); //adjusts position of pushrod based on latest setpoint command
+	//check for new commands coming from desktop remote
+	check_rf_comms(); 
 
 	//set state using commands from remote
 	String strRemoteCommand = get_remote_command();
-	if (strRemoteCommand == "IDLE") { state = IDLE; }
-	if (strRemoteCommand == "MANUAL") {state = MANUAL;}
-	if (strRemoteCommand == "STATIC_TRIM") { 
-		state = STATIC_TRIM;
-		m_fltStaticTrimDepth = get_remote_param().toFloat();
+	if (state == ALARM) {
+		//system in alarm state - can only be changed by command to go to idle state
+		if (strRemoteCommand == "IDLE") { state = IDLE; }
 	}
-	if (strRemoteCommand == "DYNAMIC_TRIM") { state = DYNAMIC_TRIM; }
-	if (strRemoteCommand == "RUN") { state = RUN; }
-	if (strRemoteCommand == "ALARM") { state = ALARM; }
-	
+	else {
+		//system NOT in alarm state - normal state changes allowed
+		if (strRemoteCommand == "IDLE") { state = IDLE; }
+		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
+		if (strRemoteCommand == "STATIC_TRIM") {
+			state = STATIC_TRIM;
+			m_fltStaticTrimDepth = get_remote_param().toFloat();
+		}
+		if (strRemoteCommand == "DYNAMIC_TRIM") { state = DYNAMIC_TRIM; }
+		if (strRemoteCommand == "RUN") { state = RUN; }
+		if (strRemoteCommand == "ALARM") { state = ALARM; }
+	}
+
+
 	//state control	
 	switch (state) {
 	case IDLE:
@@ -209,6 +222,9 @@ void loop() {
 
 		//could also initiate power to surface using motor at high thrust and rudders but this would be a problem in confined space such as tank
 		//collision with walls could occur
+
+		//also clear the comms buffer so that any user command to idle state can be read
+		clear_rf_command();
 
 		break;
 	}

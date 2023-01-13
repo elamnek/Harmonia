@@ -10,18 +10,14 @@ int m_intPushRodPinPWM = 10;
 int m_intMinPotValue = 305;
 int m_intMaxPotValue = 988;
 
-
 int m_Kp_pos = 1;
 int m_minSpeed = 100;
 int m_maxSpeed = 255;
 int m_intSetpointPos = 0;
 
-
 void init_pushrod() {
-
 	pinMode(m_intPushRodPinDir, OUTPUT);
 	pinMode(m_intPushRodPinPWM, OUTPUT);
-
 }
 
 void command_pushrod(String strCommand, int intValue) {
@@ -47,10 +43,10 @@ void check_pushrod() {
 
 	int intError = m_intSetpointPos - get_pushrod_pos();
 	
-	int intErrorMod = intError; //assume positive
-	if (intError < 0) {intErrorMod = -intError;}
+	int intErrorAbs = intError; //assume positive
+	if (intError < 0) { intErrorAbs = -intError;}
 
-	int intSpeed = (intErrorMod * m_Kp_pos) + m_minSpeed;
+	int intSpeed = (intErrorAbs * m_Kp_pos) + m_minSpeed;
 	if (intSpeed > m_maxSpeed) { intSpeed = m_maxSpeed; } //saturate
 
 	if (intError > 0) {
@@ -61,11 +57,8 @@ void check_pushrod() {
 	}
 	else if (intError == 0) {
 		command_pushrod("REVERSE", 0);
-	}
-	
+	}	
 }
-
-
 
 int get_pushrod_pos() {
 	float fltNum = analogRead(A0) - m_intMinPotValue;
