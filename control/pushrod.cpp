@@ -11,6 +11,11 @@ int m_intMinPotValue = 305;
 int m_intMaxPotValue = 988;
 
 
+int m_Kp_pos = 1;
+int m_minSpeed = 100;
+int m_maxSpeed = 255;
+int m_intSetpointPos = 0;
+
 
 void init_pushrod() {
 
@@ -34,18 +39,35 @@ void command_pushrod(String strCommand, int intValue) {
 
 //moves the pushrod to a given percent value setpoint (100 = max forward position)
 void command_pushrod_position(int intSetpoint) {
-
-	int intCurrentPos = get_weight_pos();
-
-	int intError = intSetpoint - intCurrentPos;
-
-
-
-
-
+	m_intSetpointPos = intSetpoint;
 }
 
-int get_weight_pos() {
+//needs to be run each time main loop executes
+void check_pushrod() {
+
+	int intError = m_intSetpointPos - get_pushrod_pos();
+	
+	int intErrorMod = intError; //assume positive
+	if (intError < 0) {intErrorMod = -intError;}
+
+	int intSpeed = (intErrorMod * m_Kp_pos) + m_minSpeed;
+	if (intSpeed > m_maxSpeed) { intSpeed = m_maxSpeed; } //saturate
+
+	if (intError > 0) {
+		command_pushrod("FORWARD", intSpeed);
+	}
+	else if (intError < 0) {
+		command_pushrod("REVERSE", intSpeed);
+	}
+	else if (intError == 0) {
+		command_pushrod("REVERSE", 0);
+	}
+	
+}
+
+
+
+int get_pushrod_pos() {
 	float fltNum = analogRead(A0) - m_intMinPotValue;
 	float fltDenom = m_intMaxPotValue - m_intMinPotValue;
 	int intPercent = 100*fltNum/ fltDenom;

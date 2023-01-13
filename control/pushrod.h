@@ -13,7 +13,12 @@ void init_pushrod();
 
 void command_pushrod(String strCommand, int intValue);
 
-int get_weight_pos();
+void command_pushrod_position(int intSetpoint);
+
+int get_pushrod_pos();
+
+void check_pushrod();
+
 
 #endif
 

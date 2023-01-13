@@ -124,11 +124,10 @@ void loop() {
 	subOrientation = get_imuorientation();
 	pitchAngle = subOrientation.x;*/
 
-	//call this on each loop - this updates sensor data coming from leonardo
-	read_leonardo();
-
-	//call this on each loop - this checks for new commands coming from desktop remote
-	check_rf_comms();
+	//call these on each loop
+	read_leonardo(); //this updates sensor data coming from leonardo
+	check_rf_comms(); //this checks for new commands coming from desktop remote
+	check_pushrod(); //adjusts position of pushrod based on latest setpoint command
 
 	//set state using commands from remote
 	String strRemoteCommand = get_remote_command();
