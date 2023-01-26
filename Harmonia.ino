@@ -218,7 +218,7 @@ void loop() {
 		//once in alarm state can only exit by user changing to another state via remote software
 		
 		//inflating will help sub return to surface and also ensure it stops pumping in water if the air bag is ruptured
-		command_pump("INFLATE", 255);
+		command_pump("INFLATE", 0);
 
 		//could also initiate power to surface using motor at high thrust and rudders but this would be a problem in confined space such as tank
 		//collision with walls could occur

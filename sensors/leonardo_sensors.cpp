@@ -12,6 +12,7 @@
 String m_strLeonardoRPM;
 String m_strLeonardoPressure;
 String m_strLeonardoTemp;
+String m_strLeonardoBagPressure;
 
 void init_leonardo_sensors() {
 
@@ -28,6 +29,7 @@ void read_leonardo() {
 	String strLeonardoRPM = "";
 	String strLeonardoPressure = "";
 	String strLeonardoTemp = "";
+	String strLeonardoBagPressure = "";
 	while (serialFromLeonardo.available()) {
 		delay(10);
 		if (serialFromLeonardo.available() > 0) {
@@ -39,13 +41,14 @@ void read_leonardo() {
 				if (intValueIndex == 0) { strLeonardoRPM += c; }
 				else if (intValueIndex == 1) { strLeonardoPressure += c; }
 				else if (intValueIndex == 2) { strLeonardoTemp += c; }
+				else if (intValueIndex == 3) { strLeonardoBagPressure += c; }
 			}
 		}
 	}
 	if (strLeonardoRPM.length() > 0) { m_strLeonardoRPM = strLeonardoRPM; }
 	if (strLeonardoPressure.length() > 0) { m_strLeonardoPressure = strLeonardoPressure; }
 	if (strLeonardoTemp.length() > 0) { m_strLeonardoTemp = strLeonardoTemp; }
-
+	if (strLeonardoBagPressure.length() > 0) { m_strLeonardoBagPressure = strLeonardoBagPressure; }
 }
 float get_leonardo_rpm() {
 	return m_strLeonardoRPM.toFloat();
@@ -55,4 +58,7 @@ float get_leonardo_pressure() {
 }
 float get_leonardo_temp() {
 	return m_strLeonardoTemp.toFloat();
+}
+float get_leonardo_bag_pressure() {
+	return m_strLeonardoBagPressure.toFloat();
 }

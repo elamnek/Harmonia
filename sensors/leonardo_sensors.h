@@ -19,5 +19,7 @@ float get_leonardo_pressure();
 
 float get_leonardo_temp();
 
+float get_leonardo_bag_pressure();
+
 #endif
 
