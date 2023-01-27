@@ -125,7 +125,7 @@ void loop() {
 	pitchAngle = subOrientation.x;*/
 
 	//check leak sensors and override any state that has been set
-	if (leak_detected()) { 
+	if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
 		state = ALARM; 
 	}
 	else {

@@ -6,8 +6,8 @@
 #include <Servo.h>
 
 int m_intFwdDiveServoPin = 13;
-int m_intAftDiveServoPin = 5;
-int m_intAftRudderServoPin = 4;
+int m_intAftDiveServoPin = 4;
+int m_intAftRudderServoPin = 5;
 
 Servo m_servoFwdDive;
 Servo m_servoAftDive;

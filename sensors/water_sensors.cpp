@@ -12,13 +12,19 @@ void init_watersensors() {
 	pinMode(m_intAftWaterSensorPin, INPUT);
 }
 
-boolean leak_detected() {
+int fwd_leak_detected() {
 	//normal state of pins = 1 changes to 0 if water touches sensor  track
-	//posibly implement a timer with a min time at 0 to remove chance of false positives
-	if (digitalRead(m_intFwdWaterSensorPin) == 0 || digitalRead(m_intAftWaterSensorPin) == 0){
-		return true;	
+	if (digitalRead(m_intFwdWaterSensorPin) == 0){
+		return 1;	
 	}
-	return false;
+	return 0;
+}
+int aft_leak_detected() {
+	//normal state of pins = 1 changes to 0 if water touches sensor  track
+	if (digitalRead(m_intAftWaterSensorPin) == 0) {
+		return 1;
+	}
+	return 0;
 }
 
 

@@ -11,7 +11,9 @@
 
 void init_watersensors();
 
-boolean leak_detected();
+int fwd_leak_detected();
+
+int aft_leak_detected();
 
 boolean leak_detected2();
 
