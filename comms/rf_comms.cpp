@@ -82,6 +82,7 @@ void send_operational_data_to_remote(String strState) {
 		          "15|" + String(get_imuorientation().y) + "," + 
 		          "16|" + String(get_imuorientation().z) + "," + 
 		          "17|" + String(get_pushrod_pos()) + "," +
+		          "19|" + String(get_waterpressure()) + "," +
 		          "18|" + String(get_leonardo_bag_pressure()) +"}");
 
 

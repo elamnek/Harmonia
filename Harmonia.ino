@@ -125,14 +125,14 @@ void loop() {
 	pitchAngle = subOrientation.x;*/
 
 	//check leak sensors and override any state that has been set
-	if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
+	/*if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
 		state = ALARM; 
 	}
-	else {
+	else {*/
 		//ignore these if leak detected
 		read_leonardo(); //this updates sensor data coming from leonardo	
 		check_pushrod(); //adjusts position of pushrod based on latest setpoint command
-	}
+	//}
 
 	//check for new commands coming from desktop remote
 	check_rf_comms(); 
