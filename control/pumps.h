@@ -14,6 +14,7 @@ void init_pumps();
 
 void command_pump(String strCommand, int intValue);
 
+int get_pump_status();
 
 #endif
 
