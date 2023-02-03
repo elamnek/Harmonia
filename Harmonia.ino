@@ -5,6 +5,7 @@
 */
 
 //installed libraries
+#include <SD.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <SPL06-007.h>
@@ -27,6 +28,7 @@
 #include "sensors\leonardo_sensors.h"
 #include "sensors\pressure_sensor.h"
 #include "comms\rf_comms.h"
+#include "data\sdcard.h"
 
 #define DEPTH_TRIMMED (1<<0)
 #define PITCH_TRIMMED (1<<1)
