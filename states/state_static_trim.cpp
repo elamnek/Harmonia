@@ -26,10 +26,8 @@ void adjust_depth(float fltDepthSetpoint) {
 
 void adjust_pitch() {
 
-	float fltPitch = get_imuorientation().pitch;
+	float fltPitch = get_imuorientation().y;
 
-
-	
 }
 
 

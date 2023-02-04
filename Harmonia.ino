@@ -138,9 +138,9 @@ bool timer1Hz_interrupt(void*) {
 						"7|" + String(get_leonardo_rpm()) + "," +
 						"10|" + String(get_leonardo_pressure()) + "," +
 						"11|" + String(get_leonardo_temp()) + "," +
-						"14|" + String(get_imuorientation().x) + "," +
-						"15|" + String(get_imuorientation().y) + "," +
-						"16|" + String(get_imuorientation().z) + "," +
+						"14|" + String(get_imuorientation().x) + "," + //heading
+						"15|" + String(get_imuorientation().y) + "," + //pitch
+						"16|" + String(get_imuorientation().z) + "," + //roll
 						"17|" + String(get_pushrod_pos()) + "," +
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + String(get_leonardo_bag_pressure()) + "," +
@@ -225,7 +225,7 @@ void loop() {
 
 		//adjust depth to 0.5m
 		adjust_depth(0.5);
-		adjust_pitch();
+		//adjust_pitch();
 
 		
 		//update_error((float)(depthTargetDistance-depth_distance), dt, &depthError);
