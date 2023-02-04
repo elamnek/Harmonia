@@ -11,5 +11,7 @@
 
 String init_sdcard();
 
+void sdcard_save_data(String strDataLine);
+
 #endif
 

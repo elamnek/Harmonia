@@ -52,7 +52,7 @@ auto timer1Hz = timer_create_default();
 
 
 //FSM states
-enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM} state;
+enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM, UPLOAD} state;
 //function used to return text description of current state
 String  get_state() {
 	switch (state) {
@@ -62,6 +62,7 @@ String  get_state() {
 	case DYNAMIC_TRIM: return "DYNAMIC_TRIM";
 	case RUN: return "RUN";
 	case ALARM: return "ALARM";
+	case UPLOAD: return "UPLOAD";
 	}
 }
 
@@ -119,29 +120,43 @@ void setup() {
 }
 
 bool timer1Hz_interrupt(void*) {
+
+	
+	/// format of the data package is important
+	/// each data value needs an associate metadataid (these are defined in the Digital Twin database in a table called dt_data_config
+	/// each metadataid needs to have a matching record in the dt_data_config table
+	/// the metadataid tells the DT where to insert the data (ie. what table/field combination)
+	/// the first data value always has to be the rtc date/time (metadataid=13)
+	/// format to use is {metadataid1|data_value1,metadataid2|data_value2,metadataid3|data_value3, etc.}
+	/// use curly brackets either end to ensure that entire string is received at remote end and to distinguish from other messages going to remote	
 	
 	String strData = "{13|" + get_rtctime() + "," +
-		"4|" + get_state() + "," +
-		"2|" + String(fwd_leak_detected()) + "," +
-		"3|" + String(aft_leak_detected()) + "," +
-		"1|" + String(get_depth()) + ","
-		"7|" + String(get_leonardo_rpm()) + "," +
-		"10|" + String(get_leonardo_pressure()) + "," +
-		"11|" + String(get_leonardo_temp()) + "," +
-		"14|" + String(get_imuorientation().x) + "," +
-		"15|" + String(get_imuorientation().y) + "," +
-		"16|" + String(get_imuorientation().z) + "," +
-		"17|" + String(get_pushrod_pos()) + "," +
-		"19|" + String(get_waterpressure()) + "," +
-		"18|" + String(get_leonardo_bag_pressure()) + "," +
-		"21|" + String(get_pump_status()) +
-		"}";
+						"4|" + get_state() + "," +
+						"2|" + String(fwd_leak_detected()) + "," +
+						"3|" + String(aft_leak_detected()) + "," +
+						"1|" + String(get_depth()) + ","
+						"7|" + String(get_leonardo_rpm()) + "," +
+						"10|" + String(get_leonardo_pressure()) + "," +
+						"11|" + String(get_leonardo_temp()) + "," +
+						"14|" + String(get_imuorientation().x) + "," +
+						"15|" + String(get_imuorientation().y) + "," +
+						"16|" + String(get_imuorientation().z) + "," +
+						"17|" + String(get_pushrod_pos()) + "," +
+						"19|" + String(get_waterpressure()) + "," +
+						"18|" + String(get_leonardo_bag_pressure()) + "," +
+						"21|" + String(get_pump_status()) + "," +
+						"22|" + String(get_main_motor_throttle()) +
+						"}";
 
 
 	//every second all opartional data needs to be sent to remote (sensors, state, control commands etc.)
 	send_rf_comm(strData);
 
-	//and also to sdcard
+	//if in the upload state - we don't want data to be stored
+	if (state == UPLOAD) { return true; }
+
+	//save to sdcard
+	sdcard_save_data(strData);
 
 	return true;
 }
@@ -186,6 +201,7 @@ void loop() {
 		if (strRemoteCommand == "DYNAMIC_TRIM") { state = DYNAMIC_TRIM; }
 		if (strRemoteCommand == "RUN") { state = RUN; }
 		if (strRemoteCommand == "ALARM") { state = ALARM; }
+		if (strRemoteCommand == "UPLOAD") { state = UPLOAD; }
 	}
 
 
@@ -257,6 +273,14 @@ void loop() {
 
 		//also clear the comms buffer so that any user command to idle state can be read
 		clear_rf_command();
+
+		break;
+	case UPLOAD:
+		//in upload state need to stop any active operation
+		command_pump("INFLATE", 0);
+		commmand_main_motor(0);
+
+
 
 		break;
 	}

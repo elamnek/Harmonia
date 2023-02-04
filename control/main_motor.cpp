@@ -7,6 +7,7 @@
 
 Servo m_servoMainMotor;
 int m_intMotorPinPWM = 6;
+int m_intThrottle = 0;
 
 void init_main_motor() {
 	
@@ -19,6 +20,21 @@ void init_main_motor() {
 
 void commmand_main_motor(int intValue) {
 	m_servoMainMotor.write(intValue);
+	
+	//convert to a more readible throttle value
+	if (intValue < 90) {
+		m_intThrottle = -90 + intValue;
+	} else if (intValue > 90) {
+		m_intThrottle = intValue-90;
+	}
+	else if (intValue == 90) {
+		m_intThrottle = 0;
+	}
+}
+	
+
+int get_main_motor_throttle() {
+	return m_intThrottle;
 }
 
 

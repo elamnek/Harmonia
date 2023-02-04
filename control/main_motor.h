@@ -13,5 +13,7 @@ void init_main_motor();
 
 void commmand_main_motor(int intValue);
 
+int get_main_motor_throttle();
+
 #endif
 
