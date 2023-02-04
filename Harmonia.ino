@@ -5,7 +5,7 @@
 */
 
 //installed libraries
-#include "power_sensor.h"
+#include <DFRobot_INA219.h>
 #include <SPI.h>
 #include <SD.h>
 #include <Adafruit_Sensor.h>
@@ -29,6 +29,7 @@
 #include "sensors\IMU.h"
 #include "sensors\leonardo_sensors.h"
 #include "sensors\pressure_sensor.h"
+#include "sensors\power_sensor.h"
 #include "comms\rf_comms.h"
 #include "data\sdcard.h"
 
@@ -146,7 +147,11 @@ bool timer1Hz_interrupt(void*) {
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + String(get_leonardo_bag_pressure()) + "," +
 						"21|" + String(get_pump_status()) + "," +
-						"22|" + String(get_main_motor_throttle()) +
+						"22|" + String(get_main_motor_throttle()) + "," +
+		                "23|" + String(get_bus_voltage()) + "," +
+		                "24|" + String(get_shunt_voltage()) + "," +
+		                "25|" + String(get_current_mA()) + "," +
+		                "26|" + String(get_power_mW()) +
 						"}";
 
 

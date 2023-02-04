@@ -9,6 +9,16 @@
 	#include "WProgram.h"
 #endif
 
+String init_powersensor();
+
+float get_bus_voltage();
+
+float get_shunt_voltage();
+
+float get_current_mA();
+
+float get_power_mW();
+
 
 #endif
 
