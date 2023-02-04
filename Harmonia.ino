@@ -5,6 +5,7 @@
 */
 
 //installed libraries
+#include <SPI.h>
 #include <SD.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
@@ -32,6 +33,7 @@
 
 #define DEPTH_TRIMMED (1<<0)
 #define PITCH_TRIMMED (1<<1)
+
 
 
 t_control_error depthError = {};
@@ -83,7 +85,15 @@ void setup() {
 	init_watersensors();
 	init_leonardo_sensors();
 
-	String msg = init_imu();
+	String msg = init_sdcard();
+	if (msg.length() > 0) {
+		send_rf_comm(msg);
+	}
+	else {
+		send_rf_comm("SDCard OK!!");
+	}
+
+	msg = init_imu();
 	if (msg.length() > 0) {
 		send_rf_comm(msg);
 	}
@@ -110,8 +120,28 @@ void setup() {
 
 bool timer1Hz_interrupt(void*) {
 	
+	String strData = "{13|" + get_rtctime() + "," +
+		"4|" + get_state() + "," +
+		"2|" + String(fwd_leak_detected()) + "," +
+		"3|" + String(aft_leak_detected()) + "," +
+		"1|" + String(get_depth()) + ","
+		"7|" + String(get_leonardo_rpm()) + "," +
+		"10|" + String(get_leonardo_pressure()) + "," +
+		"11|" + String(get_leonardo_temp()) + "," +
+		"14|" + String(get_imuorientation().x) + "," +
+		"15|" + String(get_imuorientation().y) + "," +
+		"16|" + String(get_imuorientation().z) + "," +
+		"17|" + String(get_pushrod_pos()) + "," +
+		"19|" + String(get_waterpressure()) + "," +
+		"18|" + String(get_leonardo_bag_pressure()) + "," +
+		"21|" + String(get_pump_status()) +
+		"}";
+
+
 	//every second all opartional data needs to be sent to remote (sensors, state, control commands etc.)
-	send_operational_data_to_remote(get_state());
+	send_rf_comm(strData);
+
+	//and also to sdcard
 
 	return true;
 }

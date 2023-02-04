@@ -9,6 +9,7 @@
 	#include "WProgram.h"
 #endif
 
+String init_sdcard();
 
 #endif
 

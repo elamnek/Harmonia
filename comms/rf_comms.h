@@ -21,7 +21,6 @@ String get_remote_param();
 
 void clear_rf_command();
 
-void send_operational_data_to_remote(String strState);
 
 #endif
 
