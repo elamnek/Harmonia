@@ -33,9 +33,13 @@ typedef struct {
 
 void update_error(float newErr, float dt, t_control_error* errUpdated);
 
-void adjust_depth(t_control_error depthError);
+//void adjust_depth(t_control_error depthError);
 
-void adjust_static_trim(t_control_error trimError);
+void adjust_depth(float fltDepthSetpoint);
+
+void adjust_pitch();
+
+//void adjust_static_trim(t_control_error trimError);
 
 #endif
 

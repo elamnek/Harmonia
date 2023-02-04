@@ -222,7 +222,11 @@ void loop() {
 		break;
 	case STATIC_TRIM:
 
-		
+
+		//adjust depth to 0.5m
+		adjust_depth(0.5);
+		adjust_pitch();
+
 		
 		//update_error((float)(depthTargetDistance-depth_distance), dt, &depthError);
 		//update_error((float)(-pitchAngle), dt, &trimError);
