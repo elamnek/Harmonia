@@ -118,6 +118,7 @@
     <ClInclude Include="control\main_motor.h" />
     <ClInclude Include="control\pushrod.h" />
     <ClInclude Include="data\sdcard.h" />
+    <ClInclude Include="sensors\power_sensor.h" />
     <ClInclude Include="sensors\leonardo_sensors.h" />
     <ClInclude Include="control\pumps.h" />
     <ClInclude Include="sensors\IMU.h" />
@@ -134,6 +135,7 @@
     <ClCompile Include="control\main_motor.cpp" />
     <ClCompile Include="control\pushrod.cpp" />
     <ClCompile Include="data\sdcard.cpp" />
+    <ClCompile Include="sensors\power_sensor.cpp" />
     <ClCompile Include="sensors\leonardo_sensors.cpp" />
     <ClCompile Include="control\pumps.cpp" />
     <ClCompile Include="sensors\IMU.cpp" />

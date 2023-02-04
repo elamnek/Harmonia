@@ -60,6 +60,9 @@
     <ClInclude Include="data\sdcard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sensors\power_sensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sensors\RTC.cpp">
@@ -99,6 +102,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="data\sdcard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sensors\power_sensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

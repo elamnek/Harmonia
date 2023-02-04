@@ -5,6 +5,7 @@
 */
 
 //installed libraries
+#include "power_sensor.h"
 #include <SPI.h>
 #include <SD.h>
 #include <Adafruit_Sensor.h>
