@@ -148,14 +148,14 @@ bool timer1Hz_interrupt(void*) {
 						"18|" + String(get_leonardo_bag_pressure()) + "," +
 						"21|" + String(get_pump_status()) + "," +
 						"22|" + String(get_main_motor_throttle()) + "," +
-		                "23|" + String(get_bus_voltage()) + "," +
-		                "24|" + String(get_shunt_voltage()) + "," +
-		                "25|" + String(get_current_mA()) + "," +
-		                "26|" + String(get_power_mW()) +
+		                "23|" + String(get_leonardo_bus_voltage()) + "," +
+		                "24|" + String(get_leonardo_shunt_voltage()) + "," +
+		                "25|" + String(get_leonardo_current()) + "," +
+		                "26|" + String(get_leonardo_power()) +
 						"}";
 
 
-	//every second all opartional data needs to be sent to remote (sensors, state, control commands etc.)
+	//every second all operational data needs to be sent to remote (sensors, state, control commands etc.)
 	send_rf_comm(strData);
 
 	//if in the upload state - we don't want data to be stored

@@ -21,5 +21,13 @@ float get_leonardo_temp();
 
 float get_leonardo_bag_pressure();
 
+float get_leonardo_bus_voltage();
+
+float get_leonardo_shunt_voltage();
+
+float get_leonardo_current();
+
+float get_leonardo_power();
+
 #endif
 
