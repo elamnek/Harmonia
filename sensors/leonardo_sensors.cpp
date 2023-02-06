@@ -90,3 +90,28 @@ float get_leonardo_current() {
 float get_leonardo_power() {
 	return m_strLeonardoPower.toFloat();
 }
+
+String get_leonardo_rpm_str() {
+	return m_strLeonardoRPM;
+}
+String get_leonardo_pressure_str() {
+	return m_strLeonardoPressure;
+}
+String get_leonardo_temp_str() {
+	return m_strLeonardoTemp;
+}
+String get_leonardo_bag_pressure_str() {
+	return m_strLeonardoBagPressure;
+}
+String get_leonardo_bus_voltage_str() {
+	return m_strLeonardoBusVoltage;
+}
+String get_leonardo_shunt_voltage_str() {
+	return m_strLeonardoShuntVoltage;
+}
+String get_leonardo_current_str() {
+	return m_strLeonardoCurrent;
+}
+String get_leonardo_power_str() {
+	return m_strLeonardoPower;
+}

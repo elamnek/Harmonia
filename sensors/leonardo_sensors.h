@@ -29,5 +29,21 @@ float get_leonardo_current();
 
 float get_leonardo_power();
 
+String get_leonardo_rpm_str();
+
+String get_leonardo_pressure_str();
+
+String get_leonardo_temp_str();
+
+String get_leonardo_bag_pressure_str();
+
+String get_leonardo_bus_voltage_str();
+
+String get_leonardo_shunt_voltage_str();
+
+String get_leonardo_current_str();
+
+String get_leonardo_power_str();
+
 #endif
 

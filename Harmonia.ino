@@ -137,21 +137,21 @@ bool timer1Hz_interrupt(void*) {
 						"2|" + String(fwd_leak_detected()) + "," +
 						"3|" + String(aft_leak_detected()) + "," +
 						"1|" + String(get_depth()) + ","
-						"7|" + String(get_leonardo_rpm()) + "," +
-						"10|" + String(get_leonardo_pressure()) + "," +
-						"11|" + String(get_leonardo_temp()) + "," +
+						"7|" + get_leonardo_rpm_str() + "," +
+						"10|" + get_leonardo_pressure_str() + "," +
+						"11|" + get_leonardo_temp_str() + "," +
 						"14|" + String(get_imuorientation().x) + "," + //heading
 						"15|" + String(get_imuorientation().y) + "," + //pitch
 						"16|" + String(get_imuorientation().z) + "," + //roll
 						"17|" + String(get_pushrod_pos()) + "," +
 						"19|" + String(get_waterpressure()) + "," +
-						"18|" + String(get_leonardo_bag_pressure()) + "," +
+						"18|" + get_leonardo_bag_pressure_str() + "," +
 						"21|" + String(get_pump_status()) + "," +
 						"22|" + String(get_main_motor_throttle()) + "," +
-		                "23|" + String(get_leonardo_bus_voltage()) + "," +
-		                "24|" + String(get_leonardo_shunt_voltage()) + "," +
-		                "25|" + String(get_leonardo_current()) + "," +
-		                "26|" + String(get_leonardo_power()) +
+		                "23|" + get_leonardo_bus_voltage_str() + "," +
+		                "24|" + get_leonardo_shunt_voltage_str() + "," +
+		                "25|" + get_leonardo_current_str() + "," +
+		                "26|" + get_leonardo_power_str() +
 						"}";
 
 
