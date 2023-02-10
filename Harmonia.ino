@@ -79,7 +79,7 @@ void setup() {
   
 	init_rtc();
 	init_rf_comms();
-	send_rf_comm("Harmonia is awake - time is: " + get_rtctime());
+	send_rf_comm("Harmonia is awake - stored time is: " + get_rtc_time());
 
 	init_servos();
 	init_pumps();
@@ -132,7 +132,7 @@ bool timer1Hz_interrupt(void*) {
 	/// format to use is {metadataid1|data_value1,metadataid2|data_value2,metadataid3|data_value3, etc.}
 	/// use curly brackets either end to ensure that entire string is received at remote end and to distinguish from other messages going to remote	
 	
-	String strData = "{13|" + get_rtctime() + "," +
+	String strData = "{13|" + get_rtc_time() + "," +
 						"4|" + get_state() + "," +
 						"2|" + String(fwd_leak_detected()) + "," +
 						"3|" + String(aft_leak_detected()) + "," +
@@ -210,6 +210,11 @@ void loop() {
 		if (strRemoteCommand == "UPLOAD") { state = UPLOAD; }
 	}
 
+	//check for command to set time
+	if (strRemoteCommand == "TIMESET") {
+		set_rtc_time(get_remote_param());
+		clear_rf_command();
+	}
 
 	//state control	
 	switch (state) {

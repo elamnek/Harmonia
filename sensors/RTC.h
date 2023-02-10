@@ -11,7 +11,11 @@
 
 void init_rtc();
 
-String get_rtctime();
+int getValue(String data, char separator, int index);
+
+void set_rtc_time(String strDateTimeFromPC);
+
+String get_rtc_time();
 
 #endif
 
