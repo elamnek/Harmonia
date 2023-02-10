@@ -3,6 +3,8 @@ Harmonia research submarine onboard control software. This is the main control c
 
 https://github.com/elamnek/Harmonia/wiki
 
+https://user-images.githubusercontent.com/25494253/217131320-b1a3298b-334c-4569-9434-a887563058a7.mp4
+
 Related projects are: 
 
 HarmoniaRemote - windows desktop software to control operation of submarine (via RF transciever) and collect sensor data and forward to PostgreSQL database
