@@ -52,7 +52,7 @@ float pitchAngle = 0.0;
 sensors_vec_t subOrientation = {};
 
 auto timer1Hz = timer_create_default();
-
+auto timer200mHz = timer_create_default();
 
 //FSM states
 enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM, UPLOAD} state;
@@ -74,6 +74,7 @@ float m_fltStaticTrimDepth;
 void setup() {
 
 	timer1Hz.every(1000, timer1Hz_interrupt);
+	timer200mHz.every(200, timer200mHz_interrupt);
 
 	//always start in IDLE state
 	state = IDLE;
@@ -161,6 +162,26 @@ bool timer1Hz_interrupt(void*) {
 
 	//if in the upload state - we don't want data to be stored
 	if (state == UPLOAD) { return true; }
+
+	//save to sdcard
+	sdcard_save_data(strData);
+
+	return true;
+}
+
+bool timer200mHz_interrupt(void*) {
+
+	//this function stored data that needs to be captured at higher fidelity
+	//200mHz data doesn't need to be sent to remote display, only stored to SD card (except if in upload mode)
+
+	//if in the upload state - we don't want data to be stored
+	if (state == UPLOAD) { return true; }
+
+	String strData = "{13|" + get_rtc_time() + "," +
+		              "27|" + get_fwddiveplane_angle() + "," +
+		              "28|" + get_aftdiveplane_angle() + "," +
+		              "29|" + get_aftrudder_angle() + 
+		              "}";
 
 	//save to sdcard
 	sdcard_save_data(strData);
