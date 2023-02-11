@@ -221,6 +221,7 @@ void loop() {
 			state = STATIC_TRIM;
 			//m_fltStaticTrimDepth = get_remote_param().toFloat();
 			init_static_trim(get_remote_param().toDouble());
+			clear_rf_command();
 		}
 		if (strRemoteCommand == "DYNAMIC_TRIM") { state = DYNAMIC_TRIM; }
 		if (strRemoteCommand == "RUN") { state = RUN; }
@@ -251,7 +252,10 @@ void loop() {
 		break;
 	case STATIC_TRIM:
 	
-		adjust_depth();
+		if (adjust_depth()) {
+			//only adjust pitch if depth is within tolerance
+			adjust_pitch();
+		}
 		
 		break;
 	case DYNAMIC_TRIM:

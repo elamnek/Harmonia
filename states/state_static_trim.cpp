@@ -14,25 +14,33 @@
 //https://playground.arduino.cc/Code/PIDLibaryBasicExample/
 
 
-double m_dblPIDSetpoint, m_dblInput, m_dblOutput;
-PID m_PIDdepth(&m_dblInput, &m_dblOutput, &m_dblPIDSetpoint, 2, 5, 1, DIRECT);
+//depth PID
+double m_dblDepthSetpoint, m_dblDepthInput, m_dblDepthOutput;
+PID m_PIDdepth(&m_dblDepthInput, &m_dblDepthOutput, &m_dblDepthSetpoint, 2, 5, 1, DIRECT);
+
+//pitch PID
+double m_dblPitchSetpoint, m_dblPitchInput, m_dblPitchOutput;
+PID m_PIDpitch(&m_dblPitchInput, &m_dblPitchOutput, &m_dblPitchSetpoint, 2, 5, 1, DIRECT);
 
 void init_static_trim(double dblDepthSetpoint) {
 
 	m_PIDdepth.SetOutputLimits(-255, 255);
-	m_dblPIDSetpoint = dblDepthSetpoint;
+	m_dblDepthSetpoint = dblDepthSetpoint;
 
-	//turn the PID on
+	m_PIDpitch.SetOutputLimits(0,100);//adjust for max and min battery pos
+	m_dblPitchSetpoint = 0; //horizontal
+
+	//turn the PIDs on
 	m_PIDdepth.SetMode(AUTOMATIC);
-
+	m_PIDpitch.SetMode(AUTOMATIC);
 }
 
 boolean adjust_depth() {
 
-	m_dblInput = get_depth();
+	m_dblDepthInput = get_depth();
 	m_PIDdepth.Compute();
 
-	int intOutput = round(m_dblOutput);
+	int intOutput = round(m_dblDepthOutput);
 	
 	if (intOutput > 0) {
 		command_pump("INFLATE", intOutput);
@@ -44,7 +52,7 @@ boolean adjust_depth() {
 		command_pump("INFLATE", 0);
 	}
 
-	double dblError = m_dblPIDSetpoint - m_dblOutput;
+	double dblError = m_dblDepthSetpoint - m_dblDepthOutput;
 	if (dblError < 0) { dblError = -dblError; }
 	if (dblError < 0.05) {
 		return true;
@@ -58,7 +66,12 @@ boolean adjust_depth() {
 
 void adjust_pitch() {
 
-	float fltPitch = get_imuorientation().y;
+	m_dblPitchInput = get_imuorientation().y;
+	m_PIDpitch.Compute();
+
+	int intOutput = round(m_dblPitchOutput);
+
+	command_pushrod_position(intOutput);
 
 }
 
