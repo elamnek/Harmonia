@@ -31,11 +31,13 @@ typedef struct {
 	float errDer;
 } t_control_error;
 
-void update_error(float newErr, float dt, t_control_error* errUpdated);
+//void update_error(float newErr, float dt, t_control_error* errUpdated);
 
 //void adjust_depth(t_control_error depthError);
 
-void adjust_depth(float fltDepthSetpoint);
+void init_static_trim(double dblDepthSetpoint);
+
+void adjust_depth();
 
 void adjust_pitch();
 

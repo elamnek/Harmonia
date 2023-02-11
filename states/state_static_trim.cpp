@@ -13,17 +13,36 @@
 #include <PID_v1.h>
 //https://playground.arduino.cc/Code/PIDLibaryBasicExample/
 
-void adjust_depth(float fltDepthSetpoint) {
 
-	float fltDepth = get_depth();
+double m_dblPIDSetpoint, m_dblInput, m_dblOutput;
+PID m_PID(&m_dblInput, &m_dblOutput, &m_dblPIDSetpoint, 2, 5, 1, DIRECT);
 
-	if (fltDepth > fltDepthSetpoint) {
-		command_pump("INFLATE", 255);
+void init_static_trim(double dblDepthSetpoint) {
+
+	m_PID.SetOutputLimits(-255, 255);
+	m_dblPIDSetpoint = dblDepthSetpoint;
+
+	//turn the PID on
+	m_PID.SetMode(AUTOMATIC);
+
+}
+
+void adjust_depth() {
+
+	m_dblInput = get_depth();
+	m_PID.Compute();
+
+	int intOutput = round(m_dblOutput);
+	
+	if (intOutput > 0) {
+		command_pump("INFLATE", intOutput);
 	}
-	else if (fltDepth <= fltDepthSetpoint) {
-		command_pump("DEFLATE", 255);
+	else if (intOutput < 0) {
+		command_pump("DEFLATE", intOutput);
 	}
-
+	else {
+		command_pump("INFLATE", 0);
+	}
 }
 
 void adjust_pitch() {
@@ -32,6 +51,14 @@ void adjust_pitch() {
 
 }
 
+
+
+/*if (fltDepth > fltDepthSetpoint) {
+		command_pump("INFLATE", 255);
+	}
+	else if (fltDepth <= fltDepthSetpoint) {
+		command_pump("DEFLATE", 255);
+	}*/
 
 // this function must be non-blocking (no pauses or time delays)
 // Rate controls the submarine depth by adjusting the ballast
@@ -63,13 +90,11 @@ void adjust_pitch() {
 //}
 
 // Based on error passed and the timestep from the past values update the error controls
-void update_error(float newErr, float dt, t_control_error* errUpdated){
-	errUpdated->errDer = (newErr - errUpdated->err)/dt;
-	errUpdated->errInt += newErr*dt;
-	errUpdated->err = newErr;
-}
-
-
+//void update_error(float newErr, float dt, t_control_error* errUpdated){
+//	errUpdated->errDer = (newErr - errUpdated->err)/dt;
+//	errUpdated->errInt += newErr*dt;
+//	errUpdated->err = newErr;
+//}
 
 /*
 //this function must be non-blocking (no pauses or time delays)

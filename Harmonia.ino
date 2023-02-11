@@ -224,7 +224,8 @@ void loop() {
 		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
 		if (strRemoteCommand == "STATIC_TRIM") {
 			state = STATIC_TRIM;
-			m_fltStaticTrimDepth = get_remote_param().toFloat();
+			//m_fltStaticTrimDepth = get_remote_param().toFloat();
+			init_static_trim(get_remote_param().toDouble());
 		}
 		if (strRemoteCommand == "DYNAMIC_TRIM") { state = DYNAMIC_TRIM; }
 		if (strRemoteCommand == "RUN") { state = RUN; }
@@ -254,46 +255,9 @@ void loop() {
 
 		break;
 	case STATIC_TRIM:
-
-
-		//adjust depth to 0.5m
-		adjust_depth(0.5);
-		//adjust_pitch();
-
+	
+		adjust_depth();
 		
-		//update_error((float)(depthTargetDistance-depth_distance), dt, &depthError);
-		//update_error((float)(-pitchAngle), dt, &trimError);
-		//
-		//// Adjust the depth until the error is with in accpetable margin and has slowed to a near stop
-		//if ((abs(depthError.err/ depthTargetDistance)>0.05) || (abs(depthError.errDer)>0.01)) {
-		//	adjust_depth(depthError);
-		//	trimmed_state &= ~(DEPTH_TRIMMED);
-		//}
-		//else {
-		//	trimmed_state |= DEPTH_TRIMMED;
-		//}
-		//
-		//// Adjust the pitch angle until error is with in accpetable margin and has slowed to a near stop
-		//if ((abs(pitchError.err)>0.1) || (abs(pitchError.errDer)>0.01)){
-		//	adjust_static_trim(pitchError);
-		//	trimmed_state &= ~(PITCH_TRIMMED);
-		//}
-		//else {
-		//	trimmed_state |= PITCH_TRIMMED;
-		//}
-		//
-		//if (trimmed_state == (DEPTH_TRIMMED | PITCH_TRIMMED)) {
-		//	command_pump("INFLATE", 0);
-		//	state = DYNAMIC_TRIM;
-		//}
-		
-
-
-		//this is a non-blocking function that checks sensors and makes adjustments to trim
-		//must be non-blocking so that main loop is always running and checking for leaks or new commands from remote
-		//adjust_static_trim(m_fltStaticTrimDepth);
-
-
 		break;
 	case DYNAMIC_TRIM:
 		break;
@@ -368,6 +332,38 @@ void scan_i2c() {
 
 
 //dead car bodies
+
+//update_error((float)(depthTargetDistance-depth_distance), dt, &depthError);
+		//update_error((float)(-pitchAngle), dt, &trimError);
+		//
+		//// Adjust the depth until the error is with in accpetable margin and has slowed to a near stop
+		//if ((abs(depthError.err/ depthTargetDistance)>0.05) || (abs(depthError.errDer)>0.01)) {
+		//	adjust_depth(depthError);
+		//	trimmed_state &= ~(DEPTH_TRIMMED);
+		//}
+		//else {
+		//	trimmed_state |= DEPTH_TRIMMED;
+		//}
+		//
+		//// Adjust the pitch angle until error is with in accpetable margin and has slowed to a near stop
+		//if ((abs(pitchError.err)>0.1) || (abs(pitchError.errDer)>0.01)){
+		//	adjust_static_trim(pitchError);
+		//	trimmed_state &= ~(PITCH_TRIMMED);
+		//}
+		//else {
+		//	trimmed_state |= PITCH_TRIMMED;
+		//}
+		//
+		//if (trimmed_state == (DEPTH_TRIMMED | PITCH_TRIMMED)) {
+		//	command_pump("INFLATE", 0);
+		//	state = DYNAMIC_TRIM;
+		//}
+
+
+
+		//this is a non-blocking function that checks sensors and makes adjustments to trim
+		//must be non-blocking so that main loop is always running and checking for leaks or new commands from remote
+		//adjust_static_trim(m_fltStaticTrimDepth);
 
 //check for state change and send to remote - move this 2 the 1s timer event
 	//if (intStartState != state) {
