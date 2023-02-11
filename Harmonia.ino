@@ -194,11 +194,6 @@ void loop() {
 	
 	timer1Hz.tick();
 
-	//update pitch angle and depth distance
-	/*depth_distance = get_depth();
-	subOrientation = get_imuorientation();
-	pitchAngle = subOrientation.x;*/
-
 	//check leak sensors and override any state that has been set
 	/*if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
 		state = ALARM; 
@@ -332,6 +327,11 @@ void scan_i2c() {
 
 
 //dead car bodies
+
+//update pitch angle and depth distance
+	/*depth_distance = get_depth();
+	subOrientation = get_imuorientation();
+	pitchAngle = subOrientation.x;*/
 
 //update_error((float)(depthTargetDistance-depth_distance), dt, &depthError);
 		//update_error((float)(-pitchAngle), dt, &trimError);

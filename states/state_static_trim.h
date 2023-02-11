@@ -37,7 +37,7 @@ typedef struct {
 
 void init_static_trim(double dblDepthSetpoint);
 
-void adjust_depth();
+boolean adjust_depth();
 
 void adjust_pitch();
 

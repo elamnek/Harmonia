@@ -15,22 +15,22 @@
 
 
 double m_dblPIDSetpoint, m_dblInput, m_dblOutput;
-PID m_PID(&m_dblInput, &m_dblOutput, &m_dblPIDSetpoint, 2, 5, 1, DIRECT);
+PID m_PIDdepth(&m_dblInput, &m_dblOutput, &m_dblPIDSetpoint, 2, 5, 1, DIRECT);
 
 void init_static_trim(double dblDepthSetpoint) {
 
-	m_PID.SetOutputLimits(-255, 255);
+	m_PIDdepth.SetOutputLimits(-255, 255);
 	m_dblPIDSetpoint = dblDepthSetpoint;
 
 	//turn the PID on
-	m_PID.SetMode(AUTOMATIC);
+	m_PIDdepth.SetMode(AUTOMATIC);
 
 }
 
-void adjust_depth() {
+boolean adjust_depth() {
 
 	m_dblInput = get_depth();
-	m_PID.Compute();
+	m_PIDdepth.Compute();
 
 	int intOutput = round(m_dblOutput);
 	
@@ -43,6 +43,17 @@ void adjust_depth() {
 	else {
 		command_pump("INFLATE", 0);
 	}
+
+	double dblError = m_dblPIDSetpoint - m_dblOutput;
+	if (dblError < 0) { dblError = -dblError; }
+	if (dblError < 0.05) {
+		return true;
+	}
+	else {
+		return false;
+	}
+
+
 }
 
 void adjust_pitch() {
