@@ -27,7 +27,7 @@ void init_static_trim(double dblDepthSetpoint) {
 	m_PIDdepth.SetOutputLimits(-255, 255);
 	m_dblDepthSetpoint = dblDepthSetpoint;
 
-	m_PIDpitch.SetOutputLimits(0,100);//adjust for max and min battery pos
+	m_PIDpitch.SetOutputLimits(-255,255);//adjust for max and min of pushrod
 	m_dblPitchSetpoint = 0; //horizontal
 
 	//turn the PIDs on
@@ -46,6 +46,7 @@ boolean adjust_depth() {
 		command_pump("INFLATE", intOutput);
 	}
 	else if (intOutput < 0) {
+		intOutput = -intOutput;
 		command_pump("DEFLATE", intOutput);
 	}
 	else {
@@ -71,7 +72,16 @@ void adjust_pitch() {
 
 	int intOutput = round(m_dblPitchOutput);
 
-	command_pushrod_position(intOutput);
+	if (intOutput > 0) {
+		command_pushrod("FORWARD", intOutput);
+	} else if (intOutput < 0) {
+		intOutput = -intOutput;
+		command_pushrod("REVERSE", intOutput);
+	} else {
+		command_pushrod("FORWARD", 0);
+	}
+
+	
 
 }
 
