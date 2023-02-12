@@ -24,7 +24,7 @@ PID m_PIDpitch(&m_dblPitchInput, &m_dblPitchOutput, &m_dblPitchSetpoint, 2, 5, 1
 
 void init_static_trim(double dblDepthSetpoint) {
 
-	m_PIDdepth.SetOutputLimits(-255, 255);
+    m_PIDdepth.SetOutputLimits(-255, 255);
 	m_dblDepthSetpoint = dblDepthSetpoint;
 
 	m_PIDpitch.SetOutputLimits(-255,255);//adjust for max and min of pushrod

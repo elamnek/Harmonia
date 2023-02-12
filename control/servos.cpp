@@ -40,13 +40,13 @@ void command_servo(String strCommand,int intValue) {
 }
 
 float get_fwddiveplane_angle() {
-
+	return -1;
 }
 float get_aftdiveplane_angle() {
-
+	return -1;
 }
 float get_aftrudder_angle() {
-
+	return -1;
 }
 
 

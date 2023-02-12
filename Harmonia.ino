@@ -89,6 +89,7 @@ void setup() {
 	init_main_motor();
 	init_watersensors();
 	init_leonardo_sensors();
+	init_static_trim(0.5);
 
 	String msg = init_sdcard();
 	if (msg.length() > 0) {
@@ -193,6 +194,7 @@ bool timer200mHz_interrupt(void*) {
 void loop() {
 	
 	timer1Hz.tick();
+	timer200mHz.tick();
 
 	//check leak sensors and override any state that has been set
 	/*if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
@@ -201,7 +203,7 @@ void loop() {
 	else {*/
 		//ignore these if leak detected
 		read_leonardo(); //this updates sensor data coming from leonardo	
-		check_pushrod(); //adjusts position of pushrod based on latest setpoint command
+		//check_pushrod(); //adjusts position of pushrod based on latest setpoint command
 	//}
 
 	//check for new commands coming from desktop remote
@@ -220,8 +222,8 @@ void loop() {
 		if (strRemoteCommand == "STATIC_TRIM") {
 			state = STATIC_TRIM;
 			//m_fltStaticTrimDepth = get_remote_param().toFloat();
-			init_static_trim(get_remote_param().toDouble());
-			clear_rf_command();
+			//init_static_trim(get_remote_param().toDouble());
+			//clear_rf_command();
 		}
 		if (strRemoteCommand == "DYNAMIC_TRIM") { state = DYNAMIC_TRIM; }
 		if (strRemoteCommand == "RUN") { state = RUN; }
@@ -252,10 +254,10 @@ void loop() {
 		break;
 	case STATIC_TRIM:
 	
-		if (adjust_depth()) {
+		//if (adjust_depth()) {
 			//only adjust pitch if depth is within tolerance
 			adjust_pitch();
-		}
+		//}
 		
 		break;
 	case DYNAMIC_TRIM:
