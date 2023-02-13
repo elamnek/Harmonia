@@ -128,6 +128,7 @@
     <ClInclude Include="control\servos.h" />
     <ClInclude Include="states\state_manual.h" />
     <ClInclude Include="states\state_static_trim.h" />
+    <ClInclude Include="states\state_dynamic_trim.h" />
     <ClInclude Include="__vm\.Harmonia.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +146,7 @@
     <ClCompile Include="control\servos.cpp" />
     <ClCompile Include="states\state_manual.cpp" />
     <ClCompile Include="states\state_static_trim.cpp" />
+    <ClCompile Include="states\state_dynamic_trim.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

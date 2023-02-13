@@ -6,6 +6,7 @@
 
 //installed libraries
 
+
 #include <DFRobot_INA219.h>
 #include <SPI.h>
 #include <SD.h>
@@ -21,6 +22,7 @@
 //harmonia libraries
 #include "states\state_manual.h"
 #include "states\state_static_trim.h"
+#include "states\state_dynamic_trim.h"
 #include "control\pumps.h"
 #include "control\main_motor.h"
 #include "control\servos.h"
@@ -49,7 +51,7 @@ int trimmed_state = 0;
 float depthTargetDistance = 1.0;
 float depth_distance = 0.0;
 float pitchAngle = 0.0;
-sensors_vec_t m_subOrientation = {};
+sensors_vec_t m_subOrientation;
 
 auto timer1Hz = timer_create_default();
 auto timer200mHz = timer_create_default();
@@ -230,7 +232,12 @@ void loop() {
 			//init_static_trim(get_remote_param().toDouble());
 			//clear_rf_command();
 		}
-		if (strRemoteCommand == "DYNAMIC_TRIM") { state = DYNAMIC_TRIM; }
+		if (strRemoteCommand == "DYNAMIC_TRIM") { 
+			state = DYNAMIC_TRIM; 
+			init_dynamic_trim();
+			clear_rf_command();
+		}
+
 		if (strRemoteCommand == "RUN") { state = RUN; }
 		if (strRemoteCommand == "ALARM") { state = ALARM; }
 		if (strRemoteCommand == "UPLOAD") { state = UPLOAD; }
@@ -259,13 +266,17 @@ void loop() {
 		break;
 	case STATIC_TRIM:
 	
-		//if (adjust_depth()) {
+		if (adjust_depth()) {
 			//only adjust pitch if depth is within tolerance
-			adjust_pitch(m_subOrientation.y);
-		//}
+			//adjust_pitch(m_subOrientation.y);
+		}
 		
 		break;
 	case DYNAMIC_TRIM:
+
+		adjust_dive_plane(m_subOrientation.y);
+
+
 		break;
 	case RUN:
 		break;

@@ -24,7 +24,7 @@ PID m_PIDpitch(&m_dblPitchInput, &m_dblPitchOutput, &m_dblPitchSetpoint, 2, 5, 1
 
 void init_static_trim(double dblDepthSetpoint) {
 
-    m_PIDdepth.SetOutputLimits(-255, 255);
+    m_PIDdepth.SetOutputLimits(0, 50); //adjust for min and max of internal pressure (1000-1050 values based on test data from dive testing) - need to add 100 to output
 	m_dblDepthSetpoint = dblDepthSetpoint;
 
 	m_PIDpitch.SetOutputLimits(-255,255);//adjust for max and min of pushrod
@@ -41,20 +41,23 @@ boolean adjust_depth() {
 	m_dblDepthInput = get_depth();
 	m_PIDdepth.Compute();
 
-	int intOutput = round(m_dblDepthOutput);
-	
-	if (intOutput > 0) {
-		command_pump("INFLATE", intOutput);
+	float fltPressure = get_leonardo_pressure();
+	float fltPressureError = m_dblDepthOutput + 1000 - fltPressure;
+
+	if (fltPressureError > 0) {
+		//target pressure is higher than actual pressure - so deflating bag will increase internal pressure
+		command_pump("DEFLATE", 255);
 	}
-	else if (intOutput < 0) {
-		intOutput = -intOutput;
-		command_pump("DEFLATE", intOutput);
+	else if (fltPressureError < 0) {
+		//target pressure is lower that actual pressure - so inflating bag will decrease internal pressure
+		command_pump("INFLATE", 255);
 	}
 	else {
 		command_pump("INFLATE", 0);
 	}
 
-	double dblError = m_dblDepthSetpoint - m_dblDepthOutput;
+	//check actual depth error is within 5cm and return (for use in triggering pitch adjustment
+	double dblError = m_dblDepthSetpoint - m_dblDepthInput;
 	if (dblError < 0) { dblError = -dblError; }
 	if (dblError < 0.05) {
 		return true;

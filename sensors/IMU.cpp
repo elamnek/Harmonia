@@ -29,5 +29,11 @@ String init_imu() {
     bno.getEvent(&event);
     return event.orientation;
 }
+
+ sensors_event_t get_imu_event() {
+    sensors_event_t event;
+    bno.getEvent(&event);
+    return event;
+}
  
 

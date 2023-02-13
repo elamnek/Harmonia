@@ -16,6 +16,7 @@ String init_imu();
 
 sensors_vec_t get_imuorientation();
 
+sensors_event_t get_imu_event();
 
 #endif
 
