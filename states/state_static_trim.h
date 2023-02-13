@@ -39,7 +39,7 @@ void init_static_trim(double dblDepthSetpoint);
 
 boolean adjust_depth();
 
-void adjust_pitch();
+void adjust_pitch(double dblPitch);
 
 //void adjust_static_trim(t_control_error trimError);
 

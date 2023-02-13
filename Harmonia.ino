@@ -49,7 +49,7 @@ int trimmed_state = 0;
 float depthTargetDistance = 1.0;
 float depth_distance = 0.0;
 float pitchAngle = 0.0;
-sensors_vec_t subOrientation = {};
+sensors_vec_t m_subOrientation = {};
 
 auto timer1Hz = timer_create_default();
 auto timer200mHz = timer_create_default();
@@ -73,8 +73,7 @@ float m_fltStaticTrimDepth;
 
 void setup() {
 
-	timer1Hz.every(1000, timer1Hz_interrupt);
-	timer200mHz.every(200, timer200mHz_interrupt);
+	
 
 	//always start in IDLE state
 	state = IDLE;
@@ -115,6 +114,10 @@ void setup() {
 		send_rf_comm("water pressure sensor OK!!");
 	}
 
+	//start interupts
+	timer1Hz.every(1000, timer1Hz_interrupt);
+	timer200mHz.every(500, timer200mHz_interrupt);
+
 	//this scan reports on addresses of all connected I2C devices
 	//I had issues with connecting multiple pressure sensors
 	//bluerobotics underwater sensor only support default I2C address
@@ -135,6 +138,8 @@ bool timer1Hz_interrupt(void*) {
 	/// format to use is {metadataid1|data_value1,metadataid2|data_value2,metadataid3|data_value3, etc.}
 	/// use curly brackets either end to ensure that entire string is received at remote end and to distinguish from other messages going to remote	
 	
+	m_subOrientation = get_imuorientation();
+
 	String strData = "{13|" + get_rtc_time() + "," +
 						"4|" + get_state() + "," +
 						"2|" + String(fwd_leak_detected()) + "," +
@@ -143,9 +148,9 @@ bool timer1Hz_interrupt(void*) {
 						"7|" + get_leonardo_rpm_str() + "," +
 						"10|" + get_leonardo_pressure_str() + "," +
 						"11|" + get_leonardo_temp_str() + "," +
-						"14|" + String(get_imuorientation().x) + "," + //heading
-						"15|" + String(get_imuorientation().y) + "," + //pitch
-						"16|" + String(get_imuorientation().z) + "," + //roll
+						"14|" + String(m_subOrientation.x) + "," + //heading
+						"15|" + String(m_subOrientation.y) + "," + //pitch
+						"16|" + String(m_subOrientation.z) + "," + //roll
 						"17|" + String(get_pushrod_pos()) + "," +
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + get_leonardo_bag_pressure_str() + "," +
@@ -197,14 +202,14 @@ void loop() {
 	timer200mHz.tick();
 
 	//check leak sensors and override any state that has been set
-	/*if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
+	if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
 		state = ALARM; 
 	}
-	else {*/
+	else {
 		//ignore these if leak detected
 		read_leonardo(); //this updates sensor data coming from leonardo	
 		//check_pushrod(); //adjusts position of pushrod based on latest setpoint command
-	//}
+	}
 
 	//check for new commands coming from desktop remote
 	check_rf_comms(); 
@@ -256,7 +261,7 @@ void loop() {
 	
 		//if (adjust_depth()) {
 			//only adjust pitch if depth is within tolerance
-			adjust_pitch();
+			adjust_pitch(m_subOrientation.y);
 		//}
 		
 		break;
@@ -268,7 +273,7 @@ void loop() {
 		//once in alarm state can only exit by user changing to another state via remote software
 		
 		//inflating will help sub return to surface and also ensure it stops pumping in water if the air bag is ruptured
-		command_pump("INFLATE", 0);
+		command_pump("INFLATE", 255);
 
 		//could also initiate power to surface using motor at high thrust and rudders but this would be a problem in confined space such as tank
 		//collision with walls could occur
@@ -281,7 +286,6 @@ void loop() {
 		//in upload state need to stop any active operation
 		command_pump("INFLATE", 0);
 		commmand_main_motor(0);
-
 
 
 		break;

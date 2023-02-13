@@ -28,6 +28,7 @@ void init_static_trim(double dblDepthSetpoint) {
 	m_dblDepthSetpoint = dblDepthSetpoint;
 
 	m_PIDpitch.SetOutputLimits(-255,255);//adjust for max and min of pushrod
+	//m_PIDpitch.SetSampleTime(1000);
 	m_dblPitchSetpoint = 0; //horizontal
 
 	//turn the PIDs on
@@ -65,9 +66,10 @@ boolean adjust_depth() {
 
 }
 
-void adjust_pitch() {
+void adjust_pitch(double dblPitch) {
 
-	m_dblPitchInput = get_imuorientation().y;
+	//sensors_vec_t o= get_imuorientation();
+	m_dblPitchInput = dblPitch;
 	m_PIDpitch.Compute();
 
 	int intOutput = round(m_dblPitchOutput);
