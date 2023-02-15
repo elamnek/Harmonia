@@ -20,7 +20,7 @@ String m_strRemoteParam; //numeric parameter
 void init_rf_comms() {
 	
 	//data from HarmoniaRemote (RF)
-	serialRF.begin(9600);
+	serialRF.begin(9600); //9600
 }
 
 void send_rf_comm(String strMsg) {

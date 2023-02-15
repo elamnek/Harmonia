@@ -29,7 +29,7 @@
 #include "control\pushrod.h"
 #include "sensors\water_sensors.h"
 #include "sensors\RTC.h"
-#include "sensors\IMU.h"
+//#include "sensors\IMU.h"
 #include "sensors\leonardo_sensors.h"
 #include "sensors\pressure_sensor.h"
 #include "sensors\power_sensor.h"
@@ -39,6 +39,13 @@
 #define DEPTH_TRIMMED (1<<0)
 #define PITCH_TRIMMED (1<<1)
 
+
+Adafruit_BNO055 bno = Adafruit_BNO055(55);
+float m_fltOrientation_x = 0.0;
+float m_fltOrientation_y = 0.0;
+float m_fltOrientation_z = 0.0;
+
+int m_intCounter = 0;
 
 
 t_control_error depthError = {};
@@ -51,10 +58,9 @@ int trimmed_state = 0;
 float depthTargetDistance = 1.0;
 float depth_distance = 0.0;
 float pitchAngle = 0.0;
-sensors_vec_t m_subOrientation;
 
 auto timer1Hz = timer_create_default();
-auto timer200mHz = timer_create_default();
+auto timer5Hz = timer_create_default();
 
 //FSM states
 enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM, UPLOAD} state;
@@ -100,13 +106,22 @@ void setup() {
 		send_rf_comm("SDCard OK!!");
 	}
 
-	msg = init_imu();
+	/*msg = init_imu();
 	if (msg.length() > 0) {
 		send_rf_comm(msg);
 	}
 	else {
 		send_rf_comm("IMU sensor OK!!");
+	}*/
+	if (!bno.begin()) {
+		send_rf_comm("ERROR: IMU sensor failed to initialise");
 	}
+
+	delay(1000);
+
+	bno.setExtCrystalUse(true);
+
+
 
 	msg = init_presssuresensor(997);
 	if (msg.length() > 0) {
@@ -116,9 +131,7 @@ void setup() {
 		send_rf_comm("water pressure sensor OK!!");
 	}
 
-	//start interupts
-	timer1Hz.every(1000, timer1Hz_interrupt);
-	timer200mHz.every(500, timer200mHz_interrupt);
+	
 
 	//this scan reports on addresses of all connected I2C devices
 	//I had issues with connecting multiple pressure sensors
@@ -126,6 +139,10 @@ void setup() {
 	//so does the internal pressure/temp sensor, which resulted in 2 sensors with same address 
 	//- so this is why internal pressure sensor was moved to the aft leonardo uC
 	scan_i2c();
+
+	//start interupts
+	timer1Hz.every(500, timer1Hz_interrupt);
+	timer5Hz.every(1000, timer5Hz_interrupt);
 				
 }
 
@@ -140,7 +157,24 @@ bool timer1Hz_interrupt(void*) {
 	/// format to use is {metadataid1|data_value1,metadataid2|data_value2,metadataid3|data_value3, etc.}
 	/// use curly brackets either end to ensure that entire string is received at remote end and to distinguish from other messages going to remote	
 	
-	m_subOrientation = get_imuorientation();
+	/*imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
+	m_fltOrientation_x = euler.x();
+	m_fltOrientation_y = euler.y();
+	m_fltOrientation_z = euler.z();*/
+
+	sensors_event_t event;
+	bno.getEvent(&event, Adafruit_BNO055::VECTOR_EULER);
+	m_fltOrientation_x = event.orientation.x;
+	m_fltOrientation_y = event.orientation.y;
+	m_fltOrientation_z = event.orientation.z;
+
+	//delay(100);
+
+	
+
+	////send_rf_comm(String(m_fltOrientation_x) + "," + String(m_fltOrientation_y) + "," + String(m_fltOrientation_z));
+
+	//unsigned long lngStart = millis();
 
 	String strData = "{13|" + get_rtc_time() + "," +
 						"4|" + get_state() + "," +
@@ -150,9 +184,9 @@ bool timer1Hz_interrupt(void*) {
 						"7|" + get_leonardo_rpm_str() + "," +
 						"10|" + get_leonardo_pressure_str() + "," +
 						"11|" + get_leonardo_temp_str() + "," +
-						"14|" + String(m_subOrientation.x) + "," + //heading
-						"15|" + String(m_subOrientation.y) + "," + //pitch
-						"16|" + String(m_subOrientation.z) + "," + //roll
+						"14|" + String(m_fltOrientation_x) + "," + //heading
+						"15|" + String(m_fltOrientation_y) + "," + //pitch
+						"16|" + String(m_fltOrientation_z) + "," + //roll
 						"17|" + String(get_pushrod_pos()) + "," +
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + get_leonardo_bag_pressure_str() + "," +
@@ -164,6 +198,16 @@ bool timer1Hz_interrupt(void*) {
 		                "26|" + get_leonardo_power_str() +
 						"}";
 
+	/*unsigned long lngElapsed = millis() - lngStart;
+	strData = strData + String(lngElapsed);*/
+
+	m_intCounter = m_intCounter + 1;
+	if (m_intCounter < 2) {
+		return true;
+	}
+	else {
+		m_intCounter = 0;
+	}
 
 	//every second all operational data needs to be sent to remote (sensors, state, control commands etc.)
 	send_rf_comm(strData);
@@ -177,10 +221,13 @@ bool timer1Hz_interrupt(void*) {
 	return true;
 }
 
-bool timer200mHz_interrupt(void*) {
+bool timer5Hz_interrupt(void*) {
 
 	//this function stored data that needs to be captured at higher fidelity
-	//200mHz data doesn't need to be sent to remote display, only stored to SD card (except if in upload mode)
+	//5Hz data doesn't need to be sent to remote display, only stored to SD card (except if in upload mode)
+
+	
+
 
 	//if in the upload state - we don't want data to be stored
 	if (state == UPLOAD) { return true; }
@@ -201,7 +248,7 @@ bool timer200mHz_interrupt(void*) {
 void loop() {
 	
 	timer1Hz.tick();
-	timer200mHz.tick();
+	timer5Hz.tick();
 
 	//check leak sensors and override any state that has been set
 	if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
@@ -256,7 +303,7 @@ void loop() {
 		//in idle state need to stop any active operation
 		command_pump("INFLATE", 0);
 		commmand_main_motor(0);
-		
+
 		break;
 	case MANUAL:
 
@@ -274,7 +321,10 @@ void loop() {
 		break;
 	case DYNAMIC_TRIM:
 
-		adjust_dive_plane(m_subOrientation.y);
+		//float test = get_imuorientation_y(false);
+		//double test2 = test;
+
+		adjust_dive_plane(m_fltOrientation_y);
 
 
 		break;

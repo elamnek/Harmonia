@@ -36,9 +36,6 @@
     <ClInclude Include="sensors\pressure_sensor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sensors\IMU.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="sensors\leonardo_sensors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -81,9 +78,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sensors\pressure_sensor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sensors\IMU.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sensors\leonardo_sensors.cpp">

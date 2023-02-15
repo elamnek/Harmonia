@@ -32,6 +32,8 @@ void adjust_dive_plane(double dblPitch) {
 
 	//sensors_vec_t o= get_imuorientation();
 	///m_dblDivePlaneInput = get_altitude();
+	
+	
 	m_dblDivePlaneInput = dblPitch;
 	m_PIDDivePlane.Compute();
 

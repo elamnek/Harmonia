@@ -6,6 +6,7 @@
 
 #include "..\sensors\pressure_sensor.h"
 #include "..\sensors\IMU.h"
+#include "..\sensors\leonardo_sensors.h"
 #include "..\control\pumps.h"
 #include "..\control\pushrod.h"
 //#include <Adafruit_Sensor.h>

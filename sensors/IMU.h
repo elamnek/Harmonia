@@ -14,9 +14,11 @@
 
 String init_imu();
 
-sensors_vec_t get_imuorientation();
+float get_imuorientation_x(boolean blnChkRead);
+float get_imuorientation_y(boolean blnChkRead);
+float get_imuorientation_z(boolean blnChkRead);
 
-sensors_event_t get_imu_event();
+void check_read();
 
 #endif
 
