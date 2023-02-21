@@ -28,7 +28,7 @@ void init_static_trim(double dblDepthSetpoint) {
     m_PIDdepth.SetOutputLimits(0, 50); //adjust for min and max of internal pressure (1000-1050 values based on test data from dive testing) - need to add 100 to output
 	m_dblDepthSetpoint = dblDepthSetpoint;
 
-	m_PIDpitch.SetOutputLimits(-255,255);//adjust for max and min of pushrod
+	m_PIDpitch.SetOutputLimits(0,100);//adjust for max and min of pushrod
 	//m_PIDpitch.SetSampleTime(1000);
 	m_dblPitchSetpoint = 0; //horizontal
 
@@ -57,7 +57,7 @@ boolean adjust_depth() {
 		command_pump("INFLATE", 0);
 	}
 
-	//check actual depth error is within 5cm and return (for use in triggering pitch adjustment
+	//check actual depth error is within 5cm and return (for use in triggering pitch adjustment)
 	double dblError = m_dblDepthSetpoint - m_dblDepthInput;
 	if (dblError < 0) { dblError = -dblError; }
 	if (dblError < 0.05) {
@@ -72,17 +72,16 @@ boolean adjust_depth() {
 
 void adjust_pitch(double dblPitch) {
 
-	//sensors_vec_t o= get_imuorientation();
 	m_dblPitchInput = dblPitch;
 	m_PIDpitch.Compute();
 
-	int intOutput = round(m_dblPitchOutput);
+	int intPos = get_pushrod_pos();
+	double dblPosError = m_dblPitchOutput - intPos;
 
-	if (intOutput > 0) {
-		command_pushrod("FORWARD", intOutput);
-	} else if (intOutput < 0) {
-		intOutput = -intOutput;
-		command_pushrod("REVERSE", intOutput);
+	if (dblPosError > 0) {
+		command_pushrod("FORWARD", 255);
+	} else if (dblPosError < 0) {
+		command_pushrod("REVERSE", 255);
 	} else {
 		command_pushrod("FORWARD", 0);
 	}

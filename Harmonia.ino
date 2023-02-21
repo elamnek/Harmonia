@@ -315,7 +315,7 @@ void loop() {
 	
 		if (adjust_depth()) {
 			//only adjust pitch if depth is within tolerance
-			//adjust_pitch(m_subOrientation.y);
+			adjust_pitch(m_fltOrientation_y);
 		}
 		
 		break;
