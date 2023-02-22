@@ -14,9 +14,11 @@
 
 String init_imu();
 
-float get_imuorientation_x(boolean blnChkRead);
-float get_imuorientation_y(boolean blnChkRead);
-float get_imuorientation_z(boolean blnChkRead);
+void read_imu();
+
+float get_imuorientation_x();
+float get_imuorientation_y();
+float get_imuorientation_z();
 
 void check_read();
 

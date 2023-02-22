@@ -15,6 +15,7 @@ float m_fltOrientation_x = 0.0;
 float m_fltOrientation_y = 0.0;
 float m_fltOrientation_z = 0.0;
 
+
 String init_imu() {
 
     if (!bno.begin()) {
@@ -31,14 +32,28 @@ String init_imu() {
 
 }
 
+void read_imu() {
 
- /*float get_imuorientation() {
     sensors_event_t event;
     bno.getEvent(&event, Adafruit_BNO055::VECTOR_EULER);
-    return event.orientation.x;
-}*/
 
- float get_imuorientation_x(boolean blnChkRead) {
+    m_fltOrientation_x = event.orientation.x;
+    m_fltOrientation_y = event.orientation.y;
+    m_fltOrientation_z = event.orientation.z;
+
+}
+
+float get_imuorientation_x() {
+    return m_fltOrientation_x;
+}
+float get_imuorientation_y() {
+    return m_fltOrientation_y;
+}
+float get_imuorientation_z() {
+    return m_fltOrientation_z;
+}
+
+ /*float get_imuorientation_x(boolean blnChkRead) {
      if (blnChkRead) { check_read(); }
      return m_fltOrientation_x;
  }
@@ -49,7 +64,9 @@ String init_imu() {
  float get_imuorientation_z(boolean blnChkRead) {
      if (blnChkRead) { check_read(); }
      return m_fltOrientation_z;
- }
+ }*/
+
+ 
 
  void check_read() {
 

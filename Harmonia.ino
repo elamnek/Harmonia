@@ -7,7 +7,6 @@
 //installed libraries
 
 
-#include "state_static_trim_2.h"
 #include <DFRobot_INA219.h>
 #include <SPI.h>
 #include <SD.h>
@@ -30,22 +29,16 @@
 #include "control\pushrod.h"
 #include "sensors\water_sensors.h"
 #include "sensors\RTC.h"
-//#include "sensors\IMU.h"
+#include "sensors\IMU.h"
 #include "sensors\leonardo_sensors.h"
 #include "sensors\pressure_sensor.h"
 #include "sensors\power_sensor.h"
 #include "comms\rf_comms.h"
 #include "data\sdcard.h"
 
-
-Adafruit_BNO055 bno = Adafruit_BNO055(55);
-float m_fltOrientation_x = 0.0;
-float m_fltOrientation_y = 0.0;
-float m_fltOrientation_z = 0.0;
-
 int m_intCounter = 0;
 
-auto timer1Hz = timer_create_default();
+auto timer2Hz = timer_create_default();
 auto timer5Hz = timer_create_default();
 
 //FSM states
@@ -87,23 +80,14 @@ void setup() {
 		send_rf_comm("SDCard OK!!");
 	}
 
-	/*msg = init_imu();
+	msg = init_imu();
 	if (msg.length() > 0) {
 		send_rf_comm(msg);
 	}
 	else {
 		send_rf_comm("IMU sensor OK!!");
-	}*/
-	if (!bno.begin()) {
-		send_rf_comm("ERROR: IMU sensor failed to initialise");
 	}
-
-	delay(1000);
-
-	bno.setExtCrystalUse(true);
-
-
-
+	
 	msg = init_presssuresensor(997);
 	if (msg.length() > 0) {
 		send_rf_comm(msg);
@@ -111,8 +95,6 @@ void setup() {
 	else {
 		send_rf_comm("water pressure sensor OK!!");
 	}
-
-	
 
 	//this scan reports on addresses of all connected I2C devices
 	//I had issues with connecting multiple pressure sensors
@@ -122,12 +104,12 @@ void setup() {
 	scan_i2c();
 
 	//start interupts
-	timer1Hz.every(500, timer1Hz_interrupt);
-	timer5Hz.every(1000, timer5Hz_interrupt);
+	timer2Hz.every(500, timer2Hz_interrupt);
+	timer5Hz.every(200, timer5Hz_interrupt);
 				
 }
 
-bool timer1Hz_interrupt(void*) {
+bool timer2Hz_interrupt(void*) {
 
 	
 	/// format of the data package is important
@@ -138,24 +120,11 @@ bool timer1Hz_interrupt(void*) {
 	/// format to use is {metadataid1|data_value1,metadataid2|data_value2,metadataid3|data_value3, etc.}
 	/// use curly brackets either end to ensure that entire string is received at remote end and to distinguish from other messages going to remote	
 	
-	/*imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
-	m_fltOrientation_x = euler.x();
-	m_fltOrientation_y = euler.y();
-	m_fltOrientation_z = euler.z();*/
-
-	sensors_event_t event;
-	bno.getEvent(&event, Adafruit_BNO055::VECTOR_EULER);
-	m_fltOrientation_x = event.orientation.x;
-	m_fltOrientation_y = event.orientation.y;
-	m_fltOrientation_z = event.orientation.z;
-
-	//delay(100);
-
-	
-
 	////send_rf_comm(String(m_fltOrientation_x) + "," + String(m_fltOrientation_y) + "," + String(m_fltOrientation_z));
 
 	//unsigned long lngStart = millis();
+
+	read_imu();
 
 	String strData = "{13|" + get_rtc_time() + "," +
 						"4|" + get_state() + "," +
@@ -165,9 +134,9 @@ bool timer1Hz_interrupt(void*) {
 						"7|" + get_leonardo_rpm_str() + "," +
 						"10|" + get_leonardo_pressure_str() + "," +
 						"11|" + get_leonardo_temp_str() + "," +
-						"14|" + String(m_fltOrientation_x) + "," + //heading
-						"15|" + String(m_fltOrientation_y) + "," + //pitch
-						"16|" + String(m_fltOrientation_z) + "," + //roll
+						"14|" + String(get_imuorientation_x()) + "," + //heading
+						"15|" + String(get_imuorientation_y()) + "," + //pitch
+						"16|" + String(get_imuorientation_z()) + "," + //roll
 						"17|" + String(get_pushrod_pos()) + "," +
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + get_leonardo_bag_pressure_str() + "," +
@@ -228,7 +197,7 @@ bool timer5Hz_interrupt(void*) {
 
 void loop() {
 	
-	timer1Hz.tick();
+	timer2Hz.tick();
 	timer5Hz.tick();
 
 	//check leak sensors and override any state that has been set
@@ -256,7 +225,7 @@ void loop() {
 		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
 		if (strRemoteCommand == "STATIC_TRIM") {
 			state = STATIC_TRIM;
-			init_static_trim(get_remote_param().toDouble(),0);
+			init_static_trim(get_remote_param().toDouble(),1);
 			clear_rf_command();
 		}
 		if (strRemoteCommand == "DYNAMIC_TRIM") { 
@@ -295,7 +264,7 @@ void loop() {
 	
 		if (adjust_depth()) {
 			//only adjust pitch if depth is within tolerance
-			adjust_pitch(m_fltOrientation_y);
+			adjust_pitch(get_imuorientation_y());
 		}
 		
 		break;
@@ -304,7 +273,7 @@ void loop() {
 		//float test = get_imuorientation_y(false);
 		//double test2 = test;
 
-		adjust_dive_plane(m_fltOrientation_y);
+		adjust_dive_plane(get_imuorientation_y());
 
 
 		break;
