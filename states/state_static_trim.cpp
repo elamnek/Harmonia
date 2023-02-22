@@ -23,14 +23,23 @@ PID m_PIDdepth(&m_dblDepthInput, &m_dblDepthOutput, &m_dblDepthSetpoint, 2, 5, 1
 double m_dblPitchSetpoint, m_dblPitchInput, m_dblPitchOutput;
 PID m_PIDpitch(&m_dblPitchInput, &m_dblPitchOutput, &m_dblPitchSetpoint, 2, 5, 1, DIRECT);
 
-void init_static_trim(double dblDepthSetpoint) {
+int m_intMode;
 
-    m_PIDdepth.SetOutputLimits(0, 50); //adjust for min and max of internal pressure (1000-1050 values based on test data from dive testing) - need to add 100 to output
-	m_dblDepthSetpoint = dblDepthSetpoint;
+void init_static_trim(double dblDepthSetpoint, int intMode) {
 
-	m_PIDpitch.SetOutputLimits(0,100);//adjust for max and min of pushrod
-	//m_PIDpitch.SetSampleTime(1000);
+	m_intMode = intMode;
+	m_dblDepthSetpoint = dblDepthSetpoint; //user defined on remote
 	m_dblPitchSetpoint = 0; //horizontal
+
+	if (m_intMode == 0) {
+		//pure PID
+		m_PIDdepth.SetOutputLimits(-255, 255); //just use min and max of pump
+		m_PIDpitch.SetOutputLimits(-255, 255);//just use min and max of pushrod
+	}
+	else {
+		m_PIDdepth.SetOutputLimits(0, 50); //adjust internal pressure (1000-1050 values based on test data from dive testing) - need to add 1000 to output
+		m_PIDpitch.SetOutputLimits(0, 100);//adjust using position of pushrod
+	}
 
 	//turn the PIDs on
 	m_PIDdepth.SetMode(AUTOMATIC);
@@ -42,21 +51,33 @@ boolean adjust_depth() {
 	m_dblDepthInput = get_depth();
 	m_PIDdepth.Compute();
 
-	float fltPressure = get_leonardo_pressure();
-	float fltPressureError = m_dblDepthOutput + 1000 - fltPressure;
-
-	if (fltPressureError > 0) {
-		//target pressure is higher than actual pressure - so deflating bag will increase internal pressure
-		command_pump("DEFLATE", 255);
-	}
-	else if (fltPressureError < 0) {
-		//target pressure is lower that actual pressure - so inflating bag will decrease internal pressure
-		command_pump("INFLATE", 255);
+	if (m_intMode == 0) {
+		if (m_dblDepthOutput > 0) {
+			command_pump("INFLATE", m_dblDepthOutput);
+		}
+		else if (m_dblDepthOutput < 0) {
+			command_pump("DEFLATE", -m_dblDepthOutput);
+		}
+		else {
+			command_pump("INFLATE", 0);
+		}
 	}
 	else {
-		command_pump("INFLATE", 0);
+		float fltPressure = get_leonardo_pressure();
+		float fltPressureError = m_dblDepthOutput + 1000 - fltPressure;
+		if (fltPressureError > 0) {
+			//target pressure is higher than actual pressure - so deflating bag will increase internal pressure
+			command_pump("DEFLATE", 255);
+		}
+		else if (fltPressureError < 0) {
+			//target pressure is lower that actual pressure - so inflating bag will decrease internal pressure
+			command_pump("INFLATE", 255);
+		}
+		else {
+			command_pump("INFLATE", 0);
+		}
 	}
-
+	
 	//check actual depth error is within 5cm and return (for use in triggering pitch adjustment)
 	double dblError = m_dblDepthSetpoint - m_dblDepthInput;
 	if (dblError < 0) { dblError = -dblError; }
@@ -67,7 +88,6 @@ boolean adjust_depth() {
 		return false;
 	}
 
-
 }
 
 void adjust_pitch(double dblPitch) {
@@ -75,22 +95,35 @@ void adjust_pitch(double dblPitch) {
 	m_dblPitchInput = dblPitch;
 	m_PIDpitch.Compute();
 
-	int intPos = get_pushrod_pos();
-	double dblPosError = m_dblPitchOutput - intPos;
+	if (m_intMode == 0) {
+		if (m_dblPitchOutput > 0) {
+			command_pushrod("FORWARD", m_dblPitchOutput);
+		}
+		else if (m_dblPitchOutput < 0) {
+			command_pushrod("REVERSE", -m_dblPitchOutput);
+		}
+		else {
+			command_pushrod("FORWARD", 0);
+		}
+	}
+	else {
 
-	if (dblPosError > 0) {
-		command_pushrod("FORWARD", 255);
-	} else if (dblPosError < 0) {
-		command_pushrod("REVERSE", 255);
-	} else {
-		command_pushrod("FORWARD", 0);
+		int intPos = get_pushrod_pos();
+		double dblPosError = m_dblPitchOutput - intPos;
+
+		if (dblPosError > 0) {
+			command_pushrod("FORWARD", 255);
+		}
+		else if (dblPosError < 0) {
+			command_pushrod("REVERSE", 255);
+		}
+		else {
+			command_pushrod("FORWARD", 0);
+		}
+
 	}
 
-	
-
 }
-
-
 
 /*if (fltDepth > fltDepthSetpoint) {
 		command_pump("INFLATE", 255);

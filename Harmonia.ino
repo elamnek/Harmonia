@@ -7,6 +7,7 @@
 //installed libraries
 
 
+#include "state_static_trim_2.h"
 #include <DFRobot_INA219.h>
 #include <SPI.h>
 #include <SD.h>
@@ -36,9 +37,6 @@
 #include "comms\rf_comms.h"
 #include "data\sdcard.h"
 
-#define DEPTH_TRIMMED (1<<0)
-#define PITCH_TRIMMED (1<<1)
-
 
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 float m_fltOrientation_x = 0.0;
@@ -46,18 +44,6 @@ float m_fltOrientation_y = 0.0;
 float m_fltOrientation_z = 0.0;
 
 int m_intCounter = 0;
-
-
-t_control_error depthError = {};
-t_control_error trimError = {};
-
-float dt = 1.0;
-unsigned long tPrev= 0; 
-
-int trimmed_state = 0;
-float depthTargetDistance = 1.0;
-float depth_distance = 0.0;
-float pitchAngle = 0.0;
 
 auto timer1Hz = timer_create_default();
 auto timer5Hz = timer_create_default();
@@ -77,11 +63,7 @@ String  get_state() {
 	}
 }
 
-float m_fltStaticTrimDepth;
-
 void setup() {
-
-	
 
 	//always start in IDLE state
 	state = IDLE;
@@ -96,7 +78,6 @@ void setup() {
 	init_main_motor();
 	init_watersensors();
 	init_leonardo_sensors();
-	init_static_trim(0.5);
 
 	String msg = init_sdcard();
 	if (msg.length() > 0) {
@@ -275,9 +256,8 @@ void loop() {
 		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
 		if (strRemoteCommand == "STATIC_TRIM") {
 			state = STATIC_TRIM;
-			//m_fltStaticTrimDepth = get_remote_param().toFloat();
-			//init_static_trim(get_remote_param().toDouble());
-			//clear_rf_command();
+			init_static_trim(get_remote_param().toDouble(),0);
+			clear_rf_command();
 		}
 		if (strRemoteCommand == "DYNAMIC_TRIM") { 
 			state = DYNAMIC_TRIM; 
