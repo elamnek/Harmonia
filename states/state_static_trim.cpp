@@ -11,119 +11,218 @@
 #include "..\control\pushrod.h"
 //#include <Adafruit_Sensor.h>
 //#include <Adafruit_BNO055.h>
-#include <PID_v1.h>
+//#include <PID_v1.h>
 //https://playground.arduino.cc/Code/PIDLibaryBasicExample/
 
 
-//depth PID
-double m_dblDepthSetpoint, m_dblDepthInput, m_dblDepthOutput;
-PID m_PIDdepth(&m_dblDepthInput, &m_dblDepthOutput, &m_dblDepthSetpoint, 2, 5, 1, DIRECT);
+double m_dblDepthSetpoint;
 
-//pitch PID
-double m_dblPitchSetpoint, m_dblPitchInput, m_dblPitchOutput;
-PID m_PIDpitch(&m_dblPitchInput, &m_dblPitchOutput, &m_dblPitchSetpoint, 2, 5, 1, DIRECT);
+int m_intTimerStart;
 
-int m_intMode;
+boolean m_blnPumpPhase;
 
-void init_static_trim(double dblDepthSetpoint, int intMode) {
+float m_fltStartDepth;
 
-	m_intMode = intMode;
-	m_dblDepthSetpoint = dblDepthSetpoint; //user defined on remote
-	m_dblPitchSetpoint = 0; //horizontal
+int m_intMaxMeasureTime = 5000; //stays fixed
+int m_intMaxPumpTime = 5000; //can change depending on dive rate
 
-	if (m_intMode == 0) {
-		//pure PID
-		m_PIDdepth.SetOutputLimits(-255, 255); //just use min and max of pump
-		m_PIDpitch.SetOutputLimits(-255, 255);//just use min and max of pushrod
-	}
-	else {
-		m_PIDdepth.SetOutputLimits(0, 50); //adjust internal pressure (1000-1050 values based on test data from dive testing) - need to add 1000 to output
-		m_PIDpitch.SetOutputLimits(0, 100);//adjust using position of pushrod
-	}
+float m_fltPumpTimeCoeff = 5; //the multiplier that is applied to dive rate to get pump time
+//for 1cm/s dive rate (fast), pump time will be 1 x 5 = 5s
+//for 0.1cm/s dive rate (slow), pump time will be 0.1 x 5 = 0.5s which will saturate to 1s
 
-	//turn the PIDs on
-	m_PIDdepth.SetMode(AUTOMATIC);
-	m_PIDpitch.SetMode(AUTOMATIC);
-}
 
-boolean adjust_depth() {
+void init_static_trim(double dblDepthSetpoint) {
+	m_dblDepthSetpoint = dblDepthSetpoint;
 
-	m_dblDepthInput = get_depth();
-	m_PIDdepth.Compute();
-
-	if (m_intMode == 0) {
-		if (m_dblDepthOutput > 0) {
-			command_pump("INFLATE", m_dblDepthOutput);
-		}
-		else if (m_dblDepthOutput < 0) {
-			command_pump("DEFLATE", -m_dblDepthOutput);
-		}
-		else {
-			command_pump("INFLATE", 0);
-		}
-	}
-	else {
-		float fltPressure = get_leonardo_pressure();
-		float fltPressureError = m_dblDepthOutput + 1000 - fltPressure;
-		if (fltPressureError > 0) {
-			//target pressure is higher than actual pressure - so deflating bag will increase internal pressure
-			command_pump("DEFLATE", 255);
-		}
-		else if (fltPressureError < 0) {
-			//target pressure is lower that actual pressure - so inflating bag will decrease internal pressure
-			command_pump("INFLATE", 255);
-		}
-		else {
-			command_pump("INFLATE", 0);
-		}
-	}
+	m_intTimerStart = millis();
 	
-	//check actual depth error is within 5cm and return (for use in triggering pitch adjustment)
-	double dblError = m_dblDepthSetpoint - m_dblDepthInput;
-	if (dblError < 0) { dblError = -dblError; }
-	if (dblError < 0.05) {
-		return true;
+	//start with pump on and deflating
+	command_pump("DEFLATE", 255);
+	m_blnPumpPhase = true;
+}
+
+boolean set_neutral_bouyancy() {
+
+	
+	float fltCurrentDepth = get_depth();
+	
+	//don't active this process unless sub has dropped below 0.1m
+	if (fltCurrentDepth < 0.1) { 
+		//sub not below surfaced state - continue deflate
+		command_pump("DEFLATE", 255);
+		return false; 
 	}
-	else {
-		return false;
+
+	//sub must now be below 0.1
+
+	int intTimeElapsed = millis() - m_intTimerStart;
+	if (m_blnPumpPhase && intTimeElapsed > m_intMaxPumpTime) {
+		//in pumping phase and timer has elapsed
+
+		//stop pumping	
+		command_pump("DEFLATE", 0);
+
+		//restart timer
+		m_intTimerStart = millis();
+
+		//set to pump off phase
+		m_blnPumpPhase = false;
+
+		//store start depth
+		m_fltStartDepth = fltCurrentDepth;
+		
 	}
+	else if (!m_blnPumpPhase && intTimeElapsed > m_intMaxMeasureTime) {
+		//in depth measure phase and timer has elapsed
+
+		//calc dive rate
+		float fltDepthChange = fltCurrentDepth - m_fltStartDepth;
+		float fltTimeElapsed_s = intTimeElapsed / 1000.00;
+		float fltDiveRate = (fltDepthChange * 100.00) / fltTimeElapsed_s; //units are cm/s  (+ve is diving -ve is climbing)
+
+		//determine what to do in the new pump phase
+		if (fltDiveRate >= 0) {
+			//diving (or steady depth) - inflate
+			command_pump("INFLATE", 255);
+			
+			//use dive rate to determine pump time
+			m_intMaxPumpTime = round(fltDiveRate * m_fltPumpTimeCoeff * 1000);
+		}
+		else {
+			//climbing (or steady depth) - deflate
+			command_pump("DEFLATE", 255);
+
+			//use dive rate to determine pump time
+			m_intMaxPumpTime = -round(fltDiveRate * m_fltPumpTimeCoeff * 1000);
+		}
+
+		//saturate at min and max times
+		if (m_intMaxPumpTime > 5000) { m_intMaxPumpTime = 5000; }
+		if (m_intMaxPumpTime < 1000) { m_intMaxPumpTime = 1000; }
+
+		//restart timer
+		m_intTimerStart = millis();
+
+		//set to pump phase on
+		m_blnPumpPhase = true;
+
+	}
+
 
 }
 
-void adjust_pitch(double dblPitch) {
 
-	m_dblPitchInput = dblPitch;
-	m_PIDpitch.Compute();
 
-	if (m_intMode == 0) {
-		if (m_dblPitchOutput > 0) {
-			command_pushrod("FORWARD", m_dblPitchOutput);
-		}
-		else if (m_dblPitchOutput < 0) {
-			command_pushrod("REVERSE", -m_dblPitchOutput);
-		}
-		else {
-			command_pushrod("FORWARD", 0);
-		}
-	}
-	else {
 
-		int intPos = get_pushrod_pos();
-		double dblPosError = m_dblPitchOutput - intPos;
+////depth PID
+//double m_dblDepthSetpoint, m_dblDepthInput, m_dblDepthOutput;
+//PID m_PIDdepth(&m_dblDepthInput, &m_dblDepthOutput, &m_dblDepthSetpoint, 2, 5, 1, DIRECT);
+//
+////pitch PID
+//double m_dblPitchSetpoint, m_dblPitchInput, m_dblPitchOutput;
+//PID m_PIDpitch(&m_dblPitchInput, &m_dblPitchOutput, &m_dblPitchSetpoint, 2, 5, 1, DIRECT);
+//
+//int m_intMode;
 
-		if (dblPosError > 0) {
-			command_pushrod("FORWARD", 255);
-		}
-		else if (dblPosError < 0) {
-			command_pushrod("REVERSE", 255);
-		}
-		else {
-			command_pushrod("FORWARD", 0);
-		}
+//void init_static_trim(double dblDepthSetpoint, int intMode) {
+//
+//	m_intMode = intMode;
+//	m_dblDepthSetpoint = dblDepthSetpoint; //user defined on remote
+//	m_dblPitchSetpoint = 0; //horizontal
+//
+//	if (m_intMode == 0) {
+//		//pure PID
+//		m_PIDdepth.SetOutputLimits(-255, 255); //just use min and max of pump
+//		m_PIDpitch.SetOutputLimits(-255, 255);//just use min and max of pushrod
+//	}
+//	else {
+//		m_PIDdepth.SetOutputLimits(0, 50); //adjust internal pressure (1000-1050 values based on test data from dive testing) - need to add 1000 to output
+//		m_PIDpitch.SetOutputLimits(0, 100);//adjust using position of pushrod
+//	}
+//
+//	//turn the PIDs on
+//	m_PIDdepth.SetMode(AUTOMATIC);
+//	m_PIDpitch.SetMode(AUTOMATIC);
+//}
 
-	}
-
-}
+//boolean adjust_depth() {
+//
+//	m_dblDepthInput = get_depth();
+//	m_PIDdepth.Compute();
+//
+//	if (m_intMode == 0) {
+//		if (m_dblDepthOutput > 0) {
+//			command_pump("DEFLATE", m_dblDepthOutput);
+//		}
+//		else if (m_dblDepthOutput < 0) {
+//			command_pump("INFLATE", -m_dblDepthOutput);
+//		}
+//		else {
+//			command_pump("INFLATE", 0);
+//		}
+//	}
+//	else {
+//		float fltPressure = get_leonardo_pressure();
+//		float fltPressureError = m_dblDepthOutput + 1000 - fltPressure;
+//		if (fltPressureError > 0) {
+//			//target pressure is higher than actual pressure - so deflating bag will increase internal pressure
+//			command_pump("DEFLATE", 255);
+//		}
+//		else if (fltPressureError < 0) {
+//			//target pressure is lower that actual pressure - so inflating bag will decrease internal pressure
+//			command_pump("INFLATE", 255);
+//		}
+//		else {
+//			command_pump("INFLATE", 0);
+//		}
+//	}
+//	
+//	//check actual depth error is within 5cm and return (for use in triggering pitch adjustment)
+//	double dblError = m_dblDepthSetpoint - m_dblDepthInput;
+//	if (dblError < 0) { dblError = -dblError; }
+//	if (dblError < 0.05) {
+//		return true;
+//	}
+//	else {
+//		return false;
+//	}
+//
+//}
+//
+//void adjust_pitch(double dblPitch) {
+//
+//	m_dblPitchInput = dblPitch;
+//	m_PIDpitch.Compute();
+//
+//	if (m_intMode == 0) {
+//		if (m_dblPitchOutput > 0) {
+//			command_pushrod("FORWARD", m_dblPitchOutput);
+//		}
+//		else if (m_dblPitchOutput < 0) {
+//			command_pushrod("REVERSE", -m_dblPitchOutput);
+//		}
+//		else {
+//			command_pushrod("FORWARD", 0);
+//		}
+//	}
+//	else {
+//
+//		int intPos = get_pushrod_pos();
+//		double dblPosError = m_dblPitchOutput - intPos;
+//
+//		if (dblPosError > 0) {
+//			command_pushrod("FORWARD", 255);
+//		}
+//		else if (dblPosError < 0) {
+//			command_pushrod("REVERSE", 255);
+//		}
+//		else {
+//			command_pushrod("FORWARD", 0);
+//		}
+//
+//	}
+//
+//}
 
 /*if (fltDepth > fltDepthSetpoint) {
 		command_pump("INFLATE", 255);

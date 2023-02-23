@@ -7,6 +7,7 @@
 //installed libraries
 
 
+
 #include <DFRobot_INA219.h>
 #include <SPI.h>
 #include <SD.h>
@@ -23,6 +24,7 @@
 #include "states\state_manual.h"
 #include "states\state_static_trim.h"
 #include "states\state_dynamic_trim.h"
+#include "states\state_run.h"
 #include "control\pumps.h"
 #include "control\main_motor.h"
 #include "control\servos.h"
@@ -234,7 +236,12 @@ void loop() {
 			clear_rf_command();
 		}
 
-		if (strRemoteCommand == "RUN") { state = RUN; }
+		if (strRemoteCommand == "RUN") { 
+			state = RUN; 
+			init_run();
+			clear_rf_command();
+		}
+
 		if (strRemoteCommand == "ALARM") { state = ALARM; }
 		if (strRemoteCommand == "UPLOAD") { state = UPLOAD; }
 	}
@@ -278,6 +285,9 @@ void loop() {
 
 		break;
 	case RUN:
+
+		adjust_run();
+
 		break;
 	case ALARM:
 		//once in alarm state can only exit by user changing to another state via remote software
