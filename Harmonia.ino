@@ -41,7 +41,7 @@
 int m_intCounter = 0;
 
 auto timer2Hz = timer_create_default();
-auto timer5Hz = timer_create_default();
+//auto timer5Hz = timer_create_default();
 
 //FSM states
 enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM, UPLOAD} state;
@@ -107,7 +107,7 @@ void setup() {
 
 	//start interupts
 	timer2Hz.every(500, timer2Hz_interrupt);
-	timer5Hz.every(200, timer5Hz_interrupt);
+	//timer5Hz.every(200, timer5Hz_interrupt);
 				
 }
 
@@ -161,11 +161,11 @@ bool timer2Hz_interrupt(void*) {
 		m_intCounter = 0;
 	}
 
+	//if in the upload state - we don't want data to be stored or sent to remote
+	if (state == UPLOAD) { return true; }
+
 	//every second all operational data needs to be sent to remote (sensors, state, control commands etc.)
 	send_rf_comm(strData);
-
-	//if in the upload state - we don't want data to be stored
-	if (state == UPLOAD) { return true; }
 
 	//save to sdcard
 	sdcard_save_data(strData);
@@ -181,7 +181,7 @@ bool timer5Hz_interrupt(void*) {
 	
 
 
-	//if in the upload state - we don't want data to be stored
+	//if in the upload state - we don't want data to be stored or sent to remote
 	if (state == UPLOAD) { return true; }
 
 	String strData = "{13|" + get_rtc_time() + "," +
@@ -200,7 +200,7 @@ bool timer5Hz_interrupt(void*) {
 void loop() {
 	
 	timer2Hz.tick();
-	timer5Hz.tick();
+	//timer5Hz.tick();
 
 	//check leak sensors and override any state that has been set
 	if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
@@ -242,7 +242,10 @@ void loop() {
 		}
 
 		if (strRemoteCommand == "ALARM") { state = ALARM; }
-		if (strRemoteCommand == "UPLOAD") { state = UPLOAD; }
+		if (strRemoteCommand == "UPLOAD") { 
+			state = UPLOAD;
+			clear_rf_command();
+		}
 	}
 
 	//check for command to set time
@@ -310,6 +313,11 @@ void loop() {
 		command_pump("INFLATE", 0);
 		commmand_main_motor(0);
 
+		//run the upload which reads all data in the log and sends it line by line to the remote
+		//send_rf_comm("in UPLOAD state");
+		sdcard_upload_data();
+
+		state = IDLE;
 
 		break;
 	}
