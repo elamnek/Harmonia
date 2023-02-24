@@ -123,7 +123,6 @@ bool timer2Hz_interrupt(void*) {
 	/// use curly brackets either end to ensure that entire string is received at remote end and to distinguish from other messages going to remote	
 	
 	////send_rf_comm(String(m_fltOrientation_x) + "," + String(m_fltOrientation_y) + "," + String(m_fltOrientation_z));
-
 	//unsigned long lngStart = millis();
 
 	read_imu();
@@ -147,7 +146,8 @@ bool timer2Hz_interrupt(void*) {
 		                "23|" + get_leonardo_bus_voltage_str() + "," +
 		                "24|" + get_leonardo_shunt_voltage_str() + "," +
 		                "25|" + get_leonardo_current_str() + "," +
-		                "26|" + get_leonardo_power_str() +
+		                "26|" + get_leonardo_power_str() + "," +
+		                "27|" + String(get_dive_rate()) +
 						"}";
 
 	/*unsigned long lngElapsed = millis() - lngStart;
@@ -208,8 +208,7 @@ void loop() {
 	}
 	else {
 		//ignore these if leak detected
-		read_leonardo(); //this updates sensor data coming from leonardo	
-		//check_pushrod(); //adjusts position of pushrod based on latest setpoint command
+		read_leonardo(); //this updates sensor data coming from leonardo
 	}
 
 	//check for new commands coming from desktop remote
@@ -227,7 +226,7 @@ void loop() {
 		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
 		if (strRemoteCommand == "STATIC_TRIM") {
 			state = STATIC_TRIM;
-			init_static_trim(get_remote_param().toDouble(),1);
+			init_static_trim(get_remote_param().toFloat());
 			clear_rf_command();
 		}
 		if (strRemoteCommand == "DYNAMIC_TRIM") { 
@@ -265,14 +264,18 @@ void loop() {
 
 		//this checks for a manual command from RF remote and applies it
 		apply_manual_command();
+		check_pushrod(); //adjusts position of pushrod based on latest setpoint command
 
 		break;
 	case STATIC_TRIM:
 	
-		if (adjust_depth()) {
-			//only adjust pitch if depth is within tolerance
-			adjust_pitch(get_imuorientation_y());
-		}
+		
+		adjust_depth();
+
+		//if (adjust_depth()) {
+		//	//only adjust pitch if depth is within tolerance
+		//	adjust_pitch(get_imuorientation_y());
+		//}
 		
 		break;
 	case DYNAMIC_TRIM:
