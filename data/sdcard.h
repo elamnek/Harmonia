@@ -13,6 +13,8 @@ String init_sdcard();
 
 void sdcard_save_data(String strDataLine);
 
+void sdcard_record_count();
+
 void sdcard_upload_data();
 
 #endif

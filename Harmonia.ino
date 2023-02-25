@@ -313,9 +313,15 @@ void loop() {
 		command_pump("INFLATE", 0);
 		commmand_main_motor(0);
 
+		//send record count to remote:
+		sdcard_record_count();
+
 		//run the upload which reads all data in the log and sends it line by line to the remote
 		//send_rf_comm("in UPLOAD state");
 		sdcard_upload_data();
+
+		//send completion message to remote
+		send_rf_comm("upload|done");
 
 		state = IDLE;
 

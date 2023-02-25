@@ -14,120 +14,108 @@
 //#include <PID_v1.h>
 //https://playground.arduino.cc/Code/PIDLibaryBasicExample/
 
-
-float m_fltDepthSetpoint;
-
-int m_intTimerStart;
-
-boolean m_blnPumpPhase;
-
-float m_fltStartDepth;
-
-float m_fltNeutralDiveRate = 0.5;
-
-int m_intMaxMeasureTime = 5000; //stays fixed
-int m_intMaxPumpTime = 5000; //can change depending on dive rate
-
-float m_fltDiveRateCoeff = 5; //the multiplier that is applied to dive rate to get pump time
+//input params
+int m_intDataRate = 1000; //time interval at which depth and rate of dive is collected
+float m_fltNeutralDiveRate = 1;
+float m_fltDepthErrorCoeffDown = 12; //the multiplier that is applied to depth error to get pump time
+float m_fltDepthErrorCoeffUp = 12;
+float m_fltDiveRateCoeffDown = 5; //the multiplier that is applied to dive rate to get pump time
+float m_fltDiveRateCoeffUp = 5;
 //for 1cm/s dive rate (fast), pump time will be 1 x 5 = 5s
 //for 0.1cm/s dive rate (slow), pump time will be 0.1 x 5 = 0.5s which will saturate to 1s
 
-float m_fltDepthErrorCoeff = 10; //the multiplier that is applied to depth error to get pump time
 
-
+//variables
+float m_fltDepthSetpoint;
+int m_intPumpTimerStart;
+int m_intMaxPumpTime = 5000;
+int m_intDataTimerStart;
+float m_fltCurrentDepth;
+float m_fltPreviousDepth;
 float m_fltDiveRate = 0;
 
 void init_static_trim(float fltDepthSetpoint) {
 	m_fltDepthSetpoint = fltDepthSetpoint;
 
-	m_intTimerStart = millis();
+	m_fltPreviousDepth = get_depth();
+
+	m_intPumpTimerStart = millis();
+	m_intDataTimerStart = millis();
 	
 	//start with pump on and deflating
 	command_pump("DEFLATE", 255);
-	m_blnPumpPhase = true;
 }
 
 
 void adjust_depth() {
-	
-	float fltCurrentDepth = get_depth();
-	
+
+	//first check if the data needs to be updated
+	int intDataTimeElapsed = millis() - m_intDataTimerStart;
+	if (intDataTimeElapsed > m_intDataRate) {
+		
+		//get and store new data (current depth and dive rate)
+		m_fltCurrentDepth = get_depth();
+		float fltDepthChange = m_fltCurrentDepth - m_fltPreviousDepth;
+		float fltTimeElapsed_s = intDataTimeElapsed / 1000.00;
+		m_fltDiveRate = (fltDepthChange * 100.00) / fltTimeElapsed_s; //units are cm/s  (+ve is diving -ve is climbing)
+		
+		//reset values for next round
+		m_fltPreviousDepth = m_fltCurrentDepth;
+		m_intDataTimerStart = millis();
+	}
+
 	//don't active this process unless sub has dropped below 0.1m
-	if (fltCurrentDepth < 0.1) { 
+	if (m_fltCurrentDepth < 0.1) {
 		//sub not below surfaced state - continue deflate
-		m_intTimerStart = millis();
+		m_intPumpTimerStart = millis();
 		command_pump("DEFLATE", 255);
-		m_blnPumpPhase = true;
 		return; 
 	}
 
 	//sub must now be below 0.1
 
-	int intTimeElapsed = millis() - m_intTimerStart;
-	if (m_blnPumpPhase && intTimeElapsed > m_intMaxPumpTime) {
-		//in pumping phase and timer has elapsed
+	int intPumpTimeElapsed = millis() - m_intPumpTimerStart;
+	if (intPumpTimeElapsed > m_intMaxPumpTime) {
+		//pump timer has elapsed
 
-		//stop pumping	
-		command_pump("DEFLATE", 0);
-
-		//restart timer
-		m_intTimerStart = millis();
-
-		//set to pump off phase
-		m_blnPumpPhase = false;
-
-		//store start depth
-		m_fltStartDepth = fltCurrentDepth;
-	
-	}
-	else if (!m_blnPumpPhase && intTimeElapsed > m_intMaxMeasureTime) {
-		//in depth measure phase and timer has elapsed
-
-		//calc dive rate
-		float fltDepthChange = fltCurrentDepth - m_fltStartDepth;
-		float fltTimeElapsed_s = intTimeElapsed / 1000.00;
-		m_fltDiveRate = (fltDepthChange * 100.00) / fltTimeElapsed_s; //units are cm/s  (+ve is diving -ve is climbing)
-
-		//determine what to do in the new pump phase
+		//determine what to do in the next pump phase
 		if (m_fltDiveRate > -m_fltNeutralDiveRate && m_fltDiveRate < m_fltNeutralDiveRate) {
 			//dive/climb rate is very slow (close to neutral bouyancy or on sea bed) - use depth error to adjust pump time
-			
-			float fltDepthError = m_fltDepthSetpoint - fltCurrentDepth; // -ve error need to inflate, +ve error need to deflate
+
+			float fltDepthError = m_fltDepthSetpoint - m_fltCurrentDepth; // -ve error need to inflate, +ve error need to deflate
 			if (fltDepthError < 0) {
 				command_pump("INFLATE", 255);
-				fltDepthError = -fltDepthError;
+				m_intMaxPumpTime = -round(fltDepthError * m_fltDepthErrorCoeffUp * 1000);
 			}
 			else {
 				command_pump("DEFLATE", 255);
+				m_intMaxPumpTime = round(fltDepthError * m_fltDepthErrorCoeffDown * 1000);
 			}
-			m_intMaxPumpTime = round(fltDepthError * m_fltDepthErrorCoeff * 1000);
-		
-		} else if (m_fltDiveRate >= m_fltNeutralDiveRate) {
-			
+
+		}
+		else if (m_fltDiveRate >= m_fltNeutralDiveRate) {
+
 			//dive rate is fast(ish) set pump to inflate and use dive rate to determine pump time
 			command_pump("INFLATE", 255);
-			m_intMaxPumpTime = round(m_fltDiveRate * m_fltDiveRateCoeff * 1000);
-			
-		} else if (m_fltDiveRate <= -m_fltNeutralDiveRate) {
+			m_intMaxPumpTime = round(m_fltDiveRate * m_fltDiveRateCoeffUp * 1000);
+
+		}
+		else if (m_fltDiveRate <= -m_fltNeutralDiveRate) {
 
 			//climb rate is fast(ish) set pump to deflate and use dive rate to determine pump time
 			command_pump("DEFLATE", 255);
 
 			//use dive rate to determine pump time
-			m_intMaxPumpTime = -round(m_fltDiveRate * m_fltDiveRateCoeff * 1000);
+			m_intMaxPumpTime = -round(m_fltDiveRate * m_fltDiveRateCoeffDown * 1000);
 		}
-
-		//saturate at min and max times
-		if (m_intMaxPumpTime > 5000) { m_intMaxPumpTime = 5000; }
-		if (m_intMaxPumpTime < 1000) { m_intMaxPumpTime = 1000; }
-
-		//restart timer
-		m_intTimerStart = millis();
-
-		//set to pump phase on
-		m_blnPumpPhase = true;
-
+	
+		m_intPumpTimerStart = millis();
 	}
+
+	//saturate at min and max times
+	if (m_intMaxPumpTime > 6000) { m_intMaxPumpTime = 6000; }
+	if (m_intMaxPumpTime < 1000) { m_intMaxPumpTime = 1000; }
+
 }
 
 float get_dive_rate() {
