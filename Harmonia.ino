@@ -5,9 +5,6 @@
 */
 
 //installed libraries
-
-
-
 #include <DFRobot_INA219.h>
 #include <SPI.h>
 #include <SD.h>
@@ -274,6 +271,7 @@ void loop() {
 	
 		
 		adjust_depth();
+		adjust_pitch(get_imuorientation_y());
 
 		//if (adjust_depth()) {
 		//	//only adjust pitch if depth is within tolerance

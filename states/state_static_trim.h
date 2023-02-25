@@ -9,10 +9,8 @@
 	#include "WProgram.h"
 #endif
 
-void init_static_trim(float fltDepthSetpoint);
-
+void init_static_trim(double dblDepthSetpoint);
 void adjust_depth();
-
 float get_dive_rate();
 
 //mode 0 is pure PID, mode 1 is modified pid

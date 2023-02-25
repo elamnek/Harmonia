@@ -11,112 +11,176 @@
 #include "..\control\pushrod.h"
 //#include <Adafruit_Sensor.h>
 //#include <Adafruit_BNO055.h>
-//#include <PID_v1.h>
+#include <PID_v1.h>
 //https://playground.arduino.cc/Code/PIDLibaryBasicExample/
 
-//input params
-int m_intDataRate = 1000; //time interval at which depth and rate of dive is collected
-float m_fltNeutralDiveRate = 1;
-float m_fltDepthErrorCoeffDown = 12; //the multiplier that is applied to depth error to get pump time
-float m_fltDepthErrorCoeffUp = 12;
-float m_fltDiveRateCoeffDown = 5; //the multiplier that is applied to dive rate to get pump time
-float m_fltDiveRateCoeffUp = 5;
-//for 1cm/s dive rate (fast), pump time will be 1 x 5 = 5s
-//for 0.1cm/s dive rate (slow), pump time will be 0.1 x 5 = 0.5s which will saturate to 1s
 
+//depth PID
+double m_dblDepthSetpoint, m_dblDepthInput, m_dblDepthOutput;
+PID m_PIDdepth(&m_dblDepthInput, &m_dblDepthOutput, &m_dblDepthSetpoint, 2, 5, 1, DIRECT);
 
-//variables
-float m_fltDepthSetpoint;
-int m_intPumpTimerStart;
-int m_intMaxPumpTime = 5000;
-int m_intDataTimerStart;
-float m_fltCurrentDepth;
-float m_fltPreviousDepth;
-float m_fltDiveRate = 0;
+int m_maxPushrodPWM = 255;
+float m_Kp_pitch_error = 10;
 
-void init_static_trim(float fltDepthSetpoint) {
-	m_fltDepthSetpoint = fltDepthSetpoint;
+void init_static_trim(double dblDepthSetpoint) {
 
-	m_fltPreviousDepth = get_depth();
-
-	m_intPumpTimerStart = millis();
-	m_intDataTimerStart = millis();
+	m_dblDepthSetpoint = dblDepthSetpoint; //user defined on remote
 	
-	//start with pump on and deflating
-	command_pump("DEFLATE", 255);
+	m_PIDdepth.SetOutputLimits(-125, 125); //effective range of ps pump is 130-255 (pwm)
+	
+	//turn the PID on
+	m_PIDdepth.SetMode(AUTOMATIC);
 }
-
 
 void adjust_depth() {
 
-	//first check if the data needs to be updated
-	int intDataTimeElapsed = millis() - m_intDataTimerStart;
-	if (intDataTimeElapsed > m_intDataRate) {
-		
-		//get and store new data (current depth and dive rate)
-		m_fltCurrentDepth = get_depth();
-		float fltDepthChange = m_fltCurrentDepth - m_fltPreviousDepth;
-		float fltTimeElapsed_s = intDataTimeElapsed / 1000.00;
-		m_fltDiveRate = (fltDepthChange * 100.00) / fltTimeElapsed_s; //units are cm/s  (+ve is diving -ve is climbing)
-		
-		//reset values for next round
-		m_fltPreviousDepth = m_fltCurrentDepth;
-		m_intDataTimerStart = millis();
+	m_dblDepthInput = get_depth();
+	m_PIDdepth.Compute();
+
+	if (m_dblDepthOutput > 0) {
+		double dblPWMValue = m_dblDepthOutput + 130; //map to actual
+		command_pump("DEFLATE", dblPWMValue);
 	}
-
-	//don't active this process unless sub has dropped below 0.1m
-	if (m_fltCurrentDepth < 0.1) {
-		//sub not below surfaced state - continue deflate
-		m_intPumpTimerStart = millis();
-		command_pump("DEFLATE", 255);
-		return; 
+	else if (m_dblDepthOutput < 0) {
+		double dblPWMValue = -m_dblDepthOutput + 130; //map to actual
+		command_pump("INFLATE", dblPWMValue);
 	}
-
-	//sub must now be below 0.1
-
-	int intPumpTimeElapsed = millis() - m_intPumpTimerStart;
-	if (intPumpTimeElapsed > m_intMaxPumpTime) {
-		//pump timer has elapsed
-
-		//determine what to do in the next pump phase
-		if (m_fltDiveRate > -m_fltNeutralDiveRate && m_fltDiveRate < m_fltNeutralDiveRate) {
-			//dive/climb rate is very slow (close to neutral bouyancy or on sea bed) - use depth error to adjust pump time
-
-			float fltDepthError = m_fltDepthSetpoint - m_fltCurrentDepth; // -ve error need to inflate, +ve error need to deflate
-			if (fltDepthError < 0) {
-				command_pump("INFLATE", 255);
-				m_intMaxPumpTime = -round(fltDepthError * m_fltDepthErrorCoeffUp * 1000);
-			}
-			else {
-				command_pump("DEFLATE", 255);
-				m_intMaxPumpTime = round(fltDepthError * m_fltDepthErrorCoeffDown * 1000);
-			}
-
-		}
-		else if (m_fltDiveRate >= m_fltNeutralDiveRate) {
-
-			//dive rate is fast(ish) set pump to inflate and use dive rate to determine pump time
-			command_pump("INFLATE", 255);
-			m_intMaxPumpTime = round(m_fltDiveRate * m_fltDiveRateCoeffUp * 1000);
-
-		}
-		else if (m_fltDiveRate <= -m_fltNeutralDiveRate) {
-
-			//climb rate is fast(ish) set pump to deflate and use dive rate to determine pump time
-			command_pump("DEFLATE", 255);
-
-			//use dive rate to determine pump time
-			m_intMaxPumpTime = -round(m_fltDiveRate * m_fltDiveRateCoeffDown * 1000);
-		}
+	else {
+		command_pump("INFLATE", 0);
+	}
 	
-		m_intPumpTimerStart = millis();
+}
+
+void adjust_pitch(float fltPitch) {
+
+	float fltError = fltPitch; //-ve is nose up +ve is nose down
+
+	float fltErrorAbs = fltError; //assume positive
+	if (fltError < 0) { fltErrorAbs = -fltError; }
+
+	int intPWM = round(fltErrorAbs * m_Kp_pitch_error);
+	if (intPWM > m_maxPushrodPWM) { intPWM = m_maxPushrodPWM; } //saturate
+
+	if (fltError > 0) {
+		command_pushrod("FORWARD", intPWM);
+	}
+	else if (fltError < 0) {
+		command_pushrod("REVERSE", intPWM);
+	}
+	else if (fltError == 0) {
+		command_pushrod("REVERSE", 0);
 	}
 
-	//saturate at min and max times
-	if (m_intMaxPumpTime > 6000) { m_intMaxPumpTime = 6000; }
-	if (m_intMaxPumpTime < 1000) { m_intMaxPumpTime = 1000; }
+
 
 }
+
+
+
+////input params
+//int m_intDataRate = 1000; //time interval at which depth and rate of dive is collected
+//float m_fltNeutralDiveRate = 1;
+//float m_fltDepthErrorCoeffDown = 12; //the multiplier that is applied to depth error to get pump time
+//float m_fltDepthErrorCoeffUp = 12;
+//float m_fltDiveRateCoeffDown = 5; //the multiplier that is applied to dive rate to get pump time
+//float m_fltDiveRateCoeffUp = 5;
+////for 1cm/s dive rate (fast), pump time will be 1 x 5 = 5s
+////for 0.1cm/s dive rate (slow), pump time will be 0.1 x 5 = 0.5s which will saturate to 1s
+//
+//
+////variables
+//float m_fltDepthSetpoint;
+//int m_intPumpTimerStart;
+//int m_intMaxPumpTime = 5000;
+//int m_intDataTimerStart;
+//float m_fltCurrentDepth;
+//float m_fltPreviousDepth;
+float m_fltDiveRate = 0;
+double m_dblDepthSetpoint;
+//
+//void init_static_trim(float fltDepthSetpoint) {
+//	m_fltDepthSetpoint = fltDepthSetpoint;
+//
+//	m_fltPreviousDepth = get_depth();
+//
+//	m_intPumpTimerStart = millis();
+//	m_intDataTimerStart = millis();
+//	
+//	//start with pump on and deflating
+//	command_pump("DEFLATE", 255);
+//}
+//
+//
+//void adjust_depth() {
+//
+//	//first check if the data needs to be updated
+//	int intDataTimeElapsed = millis() - m_intDataTimerStart;
+//	if (intDataTimeElapsed > m_intDataRate) {
+//		
+//		//get and store new data (current depth and dive rate)
+//		m_fltCurrentDepth = get_depth();
+//		float fltDepthChange = m_fltCurrentDepth - m_fltPreviousDepth;
+//		float fltTimeElapsed_s = intDataTimeElapsed / 1000.00;
+//		m_fltDiveRate = (fltDepthChange * 100.00) / fltTimeElapsed_s; //units are cm/s  (+ve is diving -ve is climbing)
+//		
+//		//reset values for next round
+//		m_fltPreviousDepth = m_fltCurrentDepth;
+//		m_intDataTimerStart = millis();
+//	}
+//
+//	//don't active this process unless sub has dropped below 0.1m
+//	if (m_fltCurrentDepth < 0.1) {
+//		//sub not below surfaced state - continue deflate
+//		m_intPumpTimerStart = millis();
+//		command_pump("DEFLATE", 255);
+//		return; 
+//	}
+//
+//	//sub must now be below 0.1
+//
+//	int intPumpTimeElapsed = millis() - m_intPumpTimerStart;
+//	if (intPumpTimeElapsed > m_intMaxPumpTime) {
+//		//pump timer has elapsed
+//
+//		//determine what to do in the next pump phase
+//		if (m_fltDiveRate > -m_fltNeutralDiveRate && m_fltDiveRate < m_fltNeutralDiveRate) {
+//			//dive/climb rate is very slow (close to neutral bouyancy or on sea bed) - use depth error to adjust pump time
+//
+//			float fltDepthError = m_fltDepthSetpoint - m_fltCurrentDepth; // -ve error need to inflate, +ve error need to deflate
+//			if (fltDepthError < 0) {
+//				command_pump("INFLATE", 255);
+//				m_intMaxPumpTime = -round(fltDepthError * m_fltDepthErrorCoeffUp * 1000);
+//			}
+//			else {
+//				command_pump("DEFLATE", 255);
+//				m_intMaxPumpTime = round(fltDepthError * m_fltDepthErrorCoeffDown * 1000);
+//			}
+//
+//		}
+//		else if (m_fltDiveRate >= m_fltNeutralDiveRate) {
+//
+//			//dive rate is fast(ish) set pump to inflate and use dive rate to determine pump time
+//			command_pump("INFLATE", 255);
+//			m_intMaxPumpTime = round(m_fltDiveRate * m_fltDiveRateCoeffUp * 1000);
+//
+//		}
+//		else if (m_fltDiveRate <= -m_fltNeutralDiveRate) {
+//
+//			//climb rate is fast(ish) set pump to deflate and use dive rate to determine pump time
+//			command_pump("DEFLATE", 255);
+//
+//			//use dive rate to determine pump time
+//			m_intMaxPumpTime = -round(m_fltDiveRate * m_fltDiveRateCoeffDown * 1000);
+//		}
+//	
+//		m_intPumpTimerStart = millis();
+//	}
+//
+//	//saturate at min and max times
+//	if (m_intMaxPumpTime > 6000) { m_intMaxPumpTime = 6000; }
+//	if (m_intMaxPumpTime < 1000) { m_intMaxPumpTime = 1000; }
+//
+//}
 
 float get_dive_rate() {
 	return m_fltDiveRate;
@@ -125,35 +189,33 @@ float get_dive_rate() {
 
 
 
-////depth PID
-//double m_dblDepthSetpoint, m_dblDepthInput, m_dblDepthOutput;
-//PID m_PIDdepth(&m_dblDepthInput, &m_dblDepthOutput, &m_dblDepthSetpoint, 2, 5, 1, DIRECT);
-//
-////pitch PID
+//pitch PID
 //double m_dblPitchSetpoint, m_dblPitchInput, m_dblPitchOutput;
 //PID m_PIDpitch(&m_dblPitchInput, &m_dblPitchOutput, &m_dblPitchSetpoint, 2, 5, 1, DIRECT);
-//
+
 //int m_intMode;
 
-//void init_static_trim(double dblDepthSetpoint, int intMode) {
+//void init_static_trim(double dblDepthSetpoint) {
 //
-//	m_intMode = intMode;
 //	m_dblDepthSetpoint = dblDepthSetpoint; //user defined on remote
-//	m_dblPitchSetpoint = 0; //horizontal
+//	//m_dblPitchSetpoint = 0; //horizontal
 //
-//	if (m_intMode == 0) {
-//		//pure PID
-//		m_PIDdepth.SetOutputLimits(-255, 255); //just use min and max of pump
-//		m_PIDpitch.SetOutputLimits(-255, 255);//just use min and max of pushrod
-//	}
-//	else {
-//		m_PIDdepth.SetOutputLimits(0, 50); //adjust internal pressure (1000-1050 values based on test data from dive testing) - need to add 1000 to output
-//		m_PIDpitch.SetOutputLimits(0, 100);//adjust using position of pushrod
-//	}
+//	m_PIDdepth.SetOutputLimits(-125, 125); //effective range of ps pump is 130-255 (pwm)
+//	//m_PIDpitch.SetOutputLimits(-255, 255);//just use min and max of pushrod
+//
+//	//if (m_intMode == 0) {
+//	//	//pure PID
+//	//	m_PIDdepth.SetOutputLimits(-255, 255); //just use min and max of pump
+//	//	m_PIDpitch.SetOutputLimits(-255, 255);//just use min and max of pushrod
+//	//}
+//	//else {
+//	//	m_PIDdepth.SetOutputLimits(0, 50); //adjust internal pressure (1000-1050 values based on test data from dive testing) - need to add 1000 to output
+//	//	m_PIDpitch.SetOutputLimits(0, 100);//adjust using position of pushrod
+//	//}
 //
 //	//turn the PIDs on
 //	m_PIDdepth.SetMode(AUTOMATIC);
-//	m_PIDpitch.SetMode(AUTOMATIC);
+//	//m_PIDpitch.SetMode(AUTOMATIC);
 //}
 
 //boolean adjust_depth() {
