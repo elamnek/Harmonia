@@ -5,7 +5,6 @@
 */
 
 //installed libraries
-#include "state_static_trim_2.h"
 #include <DFRobot_INA219.h>
 #include <SPI.h>
 #include <SD.h>
@@ -21,6 +20,7 @@
 //harmonia libraries
 #include "states\state_manual.h"
 #include "states\state_static_trim.h"
+#include "states\state_static_trim_2.h"
 #include "states\state_dynamic_trim.h"
 #include "states\state_run.h"
 #include "control\pumps.h"
@@ -145,7 +145,7 @@ bool timer2Hz_interrupt(void*) {
 		                "24|" + get_leonardo_shunt_voltage_str() + "," +
 		                "25|" + get_leonardo_current_str() + "," +
 		                "26|" + get_leonardo_power_str() + "," +
-		                "27|" + String(get_dive_rate()) +
+		                "27|" + String(get_dive_rate_2()) +
 						"}";
 
 	/*unsigned long lngElapsed = millis() - lngStart;
@@ -224,7 +224,7 @@ void loop() {
 		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
 		if (strRemoteCommand == "STATIC_TRIM") {
 			state = STATIC_TRIM;
-			init_static_trim(get_remote_param().toFloat());
+			init_static_trim_2(get_remote_param().toFloat());
 			clear_rf_command();
 		}
 		if (strRemoteCommand == "DYNAMIC_TRIM") { 
@@ -271,8 +271,8 @@ void loop() {
 	case STATIC_TRIM:
 	
 		
-		adjust_depth();
-		adjust_pitch(get_imuorientation_y());
+		adjust_depth_2();
+		adjust_pitch_2(get_imuorientation_y());
 
 		//if (adjust_depth()) {
 		//	//only adjust pitch if depth is within tolerance
