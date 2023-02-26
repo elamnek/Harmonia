@@ -14,6 +14,7 @@ void init_static_trim_2(float fltDepthSetpoint);
 void adjust_depth_2();
 
 float get_dive_rate_2();
+float get_depth_setpoint_2();
 
 void adjust_pitch_2(float fltPitch);
 

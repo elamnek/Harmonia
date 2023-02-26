@@ -145,7 +145,8 @@ bool timer2Hz_interrupt(void*) {
 		                "24|" + get_leonardo_shunt_voltage_str() + "," +
 		                "25|" + get_leonardo_current_str() + "," +
 		                "26|" + get_leonardo_power_str() + "," +
-		                "27|" + String(get_dive_rate_2()) +
+		                "27|" + String(get_dive_rate_2()) + "," + 
+		                "28|" + String(get_depth_setpoint_2()) +
 						"}";
 
 	/*unsigned long lngElapsed = millis() - lngStart;
@@ -270,15 +271,9 @@ void loop() {
 		break;
 	case STATIC_TRIM:
 	
-		
 		adjust_depth_2();
 		adjust_pitch_2(get_imuorientation_y());
 
-		//if (adjust_depth()) {
-		//	//only adjust pitch if depth is within tolerance
-		//	adjust_pitch(get_imuorientation_y());
-		//}
-		
 		break;
 	case DYNAMIC_TRIM:
 

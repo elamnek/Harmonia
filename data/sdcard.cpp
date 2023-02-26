@@ -10,7 +10,7 @@
 
 SDFile m_SDFile;
 int pinCS = 53; // Pin 10 on Arduino Uno Pin 53 for Mega
-char m_log_name[] = "HAR.log"; //no more than 8 chars in name
+char m_log_name[] = "HARM.log"; //no more than 8 chars in name
 
 String init_sdcard() {
 
