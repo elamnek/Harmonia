@@ -11,7 +11,9 @@
 
 void init_static_trim(double dblDepthSetpoint);
 void adjust_depth();
-float get_dive_rate();
+void adjust_pitch(float fltPitch);
+
+
 
 //mode 0 is pure PID, mode 1 is modified pid
 //void init_static_trim(double dblDepthSetpoint, int intMode);

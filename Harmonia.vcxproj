@@ -130,6 +130,7 @@
     <ClInclude Include="states\state_static_trim.h" />
     <ClInclude Include="states\state_dynamic_trim.h" />
     <ClInclude Include="states\state_run.h" />
+    <ClInclude Include="states\state_static_trim_2.h" />
     <ClInclude Include="__vm\.Harmonia.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
@@ -149,6 +150,7 @@
     <ClCompile Include="states\state_static_trim.cpp" />
     <ClCompile Include="states\state_dynamic_trim.cpp" />
     <ClCompile Include="states\state_run.cpp" />
+    <ClCompile Include="states\state_static_trim_2.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

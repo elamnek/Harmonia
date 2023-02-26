@@ -5,6 +5,7 @@
 */
 
 //installed libraries
+#include "state_static_trim_2.h"
 #include <DFRobot_INA219.h>
 #include <SPI.h>
 #include <SD.h>
