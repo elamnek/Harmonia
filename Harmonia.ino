@@ -35,6 +35,7 @@
 #include "sensors\power_sensor.h"
 #include "comms\rf_comms.h"
 #include "data\sdcard.h"
+#include "helpers.h"
 
 int m_intCounter = 0;
 
@@ -236,7 +237,7 @@ void loop() {
 
 		if (strRemoteCommand == "RUN") { 
 			state = RUN; 
-			init_run();
+			init_run(get_remote_param());
 			clear_rf_command();
 		}
 

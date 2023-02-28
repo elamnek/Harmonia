@@ -12,6 +12,7 @@
 void init_static_trim_2(float fltDepthSetpoint);
 
 void adjust_depth_2();
+int get_saturated_pwm(int intRawPWM);
 
 float get_dive_rate_2();
 float get_depth_setpoint_2();

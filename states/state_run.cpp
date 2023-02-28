@@ -19,7 +19,7 @@ double m_dblDivePlaneSetpoint1, m_dblDivePlaneInput1, m_dblDivePlaneOutput1;
 PID m_PIDDivePlane1(&m_dblDivePlaneInput1, &m_dblDivePlaneOutput1, &m_dblDivePlaneSetpoint1, 2, 5, 1, DIRECT);
 
 
-void init_run() {
+void init_run(String strParams) {
 
 	m_PIDDivePlane1.SetOutputLimits(-50, 50);
 	m_dblDivePlaneSetpoint1 = get_depth(); //setpoint set to current depth

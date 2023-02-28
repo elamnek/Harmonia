@@ -9,7 +9,7 @@
 	#include "WProgram.h"
 #endif
 
-void init_run();
+void init_run(String strParams);
 
 void adjust_run();
 
