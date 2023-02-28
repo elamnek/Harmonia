@@ -13,29 +13,20 @@ int c_maxPushrodPWM = 255;
 float c_Kp_pitch_error = 10;
 
 //input params (constants)
-const int c_intPumpPWM = 135; //very slow speed
-int c_intDataRate = 500; //time interval at which depth and rate of dive is collected
-int c_intMinPumpTime = 500;
-int c_intMaxPumpTime = 10000;
+int c_intMinPumpPWM = 135;
+int c_intMaxPumpPWM = 255;
+int c_intDataRate = 80; //time interval at which depth and rate of dive is collected
 float c_fltNeutralDiveRate = 1;
-float c_fltDepthErrorCoeffDown = 12; //the multiplier that is applied to depth error to get pump time
-float c_fltDepthErrorCoeffUp = 20;
-float c_fltDiveRateCoeffDown = 2; //the multiplier that is applied to dive rate to get pump time
-float c_fltDiveRateCoeffUp = 4;
+float c_fltDepthErrorCoeffDown = 2000; //the multiplier that is applied to depth error and depth to get speed
+float c_fltDepthErrorCoeffUp = 500;
+float c_fltDiveRateCoeffDown = 100; //the multiplier that is applied to dive rate to get pump speed
+float c_fltDiveRateCoeffUp = 100;
 //note up/down variation in coeffs is to acccount for the fact the inlfating is acting against water pressure wheras deflating is being assisted by it
 
-//example
-//for 1cm/s dive rate (slow), pump time will be 1 x 2 = 2s
-//for 1cm/s climb rate (slow), pump time will be 1 x 4 = 4s
-//for 5cm/s dive rate (fast), pump time will be 5 x 2 = 10s
-//for 5cm/s climb rate (fast), pump time will be 5 x 4 = 20s which will saturate to 10s
-// 
-
+ 
 float c_fltDepthSetpoint;
 
 //variables
-int v_intPumpTimerStart;
-int v_intPumpTime = 5000;
 int v_intDataTimerStart;
 float v_fltCurrentDepth;
 float v_fltPreviousDepth;
@@ -47,11 +38,10 @@ void init_static_trim_2(float fltDepthSetpoint) {
 
 	v_fltPreviousDepth = get_depth();
 
-	v_intPumpTimerStart = millis();
 	v_intDataTimerStart = millis();
 	
-	//start with pump on and deflating
-	command_pump("DEFLATE", c_intPumpPWM);
+	//start with pump on and deflating at min speed
+	command_pump("DEFLATE", c_intMinPumpPWM);
 }
 
 
@@ -72,57 +62,49 @@ void adjust_depth_2() {
 		v_intDataTimerStart = millis();
 	}
 
-	//don't active this process unless sub has dropped below 0.1m
-	//if (m_fltCurrentDepth < 0.1) {
-	//	//sub not below surfaced state - continue deflate
-	//	m_intPumpTimerStart = millis();
-	//	command_pump("DEFLATE", c_intPumpPWM);
-	//	return; 
-	//}
-	//sub must now be below 0.1
+	//determine pump speed
+	if (v_fltDiveRate > -c_fltNeutralDiveRate && v_fltDiveRate < c_fltNeutralDiveRate) {
+		//dive/climb rate is very slow (close to neutral bouyancy or on sea bed) - use depth error to adjust speed
 
-	int intPumpTimeElapsed = millis() - v_intPumpTimerStart;
-	if (intPumpTimeElapsed > v_intPumpTime) {
-		//pump timer has elapsed
+		float fltDepthError = c_fltDepthSetpoint - v_fltCurrentDepth; // -ve error need to inflate, +ve error need to deflate
+		if (fltDepthError < 0) {
 
-		//determine what to do in the next pump phase
-		if (v_fltDiveRate > -c_fltNeutralDiveRate && v_fltDiveRate < c_fltNeutralDiveRate) {
-			//dive/climb rate is very slow (close to neutral bouyancy or on sea bed) - use depth error to adjust pump time
-
-			float fltDepthError = c_fltDepthSetpoint - v_fltCurrentDepth; // -ve error need to inflate, +ve error need to deflate
-			if (fltDepthError < 0) {
-				command_pump("INFLATE", c_intPumpPWM);
-				v_intPumpTime = -round(fltDepthError * c_fltDepthErrorCoeffUp * 1000);
-			}
-			else {
-				command_pump("DEFLATE", c_intPumpPWM);
-				v_intPumpTime = round(fltDepthError * c_fltDepthErrorCoeffDown * 1000);
-			}
-
+			int intRawPWM = -round(fltDepthError * v_fltCurrentDepth * c_fltDepthErrorCoeffUp);
+			int intSatPWM = get_saturated_pwm(intRawPWM);
+			command_pump("INFLATE", intSatPWM);
+				
 		}
-		else if (v_fltDiveRate >= c_fltNeutralDiveRate) {
-
-			//dive rate is fast(ish) set pump to inflate and use dive rate to determine pump time
-			command_pump("INFLATE", c_intPumpPWM);
-			v_intPumpTime = round(v_fltDiveRate * c_fltDiveRateCoeffUp * 1000);
-
+		else {
+			int intRawPWM = round(fltDepthError * v_fltCurrentDepth * c_fltDepthErrorCoeffDown);
+			int intSatPWM = get_saturated_pwm(intRawPWM);
+			command_pump("DEFLATE", intSatPWM);
+			
 		}
-		else if (v_fltDiveRate <= -c_fltNeutralDiveRate) {
 
-			//climb rate is fast(ish) set pump to deflate and use dive rate to determine pump time
-			command_pump("DEFLATE", c_intPumpPWM);
-
-			//use dive rate to determine pump time
-			v_intPumpTime = -round(v_fltDiveRate * c_fltDiveRateCoeffDown * 1000);
-		}
-	
-		v_intPumpTimerStart = millis();
 	}
+	else if (v_fltDiveRate >= c_fltNeutralDiveRate) {
 
-	//saturate at min and max times
-	if (v_intPumpTime > c_intMaxPumpTime) { v_intPumpTime = c_intMaxPumpTime; }
-	if (v_intPumpTime < c_intMinPumpTime) { v_intPumpTime = c_intMinPumpTime; }
+		//dive rate is fast - set pump to inflate and use dive rate to determine pump speed
+		int intRawPWM = round(v_fltDiveRate * c_fltDiveRateCoeffUp);
+		int intSatPWM = get_saturated_pwm(intRawPWM);
+		command_pump("INFLATE", intSatPWM);
+			
+	}
+	else if (v_fltDiveRate <= -c_fltNeutralDiveRate) {
 
+		//climb rate is fast - set pump to deflate and use dive rate to determine speed
+		int intRawPWM = -round(v_fltDiveRate * c_fltDiveRateCoeffDown);
+		int intSatPWM = get_saturated_pwm(intRawPWM);
+		command_pump("DEFLATE", intSatPWM);
+	
+	}
+	
+}
+
+int get_saturated_pwm(int intRawPWM) {
+
+	if (intRawPWM > c_intMaxPumpPWM) { return c_intMaxPumpPWM; }
+	if (intRawPWM < c_intMinPumpPWM) { return c_intMinPumpPWM; }
 }
 
 float get_dive_rate_2() {

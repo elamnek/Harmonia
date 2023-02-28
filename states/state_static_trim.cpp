@@ -16,7 +16,7 @@
 
 //depth PID
 double m_dblDepthSetpoint, m_dblDepthInput, m_dblDepthOutput;
-PID m_PIDdepth(&m_dblDepthInput, &m_dblDepthOutput, &m_dblDepthSetpoint, 5, 30, 0, DIRECT);
+PID m_PIDdepth(&m_dblDepthInput, &m_dblDepthOutput, &m_dblDepthSetpoint, 2, 0.5, 1, DIRECT);
 
 int m_maxPushrodPWM = 255;
 int m_maxPumpPWM = 125;
@@ -27,7 +27,7 @@ void init_static_trim(double dblDepthSetpoint) {
 
 	m_dblDepthSetpoint = 0.5; //user defined on remote
 	
-	m_PIDdepth.SetOutputLimits(-10, 10); //effective range of ps pump is 130-255 (pwm)
+	m_PIDdepth.SetOutputLimits(-20, 20); //effective range of ps pump is 130-255 (pwm)
 	
 	//turn the PID on
 	m_PIDdepth.SetMode(AUTOMATIC);
@@ -39,11 +39,11 @@ void adjust_depth() {
 	m_PIDdepth.Compute();
 
 	if (m_dblDepthOutput > 0) {
-		double dblPWMValue = m_dblDepthOutput + 130; //map to actual
+		double dblPWMValue = m_dblDepthOutput + 180; //map to actual
 		command_pump("DEFLATE", dblPWMValue);
 	}
 	else if (m_dblDepthOutput < 0) {
-		double dblPWMValue = -m_dblDepthOutput + 130; //map to actual
+		double dblPWMValue = -m_dblDepthOutput + 180; //map to actual
 		command_pump("INFLATE", dblPWMValue);
 	}
 	else {
