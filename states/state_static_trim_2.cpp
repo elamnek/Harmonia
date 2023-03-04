@@ -15,12 +15,12 @@ float c_Kp_pitch_error = 10;
 //input params (constants)
 int c_intMinPumpPWM = 135;
 int c_intMaxPumpPWM = 255;
-int c_intDataRate = 80; //time interval at which depth and rate of dive is collected
+int c_intDataRate = 50; //time interval at which depth and rate of dive is collected
 float c_fltNeutralDiveRate = 1;
-float c_fltDepthErrorCoeffDown = 2000; //the multiplier that is applied to depth error and depth to get speed
+float c_fltDepthErrorCoeffDown = 2000; //the multiplier that is applied to depth error and depth to get pump speed
 float c_fltDepthErrorCoeffUp = 500;
 float c_fltDiveRateCoeffDown = 100; //the multiplier that is applied to dive rate to get pump speed
-float c_fltDiveRateCoeffUp = 100;
+float c_fltDiveRateCoeffUp = 130;
 //note up/down variation in coeffs is to acccount for the fact the inlfating is acting against water pressure wheras deflating is being assisted by it
 
  

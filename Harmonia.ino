@@ -185,9 +185,9 @@ bool timer5Hz_interrupt(void*) {
 	if (state == UPLOAD) { return true; }
 
 	String strData = "{13|" + get_rtc_time() + "," +
-		              "27|" + get_fwddiveplane_angle() + "," +
-		              "28|" + get_aftdiveplane_angle() + "," +
-		              "29|" + get_aftrudder_angle() + 
+		              "29|" + get_fwddiveplane_angle() + "," +
+		              "30|" + get_aftdiveplane_angle() + "," +
+		              "31|" + get_aftrudder_angle() + 
 		              "}";
 
 	//save to sdcard
