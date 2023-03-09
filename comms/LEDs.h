@@ -18,5 +18,7 @@ void orange_led_off();
 void yellow_led_on();
 void yellow_led_off();
 
+void toggle_orange_led();
+
 #endif
 

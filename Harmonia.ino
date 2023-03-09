@@ -155,6 +155,9 @@ bool timer2Hz_interrupt(void*) {
 	/*unsigned long lngElapsed = millis() - lngStart;
 	strData = strData + String(lngElapsed);*/
 
+	//if in alarm state need to flash orange light
+	if (state == ALARM) { toggle_orange_led(); }
+
 	m_intCounter = m_intCounter + 1;
 	if (m_intCounter < 2) {
 		return true;
@@ -162,6 +165,8 @@ bool timer2Hz_interrupt(void*) {
 	else {
 		m_intCounter = 0;
 	}
+
+	//the following code only executes at 1Hz
 
 	//if in the upload state - we don't want data to be stored or sent to remote
 	if (state == UPLOAD) { return true; }
@@ -221,11 +226,11 @@ void loop() {
 	if (state == ALARM) {
 		//system in alarm state - can only be changed by command to go to idle state
 		if (strRemoteCommand == "IDLE") { state = IDLE; }
-		red_led_on();
+		orange_led_on();
 	}
 	else {
 		//system NOT in alarm state - normal state changes allowed
-		red_led_off();
+		orange_led_off();
 		if (strRemoteCommand == "IDLE") { state = IDLE; }
 		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
 		if (strRemoteCommand == "STATIC_TRIM") {

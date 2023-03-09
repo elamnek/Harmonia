@@ -20,16 +20,16 @@ void command_pump(String strCommand, int intValue) {
 
 	
 	//default to both LEDs off
-	orange_led_off();
-	yellow_led_off();
+	red_led_off(); //red for deflate
+	yellow_led_off(); //yellow for inflate
 
 	if (strCommand == "INFLATE") {
 		digitalWrite(m_intPumpPinDir, HIGH);
 		analogWrite(m_intPumpPinPWM, intValue);
 		m_intStatus = intValue;
 		if (intValue > 0) {
-			orange_led_on();
-			yellow_led_off();
+			yellow_led_on();
+			red_led_off();
 		}	
 	}
 	else if (strCommand == "DEFLATE") {
@@ -37,8 +37,8 @@ void command_pump(String strCommand, int intValue) {
 		analogWrite(m_intPumpPinPWM, intValue);
 		m_intStatus = -intValue;
 		if (intValue > 0) {
-			yellow_led_on();
-			orange_led_off();
+			yellow_led_off();
+			red_led_on();
 		}	
 	}
 }

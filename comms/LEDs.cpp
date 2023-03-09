@@ -9,6 +9,8 @@ int m_intGreenLEDPin = 25;
 int m_intOrangeLEDPin = 22;
 int m_intYellowLEDPin = 24;
 
+boolean blnOrangeLED_ON = false;
+
 void init_leds() {
 
 	pinMode(m_intRedLEDPin, OUTPUT);
@@ -41,6 +43,20 @@ void yellow_led_on() {
 }
 void yellow_led_off() {
 	digitalWrite(m_intYellowLEDPin, LOW);
+}
+void toggle_orange_led() {
+
+	if (blnOrangeLED_ON) {
+		//LED on - turn off
+		digitalWrite(m_intOrangeLEDPin, LOW);
+		blnOrangeLED_ON = false;
+	}
+	else {
+		//LED not on - turn on
+		digitalWrite(m_intOrangeLEDPin, HIGH);
+		blnOrangeLED_ON = true;
+	}
+
 }
 
 
