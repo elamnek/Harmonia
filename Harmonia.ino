@@ -34,6 +34,7 @@
 #include "sensors\pressure_sensor.h"
 #include "sensors\power_sensor.h"
 #include "comms\rf_comms.h"
+#include "comms\LEDs.h"
 #include "data\sdcard.h"
 #include "helpers.h"
 
@@ -66,6 +67,7 @@ void setup() {
 	init_rf_comms();
 	send_rf_comm("Harmonia is awake - stored time is: " + get_rtc_time());
 
+	init_leds();
 	init_servos();
 	init_pumps();
 	init_pushrod();
@@ -204,11 +206,11 @@ void loop() {
 
 	//check leak sensors and override any state that has been set
 	if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
-		state = ALARM; 
+		state = ALARM;		
 	}
 	else {
 		//ignore these if leak detected
-		read_leonardo(); //this updates sensor data coming from leonardo
+		read_leonardo(); //this updates sensor data coming from leonardo	
 	}
 
 	//check for new commands coming from desktop remote
@@ -219,9 +221,11 @@ void loop() {
 	if (state == ALARM) {
 		//system in alarm state - can only be changed by command to go to idle state
 		if (strRemoteCommand == "IDLE") { state = IDLE; }
+		red_led_on();
 	}
 	else {
 		//system NOT in alarm state - normal state changes allowed
+		red_led_off();
 		if (strRemoteCommand == "IDLE") { state = IDLE; }
 		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
 		if (strRemoteCommand == "STATIC_TRIM") {
