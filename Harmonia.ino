@@ -139,6 +139,9 @@ bool timer2Hz_interrupt(void*) {
 						"14|" + String(get_imuorientation_x()) + "," + //heading
 						"15|" + String(get_imuorientation_y()) + "," + //pitch
 						"16|" + String(get_imuorientation_z()) + "," + //roll
+		                "32|" + String(get_imuacceleration_x()) + "," + 
+		                "33|" + String(get_imuacceleration_y()) + "," + 
+		                "-|" + String(get_imuacceleration_z()) + "," +
 						"17|" + String(get_pushrod_pos()) + "," +
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + get_leonardo_bag_pressure_str() + "," +

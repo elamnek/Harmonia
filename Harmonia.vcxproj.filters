@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Harmonia.ino" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="__vm\.Harmonia.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -137,5 +134,6 @@
     <ClCompile Include="comms\LEDs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Harmonia.ino" />
   </ItemGroup>
 </Project>
