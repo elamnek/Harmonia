@@ -10,6 +10,7 @@
 #endif
 
 int get_sep_part(String data, char separator, int index);
+double get_sep_part_dbl(String data, char separator, int index);
 
 #endif
 

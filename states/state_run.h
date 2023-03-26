@@ -11,6 +11,8 @@
 
 void init_run(String strParams);
 
+void run_start();
+
 void adjust_run();
 
 

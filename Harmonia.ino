@@ -40,6 +40,8 @@
 
 int m_intCounter = 0;
 
+boolean blnReadyToRun = false;
+
 auto timer2Hz = timer_create_default();
 //auto timer5Hz = timer_create_default();
 
@@ -249,6 +251,7 @@ void loop() {
 
 		if (strRemoteCommand == "RUN") { 
 			state = RUN; 
+			blnReadyToRun = false;
 			init_run(get_remote_param());
 			clear_rf_command();
 		}
@@ -299,7 +302,20 @@ void loop() {
 		break;
 	case RUN:
 
-		adjust_run();
+		if (!blnReadyToRun) {
+			//adjust until trim achived 
+			boolean blnInTrim = adjust_depth_2();
+			adjust_pitch_2(get_imuorientation_y());
+
+			if (blnInTrim) {
+				blnReadyToRun = true;
+				run_start();
+			}
+		}
+		else {
+			adjust_run();
+		}
+
 
 		break;
 	case ALARM:

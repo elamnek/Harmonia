@@ -21,8 +21,8 @@ float c_fltDepthErrorCoeffDown = 5000; //the multiplier that is applied to depth
 float c_fltDepthErrorCoeffUp = 500;
 float c_fltDiveRateCoeffDown = 100; //the multiplier that is applied to dive rate to get pump speed
 float c_fltDiveRateCoeffUp = 130;
-//note up/down variation in coeffs is to acccount for the fact the inlfating is acting against water pressure wheras deflating is being assisted by it
-
+//note up/down variation in coeffs is to acccount for the fact the inflating is acting against water pressure wheras deflating is being assisted by it
+float c_fltInTrimSetpointError = 0.05;
  
 float c_fltDepthSetpoint;
 
@@ -45,7 +45,8 @@ void init_static_trim_2(float fltDepthSetpoint) {
 }
 
 
-void adjust_depth_2() {
+//returns true if trim has been achieved
+boolean adjust_depth_2() {
 
 	//first check if the data needs to be updated
 	int intDataTimeElapsed = millis() - v_intDataTimerStart;
@@ -81,6 +82,10 @@ void adjust_depth_2() {
 			
 		}
 
+		if (fltDepthError <= c_fltInTrimSetpointError && fltDepthError >= -c_fltInTrimSetpointError) {
+			return true;
+		}
+
 	}
 	else if (v_fltDiveRate >= c_fltNeutralDiveRate) {
 
@@ -98,7 +103,7 @@ void adjust_depth_2() {
 		command_pump("DEFLATE", intSatPWM);
 	
 	}
-	
+	return false;
 }
 
 int get_saturated_pwm(int intRawPWM) {
