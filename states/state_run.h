@@ -13,7 +13,7 @@ void init_run(String strParams);
 
 void run_start();
 
-void adjust_run();
+void adjust_run(float fltHeading);
 
 
 
