@@ -313,7 +313,10 @@ void loop() {
 			}
 		}
 		else {
-			adjust_run(get_imuorientation_x());
+			boolean blnRunDone = adjust_run(get_imuorientation_x());
+			if (blnRunDone) {
+				state = IDLE;
+			}
 		}
 
 

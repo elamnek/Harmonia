@@ -53,8 +53,8 @@ void run_start() {
 
 }
 
-//only execute this if run has been started
-void adjust_run(float fltHeading) {
+//only execute this if run has been started - will return true if run is complete
+boolean adjust_run(float fltHeading) {
 
 	unsigned long lngElapsedTime = millis() - m_lngStartTime;
 	if (lngElapsedTime < m_lngRunTime) {
@@ -74,11 +74,15 @@ void adjust_run(float fltHeading) {
 		intOutput = intOutput + 105;
 		command_servo("SERVOAFTRUDDER", intOutput);
 
+		return false;
+
 	} else {
 		//stop run
 
 		//turn motor off
 		commmand_main_motor(0);
+
+		return true;
 	}
 
 }

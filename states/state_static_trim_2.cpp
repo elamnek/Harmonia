@@ -82,6 +82,7 @@ boolean adjust_depth_2() {
 			
 		}
 
+		//if the error is within tolerance - return true
 		if (fltDepthError <= c_fltInTrimSetpointError && fltDepthError >= -c_fltInTrimSetpointError) {
 			return true;
 		}
