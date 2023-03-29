@@ -91,7 +91,10 @@ boolean adjust_run(float fltHeading,float fltPitch) {
 		command_servo("SERVOAFTDIVE", intOutput);
 
 		//adjust rudder PID using heading
-		m_dblAftRudderInput = fltHeading;
+		//convert heading to direction -180 - +180
+		float fltDirection = fltHeading;
+		if (fltDirection > 180) {fltDirection = fltDirection - 360;}
+		m_dblAftRudderInput = fltDirection;
 		m_PIDAftRudder.Compute();
 		intOutput = round(m_dblAftRudderOutput);
 		intOutput = intOutput + m_intAftRudderServo0Pos; //135
