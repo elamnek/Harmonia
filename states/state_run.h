@@ -13,8 +13,7 @@ void init_run(String strParams);
 
 void run_start();
 
-boolean adjust_run(float fltHeading);
-
+boolean adjust_run(float fltHeading, float fltPitch);
 
 
 #endif

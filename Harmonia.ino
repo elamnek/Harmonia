@@ -143,7 +143,7 @@ bool timer2Hz_interrupt(void*) {
 						"16|" + String(get_imuorientation_z()) + "," + //roll
 		                "32|" + String(get_imuacceleration_x()) + "," + 
 		                "33|" + String(get_imuacceleration_y()) + "," + 
-		                "-|" + String(get_imuacceleration_z()) + "," +
+		                "34|" + String(get_imuacceleration_z()) + "," +
 						"17|" + String(get_pushrod_pos()) + "," +
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + get_leonardo_bag_pressure_str() + "," +
@@ -313,7 +313,7 @@ void loop() {
 			}
 		}
 		else {
-			boolean blnRunDone = adjust_run(get_imuorientation_x());
+			boolean blnRunDone = adjust_run(get_imuorientation_x(), get_imuorientation_y());
 			if (blnRunDone) {
 				state = IDLE;
 			}
