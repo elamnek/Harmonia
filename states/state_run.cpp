@@ -30,14 +30,16 @@ PID m_PIDAftRudder(&m_dblAftRudderInput, &m_dblAftRudderOutput, &m_dblAftRudderS
 
 int m_intFwdDiveServo0Pos, m_intAftPitchServo0Pos, m_intAftRudderServo0Pos;
 
-double m_dblRunThrottle;
+int m_intRunThrottle;
 unsigned long m_lngRunTime,m_lngStartTime;
 
 void init_run(String strParams) {
 
+	m_dblAftPitchSetpoint = 0;
+	
 	m_dblFwdDivePlaneSetpoint = get_sep_part_dbl(strParams, '|', 0);
 	m_dblAftRudderSetpoint = get_sep_part_dbl(strParams, '|', 1);
-	m_dblRunThrottle = get_sep_part_dbl(strParams, '|', 2);
+	m_intRunThrottle = get_sep_part(strParams, '|', 2);
 	int intRunTime = get_sep_part(strParams, '|', 3);
 	m_lngRunTime = intRunTime * 1000;
 	m_intFwdDiveServo0Pos = get_sep_part(strParams, '|', 4);
@@ -53,19 +55,19 @@ void run_start() {
 	m_lngStartTime = millis();
 
 	//turn the fwd dive PID on
-	m_PIDFwdDivePlane.SetOutputLimits(-50, 50);
+	m_PIDFwdDivePlane.SetOutputLimits(-40, 27);
 	m_PIDFwdDivePlane.SetMode(AUTOMATIC);
 
 	//turn the aft pitch PID on
-	m_PIDAftPitchPlane.SetOutputLimits(-50, 50);
+	m_PIDAftPitchPlane.SetOutputLimits(-40, 40);
 	m_PIDAftPitchPlane.SetMode(AUTOMATIC);
 
 	//turn the rudder PID on
-	m_PIDAftRudder.SetOutputLimits(-50, 50);
+	m_PIDAftRudder.SetOutputLimits(-45, 45);
 	m_PIDAftRudder.SetMode(AUTOMATIC);
 
 	//turn main motor on
-	commmand_main_motor(m_dblRunThrottle);
+	commmand_main_motor(m_intRunThrottle);
 
 }
 
