@@ -83,14 +83,14 @@ boolean adjust_run(float fltHeading,float fltPitch) {
 		m_PIDFwdDivePlane.Compute();
 		int intOutput = round(m_dblFwdDivePlaneOutput);
 		intOutput = intOutput + m_intFwdDiveServo0Pos; //105
-		command_servo("SERVOFWDDIVE", intOutput);
+		command_servo("SERVOFWDDIVE", intOutput, intOutput - m_intFwdDiveServo0Pos);
 
 		//adjust aft pitch PID using current pitch
 		m_dblAftPitchPlaneInput = fltPitch;
 		m_PIDAftPitchPlane.Compute();
 		intOutput = round(m_dblAftPitchPlaneOutput);
 		intOutput = intOutput + m_intAftPitchServo0Pos; //105
-		command_servo("SERVOAFTDIVE", intOutput);
+		command_servo("SERVOAFTDIVE", intOutput, intOutput - m_intAftPitchServo0Pos);
 
 		//adjust rudder PID using heading
 		//convert heading to direction -180 - +180
@@ -100,7 +100,7 @@ boolean adjust_run(float fltHeading,float fltPitch) {
 		m_PIDAftRudder.Compute();
 		intOutput = round(m_dblAftRudderOutput);
 		intOutput = intOutput + m_intAftRudderServo0Pos; //135
-		command_servo("SERVOAFTRUDDER", intOutput);
+		command_servo("SERVOAFTRUDDER", intOutput, intOutput - m_intAftRudderServo0Pos);
 
 		return false;
 

@@ -11,13 +11,13 @@
 
 void init_servos();
 
-void command_servo(String strCommand, int intValue);
+void command_servo(String strCommand, int intValue, int intPos);
 
-float get_fwddiveplane_angle();
+int get_fwddiveplane_pos();
 
-float get_aftdiveplane_angle();
+int get_aftdiveplane_pos();
 
-float get_aftrudder_angle();
+int get_aftrudder_pos();
 
 
 #endif

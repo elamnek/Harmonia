@@ -13,6 +13,10 @@ Servo m_servoFwdDive;
 Servo m_servoAftDive;
 Servo m_servoAftRudder;
 
+int m_intFwdDiveServoPos = 0;
+int m_intAftDiveServoPos = 0;
+int m_intAftRudderServoPos = 0;
+
 void init_servos() {
 	
 	m_servoFwdDive.attach(m_intFwdDiveServoPin);
@@ -25,28 +29,31 @@ void init_servos() {
 	
 }
 
-void command_servo(String strCommand,int intValue) {
+void command_servo(String strCommand,int intValue,int intPos) {
 
 	if (strCommand == "SERVOFWDDIVE") {
 		m_servoFwdDive.write(intValue);
+		m_intFwdDiveServoPos = intPos;
 	}
 	else if (strCommand == "SERVOAFTDIVE"){
 		m_servoAftDive.write(intValue);
+		m_intAftDiveServoPos = intPos;
 	}
 	else if (strCommand == "SERVOAFTRUDDER"){
 		m_servoAftRudder.write(intValue);
+		m_intAftRudderServoPos = intPos;
 	}
 	
 }
 
-float get_fwddiveplane_angle() {
-	return -1;
+int get_fwddiveplane_pos() {
+	return m_intFwdDiveServoPos;
 }
-float get_aftdiveplane_angle() {
-	return -1;
+int get_aftdiveplane_pos() {
+	return m_intAftDiveServoPos;
 }
-float get_aftrudder_angle() {
-	return -1;
+int get_aftrudder_pos() {
+	return m_intAftRudderServoPos;
 }
 
 

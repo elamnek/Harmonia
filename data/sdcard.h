@@ -11,7 +11,8 @@
 
 String init_sdcard();
 
-void sdcard_save_data(String strDataLine);
+void sdcard_save_data_1(String strDataLine);
+void sdcard_save_data_2(String strDataLine);
 
 void sdcard_record_count();
 

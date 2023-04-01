@@ -43,7 +43,7 @@ int m_intCounter = 0;
 boolean blnReadyToRun = false;
 
 auto timer2Hz = timer_create_default();
-//auto timer5Hz = timer_create_default();
+auto timer4Hz = timer_create_default();
 
 //FSM states
 enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM, UPLOAD} state;
@@ -110,7 +110,7 @@ void setup() {
 
 	//start interupts
 	timer2Hz.every(500, timer2Hz_interrupt);
-	//timer5Hz.every(200, timer5Hz_interrupt);
+	timer4Hz.every(250, timer4Hz_interrupt);
 				
 }
 
@@ -180,30 +180,27 @@ bool timer2Hz_interrupt(void*) {
 	send_rf_comm(strData);
 
 	//save to sdcard
-	sdcard_save_data(strData);
+	sdcard_save_data_1(strData);
 
 	return true;
 }
 
-bool timer5Hz_interrupt(void*) {
+bool timer4Hz_interrupt(void*) {
 
 	//this function stored data that needs to be captured at higher fidelity
-	//5Hz data doesn't need to be sent to remote display, only stored to SD card (except if in upload mode)
-
-	
-
+	//4Hz data doesn't need to be sent to remote display, only stored to SD card (except if in upload mode)
 
 	//if in the upload state - we don't want data to be stored or sent to remote
 	if (state == UPLOAD) { return true; }
 
 	String strData = "{13|" + get_rtc_time() + "," +
-		              "29|" + get_fwddiveplane_angle() + "," +
-		              "30|" + get_aftdiveplane_angle() + "," +
-		              "31|" + get_aftrudder_angle() + 
+		              "29|" + get_fwddiveplane_pos() + "," +
+		              "30|" + get_aftdiveplane_pos() + "," +
+		              "31|" + get_aftrudder_pos() + 
 		              "}";
 
 	//save to sdcard
-	sdcard_save_data(strData);
+	sdcard_save_data_2(strData);
 
 	return true;
 }
@@ -212,7 +209,7 @@ bool timer5Hz_interrupt(void*) {
 void loop() {
 	
 	timer2Hz.tick();
-	//timer5Hz.tick();
+	timer4Hz.tick();
 
 	//check leak sensors and override any state that has been set
 	if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 

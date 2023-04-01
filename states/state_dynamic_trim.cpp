@@ -40,7 +40,7 @@ void adjust_dive_plane(double dblPitch) {
 	int intOutput = round(m_dblDivePlaneOutput);
 	intOutput = intOutput + 105;
 
-	command_servo("SERVOAFTDIVE", intOutput);
+	command_servo("SERVOAFTDIVE", intOutput, intOutput - 105);
 
 	
 }

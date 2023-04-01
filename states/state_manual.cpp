@@ -40,15 +40,15 @@ void apply_manual_command() {
 		}
 		else if (strRemoteCommand == "SERVOFWDDIVE") {
 			//send_rf_comm("servo forward dive");
-			command_servo(strRemoteCommand, strRemoteParam.toInt());
+			command_servo(strRemoteCommand, strRemoteParam.toInt(),0);
 		}
 		else if (strRemoteCommand == "SERVOAFTDIVE") {
 			//send_rf_comm("servo aft dive");
-			command_servo(strRemoteCommand, strRemoteParam.toInt());
+			command_servo(strRemoteCommand, strRemoteParam.toInt(),0);
 		}
 		else if (strRemoteCommand == "SERVOAFTRUDDER") {
 			//send_rf_comm("servo aft rudder");
-			command_servo(strRemoteCommand, strRemoteParam.toInt());
+			command_servo(strRemoteCommand, strRemoteParam.toInt(),0);
 		}
 		
 	}
