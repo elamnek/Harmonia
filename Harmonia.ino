@@ -154,7 +154,8 @@ bool timer2Hz_interrupt(void*) {
 		                "25|" + get_leonardo_current_str() + "," +
 		                "26|" + get_leonardo_power_str() + "," +
 		                "27|" + String(get_dive_rate_2()) + "," + 
-		                "28|" + String(get_depth_setpoint_2()) +
+		                "28|" + String(get_depth_setpoint_2()) + "," +
+		                "35|" + String(millis()/1000) + //seconds that uC has been running for
 						"}";
 
 	/*unsigned long lngElapsed = millis() - lngStart;
