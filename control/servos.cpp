@@ -48,6 +48,8 @@ void command_servo(String strCommand,int intValue,int intPos) {
 
 void command_servo_test(String strParams) {
 
+	//note: blocking function that uses delays
+
 	int intFwdDiveServo0Pos = get_sep_part(strParams, '|', 0);
 	int intAftPitchServo0Pos = get_sep_part(strParams, '|', 1);
 	int intAftRudderServo0Pos = get_sep_part(strParams, '|', 2);

@@ -257,6 +257,7 @@ void loop() {
 
 		if (strRemoteCommand == "SERVO_TEST") { 
 			state = SERVO_TEST;
+			//don't clear the rf command for this state because the parameters are used when the state is exectuted
 		}
 		if (strRemoteCommand == "ALARM") { state = ALARM; }
 		if (strRemoteCommand == "UPLOAD") { 
