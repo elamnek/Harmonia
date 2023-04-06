@@ -46,7 +46,7 @@ auto timer2Hz = timer_create_default();
 auto timer4Hz = timer_create_default();
 
 //FSM states
-enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, ALARM, UPLOAD} state;
+enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, SERVO_TEST, ALARM, UPLOAD} state;
 //function used to return text description of current state
 String  get_state() {
 	switch (state) {
@@ -55,6 +55,7 @@ String  get_state() {
 	case STATIC_TRIM: return "STATIC_TRIM";
 	case DYNAMIC_TRIM: return "DYNAMIC_TRIM";
 	case RUN: return "RUN";
+	case SERVO_TEST: return "SERVO_TEST";
 	case ALARM: return "ALARM";
 	case UPLOAD: return "UPLOAD";
 	}
@@ -254,6 +255,9 @@ void loop() {
 			clear_rf_command();
 		}
 
+		if (strRemoteCommand == "SERVO_TEST") { 
+			state = SERVO_TEST;
+		}
 		if (strRemoteCommand == "ALARM") { state = ALARM; }
 		if (strRemoteCommand == "UPLOAD") { 
 			state = UPLOAD;
@@ -307,6 +311,9 @@ void loop() {
 
 			if (blnInTrim) {
 				blnReadyToRun = true;
+				command_pushrod("REVERSE", 0);
+				command_pump("DEFLATE", 0);
+
 				run_start();
 			}
 		}
@@ -317,6 +324,13 @@ void loop() {
 			}
 		}
 
+
+		break;
+	case SERVO_TEST:
+
+		//this is a blocking function - the main loop will be halted while the test process runs
+		command_servo_test(get_remote_param());
+		state = IDLE;
 
 		break;
 	case ALARM:

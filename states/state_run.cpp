@@ -41,10 +41,15 @@ void init_run(String strParams) {
 	m_dblAftRudderSetpoint = get_sep_part_dbl(strParams, '|', 1);
 	m_intRunThrottle = get_sep_part(strParams, '|', 2);
 	int intRunTime = get_sep_part(strParams, '|', 3);
-	m_lngRunTime = intRunTime * 1000;
+	m_lngRunTime = (unsigned long)intRunTime * 1000;
 	m_intFwdDiveServo0Pos = get_sep_part(strParams, '|', 4);
 	m_intAftPitchServo0Pos = get_sep_part(strParams, '|', 5);
 	m_intAftRudderServo0Pos = get_sep_part(strParams, '|', 6);
+
+	//set 0 positions of control planes at start of run (otherwise they look weird!)
+	command_servo("SERVOFWDDIVE", m_intFwdDiveServo0Pos, 0);
+	command_servo("SERVOAFTDIVE", m_intAftPitchServo0Pos, 0);
+	command_servo("SERVOAFTRUDDER", m_intAftRudderServo0Pos, 0);
 
 	init_static_trim_2(get_sep_part_dbl(strParams, '|', 0));
 
@@ -96,7 +101,7 @@ boolean adjust_run(float fltHeading,float fltPitch) {
 		//convert heading to direction -180 - +180
 		float fltDirection = fltHeading;
 		if (fltDirection > 180) {fltDirection = fltDirection - 360;}
-		m_dblAftRudderInput = fltDirection;
+		m_dblAftRudderInput = -fltDirection; //negative sign untested
 		m_PIDAftRudder.Compute();
 		intOutput = round(m_dblAftRudderOutput);
 		intOutput = intOutput + m_intAftRudderServo0Pos; //135

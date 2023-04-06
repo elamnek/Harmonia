@@ -22,7 +22,7 @@ float c_fltDepthErrorCoeffUp = 500;
 float c_fltDiveRateCoeffDown = 100; //the multiplier that is applied to dive rate to get pump speed
 float c_fltDiveRateCoeffUp = 130;
 //note up/down variation in coeffs is to acccount for the fact the inflating is acting against water pressure wheras deflating is being assisted by it
-float c_fltInTrimSetpointError = 0.05;
+float c_fltInTrimSetpointError = 0.1;
  
 float c_fltDepthSetpoint;
 
