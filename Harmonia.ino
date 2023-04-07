@@ -201,6 +201,9 @@ bool timer4Hz_interrupt(void*) {
 		              "31|" + get_aftrudder_pos() + 
 		              "}";
 
+	//may need to comment this if it slows down data transfer
+	send_rf_comm(strData);
+
 	//save to sdcard
 	sdcard_save_data_2(strData);
 
