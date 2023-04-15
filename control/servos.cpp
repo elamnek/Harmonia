@@ -4,6 +4,7 @@
 
 #include "servos.h"
 #include <Servo.h>
+#include "..\helpers.h"
 
 int m_intFwdDiveServoPin = 13;
 int m_intAftDiveServoPin = 4;
@@ -54,18 +55,26 @@ void command_servo_test(String strParams) {
 	int intAftPitchServo0Pos = get_sep_part(strParams, '|', 1);
 	int intAftRudderServo0Pos = get_sep_part(strParams, '|', 2);
 
-	//set 0 positions of control planes
-	command_servo("SERVOFWDDIVE", intFwdDiveServo0Pos, 0);
-	command_servo("SERVOAFTDIVE", intAftPitchServo0Pos, 0);
-	command_servo("SERVOAFTRUDDER", intAftRudderServo0Pos, 0);
-
-	//hold on zero position for 2s
-	delay(2000);
-
+	
 	//sweep servos
-	servo_sweep("SERVOFWDDIVE", intFwdDiveServo0Pos, -40, 40, 25);
-	servo_sweep("SERVOAFTDIVE", intAftPitchServo0Pos, -40, 40, 25);
-	servo_sweep("SERVOAFTRUDDER", intAftRudderServo0Pos, -40, 40, 25);
+	if (intFwdDiveServo0Pos != 555) {
+		command_servo("SERVOFWDDIVE", intFwdDiveServo0Pos, 0);
+		delay(2000);
+		servo_sweep("SERVOFWDDIVE", intFwdDiveServo0Pos, -40, 40, 25);
+		command_servo("SERVOFWDDIVE", intFwdDiveServo0Pos, 0);
+	}
+	if (intAftPitchServo0Pos != 555) {
+		command_servo("SERVOAFTDIVE", intAftPitchServo0Pos, 0);
+		delay(2000);
+		servo_sweep("SERVOAFTDIVE", intAftPitchServo0Pos, -40, 40, 25);
+		command_servo("SERVOAFTDIVE", intAftPitchServo0Pos, 0);
+	}
+	if (intAftRudderServo0Pos != 555) {
+		command_servo("SERVOAFTRUDDER", intAftRudderServo0Pos, 0);
+		delay(2000);
+		servo_sweep("SERVOAFTRUDDER", intAftRudderServo0Pos, -45,45, 25);
+		command_servo("SERVOAFTRUDDER", intAftRudderServo0Pos, 0);
+	}
 
 }
 void servo_sweep(String strCommand,int intServo0Value,int intMinPos,int intMaxPos,int intDelay_ms){

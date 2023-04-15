@@ -195,14 +195,14 @@ bool timer4Hz_interrupt(void*) {
 	//if in the upload state - we don't want data to be stored or sent to remote
 	if (state == UPLOAD) { return true; }
 
-	String strData = "{13|" + get_rtc_time() + "," +
+	String strData = "{13|" + get_rtc_time_millis() + "," +
 		              "29|" + get_fwddiveplane_pos() + "," +
 		              "30|" + get_aftdiveplane_pos() + "," +
 		              "31|" + get_aftrudder_pos() + 
 		              "}";
 
 	//may need to comment this if it slows down data transfer
-	send_rf_comm(strData);
+	//send_rf_comm(strData);
 
 	//save to sdcard
 	sdcard_save_data_2(strData);
@@ -335,6 +335,7 @@ void loop() {
 		//this is a blocking function - the main loop will be halted while the test process runs
 		command_servo_test(get_remote_param());
 		state = IDLE;
+		clear_rf_command();
 
 		break;
 	case ALARM:

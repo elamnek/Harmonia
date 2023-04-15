@@ -15,7 +15,9 @@ int getValue(String data, char separator, int index);
 
 void set_rtc_time(String strDateTimeFromPC);
 
+
 String get_rtc_time();
+String get_rtc_time_millis();
 
 #endif
 

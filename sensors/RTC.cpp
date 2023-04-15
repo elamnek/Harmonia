@@ -33,8 +33,18 @@ void set_rtc_time(String strDateTimeFromPC) {
 String get_rtc_time() {
 
 	rtc.read();
-
+	
 	String strTime = String(rtc.hour) +":"+ String(rtc.minute) + ":" + String(rtc.second) + " " + String(rtc.day) + "/" + String(rtc.month) + "/" + String(rtc.year);
+
+	return strTime;
+
+}
+
+String get_rtc_time_millis() {
+
+	rtc.read();
+
+	String strTime = String(millis()) + "#" + String(rtc.hour) + ":" + String(rtc.minute) + ":" + String(rtc.second) + " " + String(rtc.day) + "/" + String(rtc.month) + "/" + String(rtc.year);
 
 	return strTime;
 
