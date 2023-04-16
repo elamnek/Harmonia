@@ -48,7 +48,7 @@ void init_run(String strParams) {
 
 	//set 0 positions of control planes at start of run (otherwise they look weird!)
 	command_servo("SERVOFWDDIVE", m_intFwdDiveServo0Pos, 0);
-	delay(200);
+	delay(200); // need delays between servo activation otherwise crash will occur when battery not fully charged
 	command_servo("SERVOAFTDIVE", m_intAftPitchServo0Pos, 0);
 	delay(200);
 	command_servo("SERVOAFTRUDDER", m_intAftRudderServo0Pos, 0);
