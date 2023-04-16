@@ -23,6 +23,7 @@
 #include "states\state_static_trim_2.h"
 #include "states\state_dynamic_trim.h"
 #include "states\state_run.h"
+#include "states\state_run_2.h"
 #include "control\pumps.h"
 #include "control\main_motor.h"
 #include "control\servos.h"
@@ -316,6 +317,7 @@ void loop() {
 			if (blnInTrim) {
 				blnReadyToRun = true;
 				command_pushrod("REVERSE", 0);
+				delay(200);
 				command_pump("DEFLATE", 0);
 
 				run_start();

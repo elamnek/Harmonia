@@ -111,6 +111,7 @@
       <FileType>CppCode</FileType>
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
+    <ClCompile Include="states\state_run_2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="comms\rf_comms.h" />
@@ -132,6 +133,7 @@
     <ClInclude Include="states\state_dynamic_trim.h" />
     <ClInclude Include="states\state_run.h" />
     <ClInclude Include="states\state_static_trim_2.h" />
+    <ClInclude Include="states\state_run_2.h" />
     <ClInclude Include="__vm\.Harmonia.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>

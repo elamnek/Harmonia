@@ -48,7 +48,9 @@ void init_run(String strParams) {
 
 	//set 0 positions of control planes at start of run (otherwise they look weird!)
 	command_servo("SERVOFWDDIVE", m_intFwdDiveServo0Pos, 0);
+	delay(200);
 	command_servo("SERVOAFTDIVE", m_intAftPitchServo0Pos, 0);
+	delay(200);
 	command_servo("SERVOAFTRUDDER", m_intAftRudderServo0Pos, 0);
 
 	init_static_trim_2(get_sep_part_dbl(strParams, '|', 0));
