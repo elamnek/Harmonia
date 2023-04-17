@@ -71,6 +71,9 @@ boolean adjust_run_2(float fltHeading, float fltPitch) {
 	if (lngTimeELAPSED < m_lngTimeRUN) {
 		//continue with run
 
+		double dblError = m_dblFwdDivePlaneSP - get_depth();
+		
+
 		////adjust fwd dive PID using depth sensor
 		//m_dblFwdDivePlaneInput = get_depth();
 		//m_PIDFwdDivePlane.Compute();
