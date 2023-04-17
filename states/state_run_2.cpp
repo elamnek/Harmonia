@@ -13,7 +13,7 @@
 #include "..\helpers.h"
 #include "..\states\state_static_trim_2.h"
 
-double m_dblAftPitchSP, m_dblFwdDivePlaneSP, m_dblAftRudderSP, m_intThrottleRUN;
+double m_dblAftPitchSP, m_dblDepthSP, m_dblAftRudderSP, m_intThrottleRUN;
 
 int m_intFwdDive0Pos, m_intAftPitch0Pos, m_intAftRudder0Pos;
 
@@ -23,7 +23,7 @@ void init_run_2(String strParams) {
 
 	m_dblAftPitchSP = 0;
 
-	m_dblFwdDivePlaneSP = get_sep_part_dbl(strParams, '|', 0);
+	m_dblDepthSP = get_sep_part_dbl(strParams, '|', 0);
 	m_dblAftRudderSP = get_sep_part_dbl(strParams, '|', 1);
 	m_intThrottleRUN = get_sep_part(strParams, '|', 2);
 	int intTimeRUN = get_sep_part(strParams, '|', 3);
@@ -71,7 +71,7 @@ boolean adjust_run_2(float fltHeading, float fltPitch) {
 	if (lngTimeELAPSED < m_lngTimeRUN) {
 		//continue with run
 
-		int intOutput = PropControl(m_dblFwdDivePlaneSP,get_depth())
+		int intOutput = PropControl(m_dblDepthSP,get_depth(),)
 		command_servo("SERVOFWDDIVE", intOutput, intOutput - m_intFwdDiveServo0Pos);
 
 		////adjust fwd dive PID using depth sensor
