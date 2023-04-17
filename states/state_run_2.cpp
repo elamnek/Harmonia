@@ -71,8 +71,8 @@ boolean adjust_run_2(float fltHeading, float fltPitch) {
 	if (lngTimeELAPSED < m_lngTimeRUN) {
 		//continue with run
 
-		double dblError = m_dblFwdDivePlaneSP - get_depth();
-		
+		int intOutput = PropControl(m_dblFwdDivePlaneSP,get_depth())
+		command_servo("SERVOFWDDIVE", intOutput, intOutput - m_intFwdDiveServo0Pos);
 
 		////adjust fwd dive PID using depth sensor
 		//m_dblFwdDivePlaneInput = get_depth();
@@ -109,5 +109,17 @@ boolean adjust_run_2(float fltHeading, float fltPitch) {
 
 		return true;
 	}
+	
 
 }
+int PropControl(double dblSP,double dblCurrentValue,double dblCoeff,int intMaxValue,int intMinValue){
+
+	double dblError = m_dblFwdDivePlaneSP - get_depth();
+
+	if (intRawPWM > c_intMaxPumpPWM) { return c_intMaxPumpPWM; }
+	if (intRawPWM < c_intMinPumpPWM) { return c_intMinPumpPWM; }
+
+}
+
+
+
