@@ -22,9 +22,11 @@ float c_fltDepthErrorCoeffUp = 500;
 float c_fltDiveRateCoeffDown = 100; //the multiplier that is applied to dive rate to get pump speed
 float c_fltDiveRateCoeffUp = 130;
 //note up/down variation in coeffs is to acccount for the fact the inflating is acting against water pressure wheras deflating is being assisted by it
-float c_fltInTrimSetpointError = 0.1;
+
+float c_fltDepthTrimSetpointError = 0.1;
+float c_fltPitchTrimSetpointError = 1;
  
-float c_fltDepthSetpoint;
+float c_fltDepthSetpoint, c_fltPitchSetpoint;
 
 //variables
 int v_intDataTimerStart;
@@ -32,9 +34,10 @@ float v_fltCurrentDepth;
 float v_fltPreviousDepth;
 float v_fltDiveRate = 0;
 
-void init_static_trim_2(float fltDepthSetpoint) {
+void init_static_trim_2(float fltDepthSetpoint, float fltPitchSetpoint) {
 	
 	c_fltDepthSetpoint = fltDepthSetpoint;
+	c_fltPitchSetpoint = fltPitchSetpoint;
 
 	v_fltPreviousDepth = get_depth();
 
@@ -83,7 +86,7 @@ boolean adjust_depth_2() {
 		}
 
 		//if the error is within tolerance - return true
-		if (fltDepthError <= c_fltInTrimSetpointError && fltDepthError >= -c_fltInTrimSetpointError) {
+		if (fltDepthError <= c_fltDepthTrimSetpointError && fltDepthError >= -c_fltDepthTrimSetpointError) {
 			return true;
 		}
 
@@ -120,24 +123,33 @@ float get_depth_setpoint_2() {
 	return c_fltDepthSetpoint;
 }
 
-void adjust_pitch_2(float fltPitch) {
+boolean adjust_pitch_2(float fltPitch) {
+	//-ve pitch is nose up +ve is nose down
+	//-ve pitch error means nose needs to come up (apply reverse pushrod)
+	//+ve pitch error means nose needs to come down (apply forward pushrod)
 
-	float fltError = fltPitch; //-ve is nose up +ve is nose down
+	float fltPitchError = c_fltPitchSetpoint - fltPitch;
 
-	float fltErrorAbs = fltError; //assume positive
-	if (fltError < 0) { fltErrorAbs = -fltError; }
+	//if the error is within tolerance - return true
+	if (fltPitchError <= c_fltPitchTrimSetpointError && fltPitchError >= -c_fltPitchTrimSetpointError) {
+		return true;
+	}
+
+	float fltErrorAbs = fltPitchError; //assume positive
+	if (fltPitchError < 0) { fltErrorAbs = -fltPitchError; }
 
 	int intPWM = round(fltErrorAbs * c_Kp_pitch_error);
 	if (intPWM > c_maxPushrodPWM) { intPWM = c_maxPushrodPWM; } //saturate
 
-	if (fltError > 0) {
-		command_pushrod("REVERSE", intPWM);
-	}
-	else if (fltError < 0) {
+	if (fltPitchError > 0) {
 		command_pushrod("FORWARD", intPWM);
 	}
-	else if (fltError == 0) {
+	else if (fltPitchError < 0) {
+		command_pushrod("REVERSE", intPWM);
+	}
+	else if (fltPitchError == 0) {
 		command_pushrod("REVERSE", 0);
 	}
 
+	return false;
 }

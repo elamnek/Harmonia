@@ -243,7 +243,7 @@ void loop() {
 		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
 		if (strRemoteCommand == "STATIC_TRIM") {
 			state = STATIC_TRIM;
-			init_static_trim_2(get_remote_param().toFloat());
+			init_static_trim_2(get_remote_param().toFloat(),0);
 			clear_rf_command();
 		}
 		if (strRemoteCommand == "DYNAMIC_TRIM") { 
@@ -255,7 +255,7 @@ void loop() {
 		if (strRemoteCommand == "RUN") { 
 			state = RUN; 
 			blnReadyToRun = false;
-			init_run(get_remote_param());
+			init_run_2(get_remote_param());
 			clear_rf_command();
 		}
 
@@ -295,7 +295,7 @@ void loop() {
 	case STATIC_TRIM:
 	
 		adjust_depth_2();
-		adjust_pitch_2(get_imuorientation_y());
+		adjust_pitch_2(get_imuorientation_y(),0);
 
 		break;
 	case DYNAMIC_TRIM:
@@ -311,20 +311,19 @@ void loop() {
 
 		if (!blnReadyToRun) {
 			//adjust until trim achived 
-			boolean blnInTrim = adjust_depth_2();
-			adjust_pitch_2(get_imuorientation_y());
-
-			if (blnInTrim) {
+			boolean blnDepthTrim = adjust_depth_2();
+			boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y());
+			if (blnDepthTrim && blnPitchTrim) {
 				blnReadyToRun = true;
 				command_pushrod("REVERSE", 0);
 				delay(200);
 				command_pump("DEFLATE", 0);
 
-				run_start();
+				run_start_2();
 			}
 		}
 		else {
-			boolean blnRunDone = adjust_run(get_imuorientation_x(), get_imuorientation_y());
+			boolean blnRunDone = adjust_run_2(get_imuorientation_x(), get_imuorientation_y());
 			if (blnRunDone) {
 				state = IDLE;
 			}

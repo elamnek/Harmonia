@@ -53,7 +53,7 @@ void init_run(String strParams) {
 	delay(200);
 	command_servo("SERVOAFTRUDDER", m_intAftRudderServo0Pos, 0);
 
-	init_static_trim_2(get_sep_part_dbl(strParams, '|', 0));
+	init_static_trim_2(m_dblFwdDivePlaneSetpoint,0);
 
 }
 

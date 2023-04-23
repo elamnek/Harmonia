@@ -9,7 +9,7 @@
 	#include "WProgram.h"
 #endif
 
-void init_static_trim_2(float fltDepthSetpoint);
+void init_static_trim_2(float fltDepthSetpoint, float fltPitchSetpoint);
 
 boolean adjust_depth_2();
 
@@ -18,7 +18,7 @@ int get_saturated_pwm(int intRawPWM);
 float get_dive_rate_2();
 float get_depth_setpoint_2();
 
-void adjust_pitch_2(float fltPitch);
+boolean adjust_pitch_2(float fltPitch);
 
 #endif
 
