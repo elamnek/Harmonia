@@ -19,6 +19,8 @@ int m_intFwdDive0Pos, m_intAftPitch0Pos, m_intAftRudder0Pos;
 
 unsigned long m_lngFwdTime, m_lngRevTime, m_lngTotalTime, m_lngTimeSTART;
 
+boolean blnThrottleZeroed = false;
+
 void init_run_2(String strParams) {
 
 
@@ -34,7 +36,7 @@ void init_run_2(String strParams) {
 	m_intAftPitch0Pos = get_sep_part(strParams, '|', 7);
 	m_intAftRudder0Pos = get_sep_part(strParams, '|', 8);
 
-	m_lngTotalTime = m_lngFwdTime + m_lngRevTime;
+	m_lngTotalTime = m_lngFwdTime + m_lngRevTime + 200;
 
 	//set 0 positions of control planes at start of run
 	command_servo("SERVOFWDDIVE", m_intFwdDive0Pos, 0);
@@ -54,6 +56,8 @@ void run_start_2() {
 	//initiate fwd run
 	commmand_main_motor(m_intFwdThrottle);
 
+	blnThrottleZeroed = false;
+
 }
 
 //only execute this if run has been started - will return true if run is complete
@@ -65,6 +69,13 @@ boolean adjust_run_2(float fltHeading, float fltPitch) {
 		return false;
 	}
 	else {
+
+		if (!blnThrottleZeroed) {
+			//need to zero throttle before we can change from fwd to reverse thrust
+			commmand_main_motor(0);
+			delay(200);
+			blnThrottleZeroed = true;
+		}
 	
 		if (lngTimeELAPSED < m_lngTotalTime) {
 

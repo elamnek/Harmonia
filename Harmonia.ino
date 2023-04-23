@@ -295,7 +295,7 @@ void loop() {
 	case STATIC_TRIM:
 	
 		adjust_depth_2();
-		adjust_pitch_2(get_imuorientation_y(),0);
+		adjust_pitch_2(get_imuorientation_y());
 
 		break;
 	case DYNAMIC_TRIM:
