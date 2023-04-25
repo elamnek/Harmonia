@@ -24,7 +24,7 @@ float c_fltDiveRateCoeffUp = 130;
 //note up/down variation in coeffs is to acccount for the fact the inflating is acting against water pressure wheras deflating is being assisted by it
 
 float c_fltDepthTrimSetpointError = 0.1;
-float c_fltPitchTrimSetpointError = 1;
+float c_fltPitchTrimSetpointError = 3;
  
 float c_fltDepthSetpoint, c_fltPitchSetpoint;
 
