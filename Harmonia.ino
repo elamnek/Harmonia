@@ -325,7 +325,11 @@ void loop() {
 		else {
 			boolean blnRunDone = adjust_run_2(get_imuorientation_x(), get_imuorientation_y());
 			if (blnRunDone) {
-				state = IDLE;
+				//when run is complete - maintain depth and pitch until state is changed
+				static_trim_reset();
+				adjust_depth_2();
+				adjust_pitch_2(get_imuorientation_y());
+				
 			}
 		}
 

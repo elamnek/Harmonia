@@ -11,9 +11,11 @@
 
 void init_run_2(String strParams);
 
+void static_trim_reset();
+
 void run_start_2();
 
-boolean adjust_run_2(float fltHeading, float fltPitch);
+boolean adjust_run_2(double dblHeading, double dblPitch);
 
 #endif
 
