@@ -11,13 +11,13 @@
 Adafruit_BNO055 bno = Adafruit_BNO055(55);
 
 unsigned long m_lngLastRead = 0;
-float m_fltOrientation_x = 0.0;
-float m_fltOrientation_y = 0.0;
-float m_fltOrientation_z = 0.0;
+float m_fltOrientation_x;
+float m_fltOrientation_y;
+float m_fltOrientation_z;
 
-float m_fltAcceleration_x = 0.0;
-float m_fltAcceleration_y = 0.0;
-float m_fltAcceleration_z = 0.0;
+float m_fltAcceleration_x;
+float m_fltAcceleration_y;
+float m_fltAcceleration_z;
 
 //double xPos = 0, yPos = 0, headingVel = 0;
 
@@ -39,6 +39,14 @@ String init_imu() {
     bno.setExtCrystalUse(true);
 
     m_lngLastRead - millis();
+
+    m_fltOrientation_x = 0.0;
+    m_fltOrientation_y = 0.0;
+    m_fltOrientation_z = 0.0;
+
+    m_fltAcceleration_x = 0.0;
+    m_fltAcceleration_y = 0.0;
+    m_fltAcceleration_z = 0.0;
 
     return "";
 

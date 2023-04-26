@@ -252,11 +252,18 @@ void loop() {
 			clear_rf_command();
 		}
 
-		if (strRemoteCommand == "RUN") { 
-			state = RUN; 
-			blnReadyToRun = false;
-			init_run_2(get_remote_param());
-			clear_rf_command();
+		if (strRemoteCommand == "RUN") { 	
+			String strError = init_imu(); //this will reset heading to 0 so sub needs to be correct direction when run starts
+			if (strError.length() > 0) {
+				state = IDLE;
+				send_rf_comm(strError + " RUN aborted");
+			}
+			else {
+				state = RUN;
+				blnReadyToRun = false;
+				init_run_2(get_remote_param());
+				clear_rf_command();
+			}	
 		}
 
 		if (strRemoteCommand == "SERVO_TEST") { 
@@ -325,10 +332,15 @@ void loop() {
 		else {
 			boolean blnRunDone = adjust_run_2(get_imuorientation_x(), get_imuorientation_y());
 			if (blnRunDone) {
+				
+				command_pump("INFLATE", 255);
+				state = MANUAL;
+
+				
 				//when run is complete - maintain depth and pitch until state is changed
-				static_trim_reset();
-				adjust_depth_2();
-				adjust_pitch_2(get_imuorientation_y());
+				//static_trim_reset();
+				//adjust_depth_2();
+				//adjust_pitch_2(get_imuorientation_y());
 				
 			}
 		}
