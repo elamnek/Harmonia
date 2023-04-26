@@ -66,6 +66,12 @@ boolean adjust_depth_2() {
 		v_intDataTimerStart = millis();
 	}
 
+	//apply full speed deflation until depth >= 0.2m (fin underwater)
+	if (v_fltCurrentDepth < 0.2) {
+		command_pump("DEFLATE", -255);
+		return false;
+	}
+
 	//determine pump speed
 	if (v_fltDiveRate > -c_fltNeutralDiveRate && v_fltDiveRate < c_fltNeutralDiveRate) {
 		//dive/climb rate is very slow (close to neutral bouyancy or on sea bed) - use depth error to adjust speed
