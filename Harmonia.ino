@@ -259,6 +259,7 @@ void loop() {
 				send_rf_comm(strError + " RUN aborted");
 			}
 			else {
+				send_rf_comm("IMU re-started successfully - going into RUN state");
 				state = RUN;
 				blnReadyToRun = false;
 				init_run_2(get_remote_param());
@@ -317,7 +318,7 @@ void loop() {
 	case RUN:
 
 		if (!blnReadyToRun) {
-			//adjust until trim achived 
+			//adjust until trim achieved 
 			boolean blnDepthTrim = adjust_depth_2();
 			boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y());
 			if (blnDepthTrim && blnPitchTrim) {
@@ -333,6 +334,7 @@ void loop() {
 			boolean blnRunDone = adjust_run_2(get_imuorientation_x(), get_imuorientation_y());
 			if (blnRunDone) {
 				
+				//just inflate and go into manual state
 				command_pump("INFLATE", 255);
 				state = MANUAL;
 
