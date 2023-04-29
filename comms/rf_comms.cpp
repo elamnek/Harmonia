@@ -11,7 +11,7 @@
 #include "..\control\pushrod.h"
 #include "..\control\pumps.h"
 
-//this serial will be used to communicate in 2 directions with the desktop software and digital twin
+//this serial will be used to communicate in 2 directions between the desktop software and sub
 #define serialRF Serial1
 
 String m_strRemoteCommand; //string to be captured from serial port
