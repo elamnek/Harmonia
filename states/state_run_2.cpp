@@ -20,6 +20,7 @@ int m_intFwdDive0Pos, m_intAftPitch0Pos, m_intAftRudder0Pos;
 unsigned long m_lngTrimEndTP,m_lngFwdEndTP, m_lngRevEndTP, m_lngTimeStart;
 
 boolean blnThrottleZeroed = false;
+boolean blnServosZeroed = false;
 
 void init_run_2(String strParams) {
 
@@ -65,6 +66,7 @@ void run_start_2() {
 	commmand_main_motor(m_intFwdThrottle);
 
 	blnThrottleZeroed = false;
+	blnServosZeroed = false;
 
 }
 
@@ -99,6 +101,17 @@ boolean adjust_run_2(double dblHeading, double dblPitch) {
 		return false;
 	} else if (lngTimeELAPSED > m_lngTrimEndTP && lngTimeELAPSED <= m_lngFwdEndTP) {
 		//fwd run
+
+		if (!blnServosZeroed) {
+			//set 0 positions of control planes at start of run
+			command_servo("SERVOFWDDIVE", m_intFwdDive0Pos, 0);
+			delay(100);
+			command_servo("SERVOAFTDIVE", m_intAftPitch0Pos, 0);
+			delay(100);
+			command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos, 0);
+			blnServosZeroed = true;
+		}
+		
 
 		return false;
 	} else if (lngTimeELAPSED > m_lngFwdEndTP && lngTimeELAPSED <= m_lngRevEndTP) {

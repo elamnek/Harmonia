@@ -67,8 +67,8 @@ boolean adjust_depth_2() {
 	}
 
 	//apply full speed deflation until depth >= 0.2m (fin underwater)
-	if (c_fltDepthSetpoint > 0.2 && v_fltCurrentDepth < 0.2) {
-		command_pump("DEFLATE", -255);
+	if (c_fltDepthSetpoint > 0.1 && v_fltCurrentDepth < 0.1) {
+		command_pump("DEFLATE", 245);
 		return false;
 	}
 

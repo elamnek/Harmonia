@@ -157,7 +157,7 @@ bool timer2Hz_interrupt(void*) {
 		                "26|" + get_leonardo_power_str() + "," +
 		                "27|" + String(get_dive_rate_2()) + "," + 
 		                "28|" + String(get_depth_setpoint_2()) + "," +
-		                "35|" + String(millis()/1000) + //seconds that uC has been running for
+		                "35|" + String(millis()) + //milliseconds that uC has been running for
 						"}";
 
 	/*unsigned long lngElapsed = millis() - lngStart;
@@ -337,7 +337,7 @@ void loop() {
 				//just inflate and go into manual state
 				command_pump("INFLATE", 255);
 				state = MANUAL;
-
+				blnReadyToRun = false;
 				
 				//when run is complete - maintain depth and pitch until state is changed
 				//static_trim_reset();
