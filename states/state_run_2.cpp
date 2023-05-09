@@ -84,7 +84,7 @@ boolean adjust_run_2(double dblHeading, double dblPitch) {
 		command_servo("SERVOAFTDIVE", m_intAftPitch0Pos + intPitchOutput, intPitchOutput);
 
 		double dblDepthError = m_dblDepthSP - get_depth();
-		int intDepthOutput = -round(dblDepthError * 100);
+		int intDepthOutput = -round(dblDepthError * 200);
 		if (intDepthOutput > 40) { intDepthOutput = 40; }
 		if (intDepthOutput < -40) { intDepthOutput = -40; }
 		command_servo("SERVOFWDDIVE", m_intFwdDive0Pos + intDepthOutput, intDepthOutput);
@@ -92,7 +92,7 @@ boolean adjust_run_2(double dblHeading, double dblPitch) {
 		double dblDirection = dblHeading;
 		if (dblDirection > 180) { dblDirection = dblDirection - 360; }
 		double dblDirectionError = m_dblDirectionSP - dblDirection;
-		int intDirectionOutput = -round(dblDirectionError * 2);
+		int intDirectionOutput = -round(dblDirectionError * 5);
 		if (intDirectionOutput > 40) { intDirectionOutput = 40; }
 		if (intDirectionOutput < -40) { intDirectionOutput = -40; }
 		command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intDirectionOutput, intDirectionOutput);

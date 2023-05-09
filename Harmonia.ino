@@ -46,6 +46,8 @@ boolean blnReadyToRun = false;
 auto timer2Hz = timer_create_default();
 auto timer4Hz = timer_create_default();
 
+unsigned long m_lngTestTimeStart, m_lngTestLogTime;
+
 //FSM states
 enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, SERVO_TEST, ALARM, UPLOAD} state;
 //function used to return text description of current state
@@ -196,10 +198,11 @@ bool timer4Hz_interrupt(void*) {
 	//if in the upload state - we don't want data to be stored or sent to remote
 	if (state == UPLOAD) { return true; }
 
-	String strData = "{13|" + get_rtc_time_millis() + "," +
+	String strData = "{13|" + get_rtc_time() + "," +
 		              "29|" + get_fwddiveplane_pos() + "," +
 		              "30|" + get_aftdiveplane_pos() + "," +
-		              "31|" + get_aftrudder_pos() + 
+		              "31|" + get_aftrudder_pos() + "," +
+		              "35|" + String(millis()) + //milliseconds that uC has been running for
 		              "}";
 
 	//may need to comment this if it slows down data transfer
@@ -247,9 +250,20 @@ void loop() {
 			clear_rf_command();
 		}
 		if (strRemoteCommand == "DYNAMIC_TRIM") { 
-			state = DYNAMIC_TRIM; 
-			init_dynamic_trim();
-			clear_rf_command();
+			 
+			String strError = init_imu(); //this will reset heading to 0 so sub needs to be correct direction when run starts
+			if (strError.length() > 0) {
+				state = IDLE;
+				send_rf_comm(strError + " RUN aborted");
+			}
+			else {
+				send_rf_comm("IMU re-started successfully - going into RUN state");
+				state = DYNAMIC_TRIM;
+				m_lngTestTimeStart = millis();
+				m_lngTestLogTime = millis();
+				clear_rf_command();
+			}
+			
 		}
 
 		if (strRemoteCommand == "RUN") { 	
@@ -308,11 +322,34 @@ void loop() {
 		break;
 	case DYNAMIC_TRIM:
 
-		//float test = get_imuorientation_y(false);
-		//double test2 = test;
+		unsigned long lngTimeELAPSED = millis() - m_lngTestTimeStart;
+		if (lngTimeELAPSED <= 10000) {
 
-		adjust_dive_plane(get_imuorientation_y());
+			commmand_main_motor(10);
 
+			//do rudder trim
+			double dblHeading = get_imuorientation_x();
+			double dblDirection = dblHeading;
+			if (dblDirection > 180) { dblDirection = dblDirection - 360; }
+			double dblDirectionError = 0 - dblDirection;
+			int intDirectionOutput = -round(dblDirectionError * 5);
+			if (intDirectionOutput > 40) { intDirectionOutput = 40; }
+			if (intDirectionOutput < -40) { intDirectionOutput = -40; }
+			int intValue = 148 + intDirectionOutput;
+			command_servo("SERVOAFTRUDDER", intValue, intDirectionOutput);
+
+			//send to remote every second
+			unsigned long lngLogTimeELAPSED = millis() - m_lngTestLogTime;
+			if (lngLogTimeELAPSED > 1000) {
+				String strMsg = "T" + String(lngTimeELAPSED) + ",H" + String(dblHeading) + ",D" + String(dblDirection) + ",E" + String(dblDirectionError) + ",O" + String(intDirectionOutput) + ",V" + String(intValue);
+				send_rf_comm(strMsg);
+				m_lngTestLogTime = millis(); //reset
+			}	
+		}
+		else {
+			commmand_main_motor(0);
+			state = IDLE;
+		}
 
 		break;
 	case RUN:
@@ -335,8 +372,8 @@ void loop() {
 			if (blnRunDone) {
 				
 				//just inflate and go into manual state
-				command_pump("INFLATE", 255);
-				state = MANUAL;
+				//command_pump("INFLATE", 255);
+				state = IDLE;
 				blnReadyToRun = false;
 				
 				//when run is complete - maintain depth and pitch until state is changed
