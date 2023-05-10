@@ -40,6 +40,7 @@ void init_static_trim_2(float fltDepthSetpoint, float fltPitchSetpoint) {
 	c_fltPitchSetpoint = fltPitchSetpoint;
 
 	v_fltPreviousDepth = get_depth();
+	v_fltCurrentDepth = v_fltPreviousDepth;
 
 	v_intDataTimerStart = millis();
 	

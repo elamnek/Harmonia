@@ -13,6 +13,8 @@ String init_presssuresensor(int intFluidDensity);
 
 float get_depth();
 
+float get_cached_depth();
+
 float get_waterpressure();
 
 float get_watertemperature();

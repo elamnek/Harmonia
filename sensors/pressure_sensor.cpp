@@ -7,6 +7,8 @@
 
 MS5837 sensor;
 
+float m_fltCachedDepth;
+
 String init_presssuresensor(int intFluidDensity) {
 
     while (!sensor.init()) {
@@ -20,6 +22,8 @@ String init_presssuresensor(int intFluidDensity) {
     sensor.setFluidDensity(intFluidDensity); // kg/m^3 (freshwater, 1029 for seawater)
     //sensor.setFluidDensity(1000);
 
+    m_fltCachedDepth = 0.0;
+
     return "";
 
 }
@@ -27,7 +31,12 @@ String init_presssuresensor(int intFluidDensity) {
 //returns depth in meters
 float get_depth() {
     sensor.read();
-    return sensor.depth();
+    m_fltCachedDepth = sensor.depth();
+    return m_fltCachedDepth;
+}
+
+float get_cached_depth() {
+    return m_fltCachedDepth;
 }
 
 //returns pressure in mbars

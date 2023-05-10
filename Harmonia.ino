@@ -250,19 +250,19 @@ void loop() {
 			clear_rf_command();
 		}
 		if (strRemoteCommand == "DYNAMIC_TRIM") { 
-			 
-			String strError = init_imu(); //this will reset heading to 0 so sub needs to be correct direction when run starts
-			if (strError.length() > 0) {
-				state = IDLE;
-				send_rf_comm(strError + " RUN aborted");
-			}
-			else {
-				send_rf_comm("IMU re-started successfully - going into RUN state");
-				state = DYNAMIC_TRIM;
-				m_lngTestTimeStart = millis();
-				m_lngTestLogTime = millis();
-				clear_rf_command();
-			}
+			// 
+			//String strError = init_imu(); //this will reset heading to 0 so sub needs to be correct direction when run starts
+			//if (strError.length() > 0) {
+			//	state = IDLE;
+			//	send_rf_comm(strError + " RUN aborted");
+			//}
+			//else {
+			//	send_rf_comm("IMU re-started successfully - going into RUN state");
+			//	state = DYNAMIC_TRIM;
+			//	m_lngTestTimeStart = millis();
+			//	m_lngTestLogTime = millis();
+			//	clear_rf_command();
+			//}
 			
 		}
 
@@ -322,34 +322,34 @@ void loop() {
 		break;
 	case DYNAMIC_TRIM:
 
-		unsigned long lngTimeELAPSED = millis() - m_lngTestTimeStart;
-		if (lngTimeELAPSED <= 10000) {
+		//unsigned long lngTimeELAPSED = millis() - m_lngTestTimeStart;
+		//if (lngTimeELAPSED <= 40000) {
 
-			commmand_main_motor(10);
+		//	commmand_main_motor(15);
 
-			//do rudder trim
-			double dblHeading = get_imuorientation_x();
-			double dblDirection = dblHeading;
-			if (dblDirection > 180) { dblDirection = dblDirection - 360; }
-			double dblDirectionError = 0 - dblDirection;
-			int intDirectionOutput = -round(dblDirectionError * 5);
-			if (intDirectionOutput > 40) { intDirectionOutput = 40; }
-			if (intDirectionOutput < -40) { intDirectionOutput = -40; }
-			int intValue = 148 + intDirectionOutput;
-			command_servo("SERVOAFTRUDDER", intValue, intDirectionOutput);
+		//	//do rudder trim
+		//	double dblHeading = get_imuorientation_x();
+		//	double dblDirection = dblHeading;
+		//	if (dblDirection > 180) { dblDirection = dblDirection - 360; }
+		//	double dblDirectionError = 0 - dblDirection;
+		//	int intDirectionOutput = -round(dblDirectionError * 5);
+		//	if (intDirectionOutput > 30) { intDirectionOutput = 30; }
+		//	if (intDirectionOutput < -30) { intDirectionOutput = -30; }
+		//	int intValue = 148 + intDirectionOutput;
+		//	command_servo("SERVOAFTRUDDER", intValue, intDirectionOutput);
 
-			//send to remote every second
-			unsigned long lngLogTimeELAPSED = millis() - m_lngTestLogTime;
-			if (lngLogTimeELAPSED > 1000) {
-				String strMsg = "T" + String(lngTimeELAPSED) + ",H" + String(dblHeading) + ",D" + String(dblDirection) + ",E" + String(dblDirectionError) + ",O" + String(intDirectionOutput) + ",V" + String(intValue);
-				send_rf_comm(strMsg);
-				m_lngTestLogTime = millis(); //reset
-			}	
-		}
-		else {
-			commmand_main_motor(0);
-			state = IDLE;
-		}
+		//	//send to remote every second
+		//	unsigned long lngLogTimeELAPSED = millis() - m_lngTestLogTime;
+		//	if (lngLogTimeELAPSED > 500) {
+		//		String strMsg = "T" + String(lngTimeELAPSED) + ",H" + String(dblHeading) + ",D" + String(dblDirection) + ",E" + String(dblDirectionError) + ",O" + String(intDirectionOutput) + ",V" + String(intValue);
+		//		send_rf_comm(strMsg);
+		//		m_lngTestLogTime = millis(); //reset
+		//	}	
+		//}
+		//else {
+		//	commmand_main_motor(0);
+		//	state = IDLE;
+		//}
 
 		break;
 	case RUN:
@@ -389,6 +389,7 @@ void loop() {
 	case SERVO_TEST:
 
 		//this is a blocking function - the main loop will be halted while the test process runs
+		send_rf_comm("remote param: " + get_remote_param());
 		command_servo_test(get_remote_param());
 		state = IDLE;
 		clear_rf_command();

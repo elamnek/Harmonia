@@ -77,6 +77,14 @@ boolean adjust_run_2(double dblHeading, double dblPitch) {
 	if (lngTimeELAPSED <= m_lngTrimEndTP) {
 		//do trim
 
+		double dblDirection = dblHeading;
+		if (dblDirection > 180) { dblDirection = dblDirection - 360; }
+		double dblDirectionError = m_dblDirectionSP - dblDirection;
+		int intDirectionOutput = -round(dblDirectionError * 5);
+		if (intDirectionOutput > 30) { intDirectionOutput = 30; }
+		if (intDirectionOutput < -30) { intDirectionOutput = -30; }
+		command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intDirectionOutput, intDirectionOutput);
+		
 		double dblPitchError = m_dblAftPitchSP - dblPitch;
 		int intPitchOutput = round(dblPitchError * 2);
 		if (intPitchOutput > 40) { intPitchOutput = 40; }
@@ -88,16 +96,7 @@ boolean adjust_run_2(double dblHeading, double dblPitch) {
 		if (intDepthOutput > 40) { intDepthOutput = 40; }
 		if (intDepthOutput < -40) { intDepthOutput = -40; }
 		command_servo("SERVOFWDDIVE", m_intFwdDive0Pos + intDepthOutput, intDepthOutput);
-
-		double dblDirection = dblHeading;
-		if (dblDirection > 180) { dblDirection = dblDirection - 360; }
-		double dblDirectionError = m_dblDirectionSP - dblDirection;
-		int intDirectionOutput = -round(dblDirectionError * 5);
-		if (intDirectionOutput > 40) { intDirectionOutput = 40; }
-		if (intDirectionOutput < -40) { intDirectionOutput = -40; }
-		command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intDirectionOutput, intDirectionOutput);
-
-		
+	
 		return false;
 	} else if (lngTimeELAPSED > m_lngTrimEndTP && lngTimeELAPSED <= m_lngFwdEndTP) {
 		//fwd run
