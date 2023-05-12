@@ -3,6 +3,12 @@ Harmonia research submarine onboard control software. This is the main control c
 
 https://github.com/elamnek/Harmonia/wiki
 
+
+
+https://github.com/elamnek/Harmonia/assets/25494253/4ecdf445-72b9-4e54-9ece-4d0699b3d3ca
+
+
+
 https://user-images.githubusercontent.com/25494253/226149468-e5637890-e4d6-471c-9ff0-a0221213ca73.mp4
 
 
