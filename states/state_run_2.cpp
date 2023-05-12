@@ -58,8 +58,11 @@ void static_trim_reset() {
 	init_static_trim_2(m_dblDepthSP, m_dblAftPitchSP);
 }
 
-void run_start_2() {
-
+void run_start_2(double dblStartHeading) {
+	
+	m_dblDirectionSP = dblStartHeading;
+	if (m_dblDirectionSP > 180) { m_dblDirectionSP = m_dblDirectionSP - 360; }
+	
 	m_lngTimeStart = millis();
 
 	//initiate fwd run
@@ -77,13 +80,13 @@ boolean adjust_run_2(double dblHeading, double dblPitch) {
 	if (lngTimeELAPSED <= m_lngTrimEndTP) {
 		//do trim
 
-		double dblDirection = dblHeading;
+		/*double dblDirection = dblHeading;
 		if (dblDirection > 180) { dblDirection = dblDirection - 360; }
 		double dblDirectionError = m_dblDirectionSP - dblDirection;
-		int intDirectionOutput = -round(dblDirectionError * 5);
+		int intDirectionOutput = -round(dblDirectionError * 6);
 		if (intDirectionOutput > 30) { intDirectionOutput = 30; }
 		if (intDirectionOutput < -30) { intDirectionOutput = -30; }
-		command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intDirectionOutput, intDirectionOutput);
+		command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intDirectionOutput, intDirectionOutput);*/
 		
 		double dblPitchError = m_dblAftPitchSP - dblPitch;
 		int intPitchOutput = round(dblPitchError * 2);

@@ -18,6 +18,8 @@ int m_intFwdDiveServoPos = 0;
 int m_intAftDiveServoPos = 0;
 int m_intAftRudderServoPos = 0;
 
+int m_intCurrentRudder = 148;
+
 void init_servos() {
 	
 	m_servoFwdDive.attach(m_intFwdDiveServoPin);
@@ -43,8 +45,17 @@ void command_servo(String strCommand,int intValue,int intPos) {
 	else if (strCommand == "SERVOAFTRUDDER"){
 		m_servoAftRudder.write(intValue);
 		m_intAftRudderServoPos = intPos;
+	}	
+}
+void command_servo_relative(String strCommand, int intValue) {
+	if (strCommand == "RUDDER") {
+		m_intCurrentRudder = m_intCurrentRudder + intValue;
+		if (m_intCurrentRudder > 180) { m_intCurrentRudder = 180; }
+		if (m_intCurrentRudder < 0) { m_intCurrentRudder = 0; }
+
+		m_servoAftRudder.write(m_intCurrentRudder);
+		
 	}
-	
 }
 
 void command_servo_test(String strParams) {

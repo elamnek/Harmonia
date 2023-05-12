@@ -13,7 +13,7 @@ void init_run_2(String strParams);
 
 void static_trim_reset();
 
-void run_start_2();
+void run_start_2(double dblStartHeading);
 
 boolean adjust_run_2(double dblHeading, double dblPitch);
 

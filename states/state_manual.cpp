@@ -9,6 +9,7 @@
 #include "..\control\servos.h"
 #include "..\control\main_motor.h"
 
+
 void apply_manual_command() {
 
 	String strRemoteCommand = get_remote_command();
@@ -49,6 +50,9 @@ void apply_manual_command() {
 		else if (strRemoteCommand == "SERVOAFTRUDDER") {
 			//send_rf_comm("servo aft rudder");
 			command_servo(strRemoteCommand, strRemoteParam.toInt(),0);
+		}
+		else if (strRemoteCommand == "RUDDER") {
+			command_servo_relative(strRemoteCommand, strRemoteParam.toInt());
 		}
 		
 	}
