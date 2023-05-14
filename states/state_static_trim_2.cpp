@@ -137,11 +137,6 @@ boolean adjust_pitch_2(float fltPitch) {
 
 	float fltPitchError = c_fltPitchSetpoint - fltPitch;
 
-	//if the error is within tolerance - return true
-	if (fltPitchError <= c_fltPitchTrimSetpointError && fltPitchError >= -c_fltPitchTrimSetpointError) {
-		return true;
-	}
-
 	float fltErrorAbs = fltPitchError; //assume positive
 	if (fltPitchError < 0) { fltErrorAbs = -fltPitchError; }
 
@@ -158,5 +153,13 @@ boolean adjust_pitch_2(float fltPitch) {
 		command_pushrod("REVERSE", 0);
 	}
 
-	return false;
+	//if the error is within tolerance - return true
+	if (fltPitchError <= c_fltPitchTrimSetpointError && fltPitchError >= -c_fltPitchTrimSetpointError) {
+		return true;
+	}
+	else {
+		return false;
+	}
+
+	
 }
