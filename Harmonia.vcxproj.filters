@@ -78,6 +78,9 @@
     <ClInclude Include="states\state_run_2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="control\main_motor_precision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sensors\RTC.cpp">
@@ -139,6 +142,9 @@
     </ClCompile>
     <ClCompile Include="Harmonia.ino" />
     <ClCompile Include="states\state_run_2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="control\main_motor_precision.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -9,7 +9,7 @@
 #include "..\control\pumps.h"
 #include "..\control\pushrod.h"
 #include "..\control\servos.h"
-#include "..\control\main_motor.h"
+#include "..\control\main_motor_precision.h"
 #include "..\helpers.h"
 #include "..\states\state_static_trim_2.h"
 
@@ -66,7 +66,7 @@ void run_start_2(double dblStartHeading) {
 	m_lngTimeStart = millis();
 
 	//initiate fwd run
-	commmand_main_motor(m_intFwdThrottle);
+	commmand_main_motor_precision(m_intFwdThrottle);
 
 	blnThrottleZeroed = false;
 	blnServosZeroed = false;
@@ -122,19 +122,19 @@ boolean adjust_run_2(double dblHeading, double dblPitch) {
 		//if changing from forward to reverse - make sure throttle is zeroed
 		if (!blnThrottleZeroed) {
 			//need to zero throttle before we can change from fwd to reverse thrust
-			commmand_main_motor(0);
+			commmand_main_motor_precision(0);
 			delay(200);
 			blnThrottleZeroed = true;
 		}
 
 		//continue with reverse run
-		commmand_main_motor(m_intRevThrottle);
+		commmand_main_motor_precision(m_intRevThrottle);
 
 		return false;
 	} else {
 
 		//run complete - turn motor off
-		commmand_main_motor(0);
+		commmand_main_motor_precision(0);
 
 		return true;	
 	}

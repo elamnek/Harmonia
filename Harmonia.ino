@@ -17,6 +17,7 @@
 #include "Wire.h"
 #include <Servo.h>
 
+
 //harmonia libraries
 #include "states\state_manual.h"
 #include "states\state_static_trim.h"
@@ -26,6 +27,7 @@
 #include "states\state_run_2.h"
 #include "control\pumps.h"
 #include "control\main_motor.h"
+#include "control\main_motor_precision.h"
 #include "control\servos.h"
 #include "control\pushrod.h"
 #include "sensors\water_sensors.h"
@@ -77,7 +79,7 @@ void setup() {
 	init_servos();
 	init_pumps();
 	init_pushrod();
-	init_main_motor();
+	init_main_motor_precision();
 	init_watersensors();
 	init_leonardo_sensors();
 
@@ -152,7 +154,7 @@ bool timer2Hz_interrupt(void*) {
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + get_leonardo_bag_pressure_str() + "," +
 						"21|" + String(get_pump_status()) + "," +
-						"22|" + String(get_main_motor_throttle()) + "," +
+						"22|" + String(get_main_motor_precision_throttle()) + "," +
 		                "23|" + get_leonardo_bus_voltage_str() + "," +
 		                "24|" + get_leonardo_shunt_voltage_str() + "," +
 		                "25|" + get_leonardo_current_str() + "," +
@@ -310,7 +312,7 @@ void loop() {
 
 		//in idle state need to stop any active operation
 		command_pump("INFLATE", 0);
-		commmand_main_motor(0);
+		commmand_main_motor_precision(0);
 
 		break;
 	case MANUAL:
@@ -318,6 +320,7 @@ void loop() {
 		//this checks for a manual command from RF remote and applies it
 		apply_manual_command();
 		check_pushrod(); //adjusts position of pushrod based on latest setpoint command
+		clear_rf_command();
 
 		break;
 	case STATIC_TRIM:
@@ -393,6 +396,7 @@ void loop() {
 			}
 		}
 
+		clear_rf_command();
 
 		break;
 	case SERVO_TEST:
@@ -420,7 +424,7 @@ void loop() {
 	case UPLOAD:
 		//in upload state need to stop any active operation
 		command_pump("INFLATE", 0);
-		commmand_main_motor(0);
+		commmand_main_motor_precision(0);
 
 		//send record count to remote:
 		sdcard_record_count();
