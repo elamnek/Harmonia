@@ -54,7 +54,7 @@ void apply_manual_command() {
 		else if (strRemoteCommand == "RUDDER") {
 			command_servo_relative(strRemoteCommand, strRemoteParam.toInt());
 		}
-		
+			
 	}
 
 }

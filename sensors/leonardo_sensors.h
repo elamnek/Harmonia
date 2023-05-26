@@ -11,6 +11,8 @@
 
 void init_leonardo_sensors();
 
+void send_leonardo_comm(String strMsg);
+
 void read_leonardo();
 
 float get_leonardo_rpm();

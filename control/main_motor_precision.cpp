@@ -3,6 +3,7 @@
 // 
 
 #include "main_motor_precision.h"
+#include "..\sensors\leonardo_sensors.h"
 
 #include <Motoron.h>
 
@@ -34,6 +35,8 @@ void commmand_main_motor_precision(int intValue) {
 	//main motor throttle commands should always use the scale -800 to + 800 where 0 is motor off
 
 	mc.setSpeed(1, intValue);
+
+	send_leonardo_comm(String(intValue));
 }
 
 int get_main_motor_precision_throttle() {

@@ -24,6 +24,11 @@ void init_leonardo_sensors() {
 	serialFromLeonardo.begin(9600);
 }
 
+//for use during motor characteristics testing
+void send_leonardo_comm(String strMsg) {
+	serialFromLeonardo.print(strMsg);
+}
+
 //this must be called each time main loop runs
 void read_leonardo() {
 
