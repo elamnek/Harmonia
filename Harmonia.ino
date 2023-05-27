@@ -154,7 +154,7 @@ bool timer2Hz_interrupt(void*) {
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + get_leonardo_bag_pressure_str() + "," +
 						"21|" + String(get_pump_status()) + "," +
-						"22|" + String(get_main_motor_precision_throttle()) + "," +
+						"37|" + String(get_main_motor_precision_throttle()) + "," +
 		                "23|" + get_leonardo_bus_voltage_str() + "," +
 		                "24|" + get_leonardo_shunt_voltage_str() + "," +
 		                "25|" + get_leonardo_current_str() + "," +

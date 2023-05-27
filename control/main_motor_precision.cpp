@@ -36,7 +36,8 @@ void commmand_main_motor_precision(int intValue) {
 
 	mc.setSpeed(1, intValue);
 
-	send_leonardo_comm(String(intValue));
+	//only enable for motor testing
+	//send_leonardo_comm(String(intValue));
 }
 
 int get_main_motor_precision_throttle() {
