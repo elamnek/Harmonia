@@ -3,7 +3,7 @@ Harmonia research submarine onboard control software. This is the main control c
 
 https://github.com/elamnek/Harmonia/wiki
 
-The project is near completion and we have achieved one of the main aims, to carry out a crash back manoeuvre (emergency stop) and collect data in a digital twin:
+The project is near completion and we have achieved one of the main aims, to carry out a crash back manoeuvre (emergency stop carried out by reversing propellor direction) and collect data in a digital twin:
 
 
 https://github.com/elamnek/Harmonia/assets/25494253/c1d06732-8ada-42d3-8d55-6945b3f8712a
