@@ -14,6 +14,8 @@
 
 String init_imu();
 
+String check_imu_calibration();
+
 void read_imu();
 
 float get_imuorientation_x();

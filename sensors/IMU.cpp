@@ -52,6 +52,19 @@ String init_imu() {
 
 }
 
+String check_imu_calibration() {
+
+
+    uint8_t system, gyro, accel, mag;
+    system = gyro = accel = mag = 0;
+    bno.getCalibration(&system, &gyro, &accel, &mag);
+
+    String strReturn = "system=" + String(system) + ",gyro=" + String(gyro) + ",accel=" + String(accel) + ",mag=" + String(mag);
+
+    return strReturn;
+
+}
+
 void read_imu() {
 
     //get orientation data from IMU

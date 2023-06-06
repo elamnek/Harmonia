@@ -48,17 +48,17 @@ boolean blnReadyToRun = false;
 auto timer2Hz = timer_create_default();
 auto timer4Hz = timer_create_default();
 
-unsigned long m_lngTestTimeStart, m_lngTestLogTime;
+unsigned long m_lngTestTimeStart, m_lngTestLogTime, m_lngCalTimerStart;
 
 //FSM states
-enum { IDLE, MANUAL, STATIC_TRIM, DYNAMIC_TRIM, RUN, SERVO_TEST, ALARM, UPLOAD} state;
+enum { IDLE, MANUAL, STATIC_TRIM, CALIBRATE_IMU, RUN, SERVO_TEST, ALARM, UPLOAD} state;
 //function used to return text description of current state
 String  get_state() {
 	switch (state) {
 	case IDLE: return "IDLE";
 	case MANUAL: return "MANUAL";
 	case STATIC_TRIM: return "STATIC_TRIM";
-	case DYNAMIC_TRIM: return "DYNAMIC_TRIM";
+	case CALIBRATE_IMU: return "CALIBRATE_IMU";
 	case RUN: return "RUN";
 	case SERVO_TEST: return "SERVO_TEST";
 	case ALARM: return "ALARM";
@@ -141,7 +141,7 @@ bool timer2Hz_interrupt(void*) {
 						"2|" + String(fwd_leak_detected()) + "," +
 						"3|" + String(aft_leak_detected()) + "," +
 						"1|" + String(get_depth()) + ","
-						"7|" + get_leonardo_rpm_str() + "," +
+						"38|" + get_leonardo_rpm_str() + "," +
 						"10|" + get_leonardo_pressure_str() + "," +
 						"11|" + get_leonardo_temp_str() + "," +
 						"14|" + String(get_imuorientation_x()) + "," + //heading
@@ -246,28 +246,15 @@ void loop() {
 		orange_led_off();
 		if (strRemoteCommand == "IDLE") { state = IDLE; }
 		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
+		if (strRemoteCommand == "CALIBRATE_IMU") { 
+			state = CALIBRATE_IMU;
+			m_lngCalTimerStart = millis();
+		}
 		if (strRemoteCommand == "STATIC_TRIM") {
 			state = STATIC_TRIM;
 			init_static_trim_2(get_remote_param().toFloat(),0);
 			clear_rf_command();
 		}
-		if (strRemoteCommand == "DYNAMIC_TRIM") { 
-			// 
-			//String strError = init_imu(); //this will reset heading to 0 so sub needs to be correct direction when run starts
-			//if (strError.length() > 0) {
-			//	state = IDLE;
-			//	send_rf_comm(strError + " RUN aborted");
-			//}
-			//else {
-			//	send_rf_comm("IMU re-started successfully - going into RUN state");
-			//	state = DYNAMIC_TRIM;
-			//	m_lngTestTimeStart = millis();
-			//	m_lngTestLogTime = millis();
-			//	clear_rf_command();
-			//}
-			
-		}
-
 		if (strRemoteCommand == "RUN") { 	
 			//String strError = init_imu(); //this will reset heading to 0 so sub needs to be correct direction when run starts
 			//if (strError.length() > 0) {
@@ -323,44 +310,25 @@ void loop() {
 		clear_rf_command();
 
 		break;
+	case CALIBRATE_IMU:
+		
+		//check IMU status every second and send the result back to remote
+		unsigned long lngCalTimeNow = millis();
+		unsigned long lngCalTimeElapsed = lngCalTimeNow - m_lngCalTimerStart;
+		if (lngCalTimeElapsed > 1000) {
+			String strCal = check_imu_calibration();
+			send_rf_comm(strCal);
+			m_lngCalTimerStart = millis();
+		}
+
+		break;
 	case STATIC_TRIM:
 	
 		adjust_depth_2();
 		adjust_pitch_2(get_imuorientation_y());
 
 		break;
-	case DYNAMIC_TRIM:
-
-		//unsigned long lngTimeELAPSED = millis() - m_lngTestTimeStart;
-		//if (lngTimeELAPSED <= 40000) {
-
-		//	commmand_main_motor(15);
-
-		//	//do rudder trim
-		//	double dblHeading = get_imuorientation_x();
-		//	double dblDirection = dblHeading;
-		//	if (dblDirection > 180) { dblDirection = dblDirection - 360; }
-		//	double dblDirectionError = 0 - dblDirection;
-		//	int intDirectionOutput = -round(dblDirectionError * 5);
-		//	if (intDirectionOutput > 30) { intDirectionOutput = 30; }
-		//	if (intDirectionOutput < -30) { intDirectionOutput = -30; }
-		//	int intValue = 148 + intDirectionOutput;
-		//	command_servo("SERVOAFTRUDDER", intValue, intDirectionOutput);
-
-		//	//send to remote every second
-		//	unsigned long lngLogTimeELAPSED = millis() - m_lngTestLogTime;
-		//	if (lngLogTimeELAPSED > 500) {
-		//		String strMsg = "T" + String(lngTimeELAPSED) + ",H" + String(dblHeading) + ",D" + String(dblDirection) + ",E" + String(dblDirectionError) + ",O" + String(intDirectionOutput) + ",V" + String(intValue);
-		//		send_rf_comm(strMsg);
-		//		m_lngTestLogTime = millis(); //reset
-		//	}	
-		//}
-		//else {
-		//	commmand_main_motor(0);
-		//	state = IDLE;
-		//}
-
-		break;
+	
 	case RUN:
 
 		//allow for manual adjustments while running
@@ -369,8 +337,9 @@ void loop() {
 		if (!blnReadyToRun) {
 			//adjust until trim achieved 
 			boolean blnDepthTrim = adjust_depth_2();
-			boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y());
-			if (blnDepthTrim && blnPitchTrim) {
+			//boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y()); 
+			//&& blnPitchTrim
+			if (blnDepthTrim) {
 				blnReadyToRun = true;
 				command_pushrod("REVERSE", 0);
 				delay(200);
@@ -402,7 +371,7 @@ void loop() {
 	case SERVO_TEST:
 
 		//this is a blocking function - the main loop will be halted while the test process runs
-		send_rf_comm("remote param: " + get_remote_param());
+		//send_rf_comm("remote param: " + get_remote_param());
 		command_servo_test(get_remote_param());
 		state = IDLE;
 		clear_rf_command();
