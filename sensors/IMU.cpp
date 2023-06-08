@@ -19,6 +19,8 @@ float m_fltAcceleration_x;
 float m_fltAcceleration_y;
 float m_fltAcceleration_z;
 
+uint8_t m_intCalSystem, m_intCalGyro, m_intCalAccel, m_intCalMag;
+
 //double xPos = 0, yPos = 0, headingVel = 0;
 
 //velocity = accel*dt (dt in seconds)
@@ -48,22 +50,27 @@ String init_imu() {
     m_fltAcceleration_y = 0.0;
     m_fltAcceleration_z = 0.0;
 
+    m_intCalSystem = 0;
+    m_intCalGyro = 0;
+    m_intCalAccel = 0;
+    m_intCalMag = 0;
+
     return "";
 
 }
 
-String check_imu_calibration() {
-
-
-    uint8_t system, gyro, accel, mag;
-    system = gyro = accel = mag = 0;
-    bno.getCalibration(&system, &gyro, &accel, &mag);
-
-    String strReturn = "system=" + String(system) + ",gyro=" + String(gyro) + ",accel=" + String(accel) + ",mag=" + String(mag);
-
-    return strReturn;
-
-}
+//String check_imu_calibration() {
+//
+//
+//    //uint8_t system, gyro, accel, mag;
+//    //system = gyro = accel = mag = 0;
+//    bno.getCalibration(&m_intCalSystem, &m_intCalGyro, &m_intCalAccel, &m_intCalMag);
+//
+//    String strReturn = "system=" + String(system) + ",gyro=" + String(gyro) + ",accel=" + String(accel) + ",mag=" + String(mag);
+//
+//    return strReturn;
+//
+//}
 
 void read_imu() {
 
@@ -83,12 +90,19 @@ void read_imu() {
     m_fltAcceleration_y = linearAccelData.acceleration.y;
     m_fltAcceleration_z = linearAccelData.acceleration.z;
 
+
+    bno.getCalibration(&m_intCalSystem, &m_intCalGyro, &m_intCalAccel, &m_intCalMag);
+
     //calculate position
     //xPos = xPos + ACCEL_POS_TRANSITION * m_fltAcceleration_x;
     //yPos = yPos + ACCEL_POS_TRANSITION * m_fltAcceleration_y;
 
     //calculate velocity of sensor in the direction it's facing
     //headingVel = ACCEL_VEL_TRANSITION * linearAccelData.acceleration.x / cos(DEG_2_RAD * orientationData.orientation.x);
+}
+
+String get_cal() {
+    return "system=" + String(m_intCalSystem) + ",gyro=" + String(m_intCalGyro) + ",accel=" + String(m_intCalAccel) + ",mag=" + String(m_intCalMag);
 }
 
 float get_imuorientation_x() {

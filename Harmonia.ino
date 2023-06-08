@@ -317,8 +317,8 @@ void loop() {
 		unsigned long lngCalTimeNow = millis();
 		unsigned long lngCalTimeElapsed = lngCalTimeNow - m_lngCalTimerStart;
 		if (lngCalTimeElapsed >= 1000) {
-			String strCal = check_imu_calibration();
-			send_rf_comm(strCal);
+			//String strCal = check_imu_calibration();
+			send_rf_comm(get_cal());
 			m_lngCalTimerStart = millis();
 		}
 
