@@ -249,6 +249,7 @@ void loop() {
 		if (strRemoteCommand == "CALIBRATE_IMU") { 
 			state = CALIBRATE_IMU;
 			m_lngCalTimerStart = millis();
+			clear_rf_command();
 		}
 		if (strRemoteCommand == "STATIC_TRIM") {
 			state = STATIC_TRIM;
@@ -315,7 +316,7 @@ void loop() {
 		//check IMU status every second and send the result back to remote
 		unsigned long lngCalTimeNow = millis();
 		unsigned long lngCalTimeElapsed = lngCalTimeNow - m_lngCalTimerStart;
-		if (lngCalTimeElapsed > 1000) {
+		if (lngCalTimeElapsed >= 1000) {
 			String strCal = check_imu_calibration();
 			send_rf_comm(strCal);
 			m_lngCalTimerStart = millis();
