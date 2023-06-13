@@ -16,7 +16,7 @@ String init_imu();
 
 //String check_imu_calibration();
 
-String get_cal();
+String get_imucalibration();
 
 void read_imu();
 

@@ -101,7 +101,7 @@ void read_imu() {
     //headingVel = ACCEL_VEL_TRANSITION * linearAccelData.acceleration.x / cos(DEG_2_RAD * orientationData.orientation.x);
 }
 
-String get_cal() {
+String get_imucalibration() {
     return "system=" + String(m_intCalSystem) + ",gyro=" + String(m_intCalGyro) + ",accel=" + String(m_intCalAccel) + ",mag=" + String(m_intCalMag);
 }
 
