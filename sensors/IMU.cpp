@@ -102,7 +102,7 @@ void read_imu() {
 }
 
 String get_imucalibration() {
-    return "system=" + String(m_intCalSystem) + ",gyro=" + String(m_intCalGyro) + ",accel=" + String(m_intCalAccel) + ",mag=" + String(m_intCalMag);
+    return "sys=" + String(m_intCalSystem) + ";gyro=" + String(m_intCalGyro) + ";accel=" + String(m_intCalAccel) + ";mag=" + String(m_intCalMag);
 }
 
 float get_imuorientation_x() {

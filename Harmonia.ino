@@ -150,6 +150,7 @@ bool timer2Hz_interrupt(void*) {
 		                "32|" + String(get_imuacceleration_x()) + "," + 
 		                "33|" + String(get_imuacceleration_y()) + "," + 
 		                "34|" + String(get_imuacceleration_z()) + "," +
+		                "45|" + String(get_imucalibration()) + "," +
 						"17|" + String(get_pushrod_pos()) + "," +
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + get_leonardo_bag_pressure_str() + "," +
