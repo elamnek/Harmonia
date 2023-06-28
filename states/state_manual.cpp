@@ -7,7 +7,7 @@
 #include "..\control\pumps.h"
 #include "..\control\pushrod.h"
 #include "..\control\servos.h"
-#include "..\control\main_motor_precision.h"
+#include "..\control\main_motor.h"
 
 
 void apply_manual_command() {
@@ -37,7 +37,7 @@ void apply_manual_command() {
 		}
 		else if (strRemoteCommand == "PROPELL") {
 			//send_rf_comm("propelling main motor");
-			commmand_main_motor_precision(strRemoteParam.toInt());
+			commmand_main_motor(strRemoteParam.toInt());
 		}
 		else if (strRemoteCommand == "SERVOFWDDIVE") {
 			//send_rf_comm("servo forward dive");

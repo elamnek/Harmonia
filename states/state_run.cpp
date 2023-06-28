@@ -9,7 +9,7 @@
 #include "..\control\pumps.h"
 #include "..\control\pushrod.h"
 #include "..\control\servos.h"
-#include "..\control\main_motor_precision.h"
+#include "..\control\main_motor.h"
 #include "..\helpers.h"
 #include "..\states\state_static_trim_2.h"
 
@@ -74,7 +74,7 @@ void run_start() {
 	m_PIDAftRudder.SetMode(AUTOMATIC);
 
 	//turn main motor on
-	commmand_main_motor_precision(m_intRunThrottle);
+	commmand_main_motor(m_intRunThrottle);
 
 }
 
@@ -115,7 +115,7 @@ boolean adjust_run(float fltHeading,float fltPitch) {
 		//stop run
 
 		//turn motor off
-		commmand_main_motor_precision(0);
+		commmand_main_motor(0);
 
 		return true;
 	}

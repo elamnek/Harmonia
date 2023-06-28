@@ -27,7 +27,6 @@
 #include "states\state_run_2.h"
 #include "control\pumps.h"
 #include "control\main_motor.h"
-#include "control\main_motor_precision.h"
 #include "control\servos.h"
 #include "control\pushrod.h"
 #include "sensors\water_sensors.h"
@@ -79,7 +78,7 @@ void setup() {
 	init_servos();
 	init_pumps();
 	init_pushrod();
-	init_main_motor_precision();
+	init_main_motor();
 	init_watersensors();
 	init_leonardo_sensors();
 
@@ -155,7 +154,7 @@ bool timer2Hz_interrupt(void*) {
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + get_leonardo_bag_pressure_str() + "," +
 						"21|" + String(get_pump_status()) + "," +
-						"37|" + String(get_main_motor_precision_throttle()) + "," +
+						"22|" + String(get_main_motor_throttle()) + "," +
 		                "23|" + get_leonardo_bus_voltage_str() + "," +
 		                "24|" + get_leonardo_shunt_voltage_str() + "," +
 		                "25|" + get_leonardo_current_str() + "," +
@@ -301,7 +300,7 @@ void loop() {
 
 		//in idle state need to stop any active operation
 		command_pump("INFLATE", 0);
-		commmand_main_motor_precision(0);
+		commmand_main_motor(0);
 
 		break;
 	case MANUAL:
@@ -395,7 +394,7 @@ void loop() {
 	case UPLOAD:
 		//in upload state need to stop any active operation
 		command_pump("INFLATE", 0);
-		commmand_main_motor_precision(0);
+		commmand_main_motor(0);
 
 		//send record count to remote:
 		sdcard_record_count();
