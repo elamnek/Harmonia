@@ -101,9 +101,7 @@ void read_imu() {
     //headingVel = ACCEL_VEL_TRANSITION * linearAccelData.acceleration.x / cos(DEG_2_RAD * orientationData.orientation.x);
 }
 
-String get_imucalibration() {
-    return "sys=" + String(m_intCalSystem) + ";gyro=" + String(m_intCalGyro) + ";accel=" + String(m_intCalAccel) + ";mag=" + String(m_intCalMag);
-}
+
 
 float get_imuorientation_x() {
     return m_fltOrientation_x;
@@ -136,6 +134,10 @@ float get_imuacceleration_z() {
      if (blnChkRead) { check_read(); }
      return m_fltOrientation_z;
  }*/
+
+String get_imucal() {
+    return "sys=" + String(m_intCalSystem) + ";gyro=" + String(m_intCalGyro) + ";accel=" + String(m_intCalAccel) + ";mag=" + String(m_intCalMag);
+}
 
  
 
