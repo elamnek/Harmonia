@@ -56,20 +56,15 @@ boolean adjust_depth_2() {
 	int intDataTimeElapsed = millis() - v_intDataTimerStart;
 	if (intDataTimeElapsed > c_intDataRate) {
 		
-		
-		v_fltDiveRate = 0.5;
-		
-		
-		
 		//get and store new data (current depth and dive rate)
-		//v_fltCurrentDepth = get_depth();
-		//float fltDepthChange = v_fltCurrentDepth - v_fltPreviousDepth;
-		//float fltTimeElapsed_s = intDataTimeElapsed / 1000.00;
-		//v_fltDiveRate = (fltDepthChange * 100.00) / fltTimeElapsed_s; //units are cm/s  (+ve is diving -ve is climbing)
-		//
-		////reset values for next round
-		//v_fltPreviousDepth = v_fltCurrentDepth;
-		//v_intDataTimerStart = millis();
+		v_fltCurrentDepth = get_depth();
+		float fltDepthChange = v_fltCurrentDepth - v_fltPreviousDepth;
+		float fltTimeElapsed_s = intDataTimeElapsed / 1000.00;
+		v_fltDiveRate = (fltDepthChange * 100.00) / fltTimeElapsed_s; //units are cm/s  (+ve is diving -ve is climbing)
+		
+		//reset values for next round
+		v_fltPreviousDepth = v_fltCurrentDepth;
+		v_intDataTimerStart = millis();
 	}
 
 	//apply full speed deflation until depth >= 0.2m (fin underwater)
