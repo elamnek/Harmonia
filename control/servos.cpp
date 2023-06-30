@@ -83,7 +83,7 @@ void command_servo_test(String strParams) {
 	if (intAftRudderServo0Pos != 555) {
 		command_servo("SERVOAFTRUDDER", intAftRudderServo0Pos, 0);
 		delay(2000);
-		servo_sweep("SERVOAFTRUDDER", intAftRudderServo0Pos, -20,20, 25);
+		servo_sweep("SERVOAFTRUDDER", intAftRudderServo0Pos, -40,40, 25);
 		command_servo("SERVOAFTRUDDER", intAftRudderServo0Pos, 0);
 	}
 

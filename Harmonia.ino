@@ -338,9 +338,9 @@ void loop() {
 		if (!blnReadyToRun) {
 			//adjust until trim achieved 
 			boolean blnDepthTrim = adjust_depth_2();
-			boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y()); 
-			
-			if (blnDepthTrim && blnPitchTrim) {
+			//boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y()); 
+			// && blnPitchTrim
+			if (blnDepthTrim) {
 				blnReadyToRun = true;
 				command_pushrod("REVERSE", 0);
 				delay(200);

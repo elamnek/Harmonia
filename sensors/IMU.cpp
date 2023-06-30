@@ -91,7 +91,7 @@ void read_imu() {
     m_fltAcceleration_z = linearAccelData.acceleration.z;
 
 
-    bno.getCalibration(&m_intCalSystem, &m_intCalGyro, &m_intCalAccel, &m_intCalMag);
+    //bno.getCalibration(&m_intCalSystem, &m_intCalGyro, &m_intCalAccel, &m_intCalMag);
 
     //calculate position
     //xPos = xPos + ACCEL_POS_TRANSITION * m_fltAcceleration_x;

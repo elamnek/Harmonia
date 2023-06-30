@@ -20,12 +20,12 @@ void init_main_motor() {
 
 void commmand_main_motor(int intValue) {
 	
-	m_intThrottle = intValue;
+	m_intThrottle = -intValue;
 	//main motor throttle commands should always use the scale -90 to + 90 where 0 is motor off
 	
 	//convert to servo throttle value
 	
-	int intServoValue = intValue + 90;
+	int intServoValue = -intValue + 90;
 	m_servoMainMotor.write(intServoValue);
 	
 	////convert to a more readible throttle value
