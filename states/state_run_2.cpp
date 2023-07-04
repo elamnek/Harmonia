@@ -87,6 +87,16 @@ boolean adjust_run_2(double dblHeading, double dblPitch) {
 		if (intDirectionOutput > 30) { intDirectionOutput = 30; }
 		if (intDirectionOutput < -30) { intDirectionOutput = -30; }
 		command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intDirectionOutput, intDirectionOutput);*/
+
+		//zig zag	
+		int intPeriod = 6000;
+		int intMaxOffset = 40;
+		float fltPos = (lngTimeELAPSED % intPeriod);
+		float fltqq = fltPos / (intPeriod / (intMaxOffset * 4));
+		if (fltqq > intMaxOffset * 2) { fltqq = (intMaxOffset * 4) - fltqq; }
+		int intDirectionOutput = round(fltqq - intMaxOffset);
+		command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intDirectionOutput, intDirectionOutput);
+
 		
 		double dblPitchError = m_dblAftPitchSP - dblPitch;
 		int intPitchOutput = round(dblPitchError * 2);

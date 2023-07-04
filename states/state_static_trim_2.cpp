@@ -80,6 +80,8 @@ boolean adjust_depth_2() {
 		float fltDepthError = c_fltDepthSetpoint - v_fltCurrentDepth; // -ve error need to inflate, +ve error need to deflate
 		if (fltDepthError < 0) {
 
+			
+
 			int intRawPWM = -round(fltDepthError * v_fltCurrentDepth * c_fltDepthErrorCoeffUp);
 			int intSatPWM = get_saturated_pwm(intRawPWM);
 			command_pump("INFLATE", intSatPWM);
