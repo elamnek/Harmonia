@@ -50,14 +50,14 @@ auto timer4Hz = timer_create_default();
 unsigned long m_lngTestTimeStart, m_lngTestLogTime, m_lngCalTimerStart;
 
 //FSM states
-enum { IDLE, MANUAL, STATIC_TRIM, RUN, SERVO_TEST, ALARM, UPLOAD} state; //CALIBRATE_IMU, 
+enum { IDLE, MANUAL, STATIC_TRIM, CALIBRATE_IMU, RUN, SERVO_TEST, ALARM, UPLOAD} state; //CALIBRATE_IMU, 
 //function used to return text description of current state
 String  get_state() {
 	switch (state) {
 	case IDLE: return "IDLE";
 	case MANUAL: return "MANUAL";
 	case STATIC_TRIM: return "STATIC_TRIM";
-	//case CALIBRATE_IMU: return "CALIBRATE_IMU";
+	case CALIBRATE_IMU: return "CALIBRATE_IMU";
 	case RUN: return "RUN";
 	case SERVO_TEST: return "SERVO_TEST";
 	case ALARM: return "ALARM";
@@ -246,11 +246,11 @@ void loop() {
 		orange_led_off();
 		if (strRemoteCommand == "IDLE") { state = IDLE; }
 		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
-		/*if (strRemoteCommand == "CALIBRATE_IMU") { 
+		if (strRemoteCommand == "CALIBRATE_IMU") { 
 			state = CALIBRATE_IMU;
-			m_lngCalTimerStart = millis();
-			clear_rf_command();
-		}*/
+			//m_lngCalTimerStart = millis();
+			//clear_rf_command();
+		}
 		if (strRemoteCommand == "STATIC_TRIM") {
 			state = STATIC_TRIM;
 			init_static_trim_2(get_remote_param().toFloat(),0);
@@ -311,18 +311,22 @@ void loop() {
 		clear_rf_command();
 
 		break;
-	//case CALIBRATE_IMU:
-	//	
-	//	//check IMU status every second and send the result back to remote
-	//	unsigned long lngCalTimeNow = millis();
-	//	unsigned long lngCalTimeElapsed = lngCalTimeNow - m_lngCalTimerStart;
-	//	if (lngCalTimeElapsed >= 1000) {
-	//		//String strCal = check_imu_calibration();
-	//		send_rf_comm(get_imucalibration());
-	//		m_lngCalTimerStart = millis();
-	//	}
+	case CALIBRATE_IMU:
 
-	//	break;
+		send_rf_comm("checking IMU calibration");
+		check_imu_calibration();
+		delay(200);
+		
+		//check IMU status every second and send the result back to remote
+		//unsigned long lngCalTimeNow = millis();
+		//unsigned long lngCalTimeElapsed = lngCalTimeNow - m_lngCalTimerStart;
+		//if (lngCalTimeElapsed >= 1000) {
+		//	//String strCal = check_imu_calibration();
+		//	send_rf_comm(get_imucalibration());
+		//	m_lngCalTimerStart = millis();
+		//}
+
+		break;
 	case STATIC_TRIM:
 	
 		adjust_depth_2();
@@ -338,9 +342,9 @@ void loop() {
 		if (!blnReadyToRun) {
 			//adjust until trim achieved 
 			boolean blnDepthTrim = adjust_depth_2();
-			//boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y()); 
-			// && blnPitchTrim
-			if (blnDepthTrim) {
+			boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y()); 
+			// 
+			if (blnDepthTrim && blnPitchTrim) {
 				blnReadyToRun = true;
 				command_pushrod("REVERSE", 0);
 				delay(200);

@@ -59,18 +59,18 @@ String init_imu() {
 
 }
 
-//String check_imu_calibration() {
-//
-//
-//    //uint8_t system, gyro, accel, mag;
-//    //system = gyro = accel = mag = 0;
-//    bno.getCalibration(&m_intCalSystem, &m_intCalGyro, &m_intCalAccel, &m_intCalMag);
-//
-//    String strReturn = "system=" + String(system) + ",gyro=" + String(gyro) + ",accel=" + String(accel) + ",mag=" + String(mag);
-//
-//    return strReturn;
-//
-//}
+String check_imu_calibration() {
+
+
+    //uint8_t system, gyro, accel, mag;
+    //system = gyro = accel = mag = 0;
+    bno.getCalibration(&m_intCalSystem, &m_intCalGyro, &m_intCalAccel, &m_intCalMag);
+
+    String strReturn = "system=" + String(m_intCalSystem) + ",gyro=" + String(m_intCalGyro) + ",accel=" + String(m_intCalAccel) + ",mag=" + String(m_intCalMag);
+
+    return strReturn;
+
+}
 
 void read_imu() {
 

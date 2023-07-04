@@ -95,7 +95,7 @@ boolean adjust_run_2(double dblHeading, double dblPitch) {
 		command_servo("SERVOAFTDIVE", m_intAftPitch0Pos + intPitchOutput, intPitchOutput);
 
 		double dblDepthError = m_dblDepthSP - get_depth();
-		int intDepthOutput = -round(dblDepthError * 200);
+		int intDepthOutput = -round(dblDepthError * 300); //increased from 200 on 4/7/2023
 		if (intDepthOutput > 40) { intDepthOutput = 40; }
 		if (intDepthOutput < -40) { intDepthOutput = -40; }
 		command_servo("SERVOFWDDIVE", m_intFwdDive0Pos + intDepthOutput, intDepthOutput);
