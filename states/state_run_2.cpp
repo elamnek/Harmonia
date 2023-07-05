@@ -15,7 +15,7 @@
 
 double m_dblDepthSP, m_dblAftPitchSP, m_intFwdThrottle, m_intRevThrottle, m_dblDirectionSP;
 
-int m_intFwdDive0Pos, m_intAftPitch0Pos, m_intAftRudder0Pos;
+int m_intFwdDive0Pos, m_intAftPitch0Pos, m_intAftRudder0Pos, m_intZigZagPeriod;
 
 unsigned long m_lngTrimEndTP,m_lngFwdEndTP, m_lngRevEndTP, m_lngTimeStart;
 
@@ -37,6 +37,7 @@ void init_run_2(String strParams) {
 	m_intAftRudder0Pos = get_sep_part(strParams, '|', 8);
 	int intTrimTime = get_sep_part(strParams, '|', 9);
 	m_dblDirectionSP = get_sep_part_dbl(strParams, '|', 10);
+	m_intZigZagPeriod = get_sep_part(strParams, '|', 11);
 	
 	//work out the elapsed time points
 	m_lngTrimEndTP = (unsigned long)intTrimTime * 1000;
@@ -89,14 +90,24 @@ boolean adjust_run_2(double dblHeading, double dblPitch) {
 		command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intDirectionOutput, intDirectionOutput);*/
 
 		//zig zag	
-		int intPeriod = 6000;
-		int intMaxOffset = 40;
-		float fltPos = (lngTimeELAPSED % intPeriod);
-		float fltqq = fltPos / (intPeriod / (intMaxOffset * 4));
-		if (fltqq > intMaxOffset * 2) { fltqq = (intMaxOffset * 4) - fltqq; }
-		int intDirectionOutput = round(fltqq - intMaxOffset);
-		command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intDirectionOutput, intDirectionOutput);
+		//int intPeriod = 6000;
+		//int intMaxOffset = 40;
+		//float fltPos = (lngTimeELAPSED % m_intZigZagPeriod);
+		//float fltqq = fltPos / (m_intZigZagPeriod / (intMaxOffset * 4));
+		//if (fltqq > intMaxOffset * 2) { fltqq = (intMaxOffset * 4) - fltqq; }
+		//int intDirectionOutput = round(fltqq - intMaxOffset);
+		//command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intDirectionOutput, intDirectionOutput);
 
+		int intOffset = 40;
+		float fltRemainder = (lngTimeELAPSED % m_intZigZagPeriod);
+		float fltHalfPeriod = m_intZigZagPeriod / 2.00;
+		if (fltRemainder <= fltHalfPeriod) {
+			command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intOffset, intOffset);
+		}
+		else {
+			command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos - intOffset, -intOffset);
+		}
+		
 		
 		double dblPitchError = m_dblAftPitchSP - dblPitch;
 		int intPitchOutput = round(dblPitchError * 2);
