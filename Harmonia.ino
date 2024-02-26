@@ -50,12 +50,13 @@ auto timer4Hz = timer_create_default();
 unsigned long m_lngTestTimeStart, m_lngTestLogTime, m_lngCalTimerStart;
 
 //FSM states
-enum { IDLE, MANUAL, STATIC_TRIM, CALIBRATE_IMU, RUN, SERVO_TEST, ALARM, UPLOAD} state; //CALIBRATE_IMU, 
+enum { IDLE, MANUAL, REMOTE, STATIC_TRIM, CALIBRATE_IMU, RUN, SERVO_TEST, ALARM, UPLOAD } state; //CALIBRATE_IMU, 
 //function used to return text description of current state
 String  get_state() {
 	switch (state) {
 	case IDLE: return "IDLE";
 	case MANUAL: return "MANUAL";
+	case REMOTE: return "REMOTE";
 	case STATIC_TRIM: return "STATIC_TRIM";
 	case CALIBRATE_IMU: return "CALIBRATE_IMU";
 	case RUN: return "RUN";
@@ -122,6 +123,11 @@ void setup() {
 bool timer2Hz_interrupt(void*) {
 
 	
+	if (state == REMOTE) { 
+		//if in remote state don't send anything here - all data is send using timer4Hz_interrupt
+		return true;
+	}
+
 	/// format of the data package is important
 	/// each data value needs an associate metadataid (these are defined in the Digital Twin database in a table called dt_data_config
 	/// each metadataid needs to have a matching record in the dt_data_config table
@@ -194,6 +200,21 @@ bool timer2Hz_interrupt(void*) {
 
 bool timer4Hz_interrupt(void*) {
 
+
+	if (state == REMOTE) {
+
+		//if in remote state need to send current throttle, rudder and diveplane settings as well as leak information
+		String strData = "{4|" + get_state() + "," +
+			"2|" + String(fwd_leak_detected()) + "," +
+			"3|" + String(aft_leak_detected()) + "," +
+			"22|" + String(get_main_motor_throttle()) + "," +
+			//"23|" + get_leonardo_bus_voltage_str() + "," +
+			"29|" + get_fwddiveplane_pos() + "," +
+			"31|" + get_aftrudder_pos() +
+			"}";
+		return true;
+	}
+
 	//this function stored data that needs to be captured at higher fidelity
 	//4Hz data doesn't need to be sent to remote display, only stored to SD card (except if in upload mode)
 
@@ -228,7 +249,9 @@ void loop() {
 	}
 	else {
 		//ignore these if leak detected
-		read_leonardo(); //this updates sensor data coming from leonardo	
+		if (state != "REMOTE") {
+			read_leonardo(); //this updates sensor data coming from leonardo - don't need this data in remote state	
+		}
 	}
 
 	//check for new commands coming from desktop remote
@@ -246,6 +269,7 @@ void loop() {
 		orange_led_off();
 		if (strRemoteCommand == "IDLE") { state = IDLE; }
 		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
+		if (strRemoteCommand == "REMOTE") { state = REMOTE; }
 		if (strRemoteCommand == "CALIBRATE_IMU") { 
 			state = CALIBRATE_IMU;
 			//m_lngCalTimerStart = millis();
@@ -311,6 +335,14 @@ void loop() {
 		clear_rf_command();
 
 		break;
+	case REMOTE:
+
+		//this checks for a manual command from HANDHELD RF remote and applies it
+		apply_manual_command();
+		check_pushrod(); //adjusts position of pushrod based on latest setpoint command
+		clear_rf_command();
+
+		break;
 	case CALIBRATE_IMU:
 
 		send_rf_comm("checking IMU calibration");
@@ -342,9 +374,9 @@ void loop() {
 		if (!blnReadyToRun) {
 			//adjust until trim achieved 
 			boolean blnDepthTrim = adjust_depth_2();
-			boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y()); 
+			//boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y()); 
 			// 
-			if (blnDepthTrim && blnPitchTrim) {
+			if (blnDepthTrim) {
 				blnReadyToRun = true;
 				command_pushrod("REVERSE", 0);
 				delay(200);

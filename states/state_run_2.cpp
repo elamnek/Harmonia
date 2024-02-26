@@ -109,17 +109,17 @@ boolean adjust_run_2(double dblHeading, double dblPitch) {
 		}
 		
 		
-		double dblPitchError = m_dblAftPitchSP - dblPitch;
-		int intPitchOutput = round(dblPitchError * 2);
-		if (intPitchOutput > 40) { intPitchOutput = 40; }
-		if (intPitchOutput < -40) { intPitchOutput = -40; }
-		command_servo("SERVOAFTDIVE", m_intAftPitch0Pos + intPitchOutput, intPitchOutput);
+		//double dblPitchError = m_dblAftPitchSP - dblPitch;
+		//int intPitchOutput = round(dblPitchError * 2);
+		//if (intPitchOutput > 40) { intPitchOutput = 40; }
+		//if (intPitchOutput < -40) { intPitchOutput = -40; }
+		//command_servo("SERVOAFTDIVE", m_intAftPitch0Pos + intPitchOutput, intPitchOutput);
 
-		double dblDepthError = m_dblDepthSP - get_depth();
-		int intDepthOutput = -round(dblDepthError * 300); //increased from 200 on 4/7/2023
-		if (intDepthOutput > 40) { intDepthOutput = 40; }
-		if (intDepthOutput < -40) { intDepthOutput = -40; }
-		command_servo("SERVOFWDDIVE", m_intFwdDive0Pos + intDepthOutput, intDepthOutput);
+		//double dblDepthError = m_dblDepthSP - get_depth();
+		//int intDepthOutput = -round(dblDepthError * 300); //increased from 200 on 4/7/2023
+		//if (intDepthOutput > 40) { intDepthOutput = 40; }
+		//if (intDepthOutput < -40) { intDepthOutput = -40; }
+		//command_servo("SERVOFWDDIVE", m_intFwdDive0Pos + intDepthOutput, intDepthOutput);
 	
 		return false;
 	} else if (lngTimeELAPSED > m_lngTrimEndTP && lngTimeELAPSED <= m_lngFwdEndTP) {
