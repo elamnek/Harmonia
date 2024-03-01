@@ -5,6 +5,7 @@
 */
 
 //installed libraries
+#include <PID_v1.h>
 #include <DFRobot_INA219.h>
 #include <SPI.h>
 #include <SD.h>
@@ -50,12 +51,12 @@ auto timer4Hz = timer_create_default();
 unsigned long m_lngTestTimeStart, m_lngTestLogTime, m_lngCalTimerStart;
 
 //FSM states
-enum { IDLE, MANUAL, REMOTE, STATIC_TRIM, CALIBRATE_IMU, RUN, SERVO_TEST, ALARM, UPLOAD } state; //CALIBRATE_IMU, 
+enum { IDLE, REMOTE, STATIC_TRIM, CALIBRATE_IMU, RUN, SERVO_TEST, ALARM, UPLOAD } state; //CALIBRATE_IMU, 
 //function used to return text description of current state
 String  get_state() {
 	switch (state) {
 	case IDLE: return "IDLE";
-	case MANUAL: return "MANUAL";
+	//case MANUAL: return "MANUAL";
 	case REMOTE: return "REMOTE";
 	case STATIC_TRIM: return "STATIC_TRIM";
 	case CALIBRATE_IMU: return "CALIBRATE_IMU";
@@ -249,7 +250,7 @@ void loop() {
 	}
 	else {
 		//ignore these if leak detected
-		if (state != "REMOTE") {
+		if (state != REMOTE) {
 			read_leonardo(); //this updates sensor data coming from leonardo - don't need this data in remote state	
 		}
 	}
@@ -265,10 +266,11 @@ void loop() {
 		orange_led_on();
 	}
 	else {
-		//system NOT in alarm state - normal state changes allowed
+		//system mot in alarm state - normal state changes allowed
+		
 		orange_led_off();
 		if (strRemoteCommand == "IDLE") { state = IDLE; }
-		if (strRemoteCommand == "MANUAL") { state = MANUAL; }
+		//if (strRemoteCommand == "MANUAL") { state = MANUAL; }
 		if (strRemoteCommand == "REMOTE") { state = REMOTE; }
 		if (strRemoteCommand == "CALIBRATE_IMU") { 
 			state = CALIBRATE_IMU;
@@ -281,6 +283,12 @@ void loop() {
 			clear_rf_command();
 		}
 		if (strRemoteCommand == "RUN") { 	
+			
+			state = RUN;
+			init_run(get_remote_param());
+			run_start();
+			clear_rf_command();
+			
 			//String strError = init_imu(); //this will reset heading to 0 so sub needs to be correct direction when run starts
 			//if (strError.length() > 0) {
 			//	state = IDLE;
@@ -288,16 +296,16 @@ void loop() {
 			//}
 			//else {
 			//	send_rf_comm("IMU re-started successfully - going into RUN state");
-			//	state = RUN;
+			//state = RUN;
 			//	blnReadyToRun = false;
-			//	init_run_2(get_remote_param());
-			//	clear_rf_command();
+			//init_run(get_remote_param());
+			//clear_rf_command();
 			//}	
 
-			state = RUN;
-			blnReadyToRun = false;
-			init_run_2(get_remote_param());
-			clear_rf_command();
+			//state = RUN;
+			//blnReadyToRun = false;
+			//init_run_2(get_remote_param());
+			//clear_rf_command();
 
 		}
 
@@ -327,14 +335,14 @@ void loop() {
 		commmand_main_motor(0);
 
 		break;
-	case MANUAL:
+	//case MANUAL:
 
-		//this checks for a manual command from RF remote and applies it
-		apply_manual_command();
-		check_pushrod(); //adjusts position of pushrod based on latest setpoint command
-		clear_rf_command();
+	//	//this checks for a manual command from RF remote and applies it
+	//	apply_manual_command();
+	//	check_pushrod(); //adjusts position of pushrod based on latest setpoint command
+	//	clear_rf_command();
 
-		break;
+	//	break;
 	case REMOTE:
 
 		//this checks for a manual command from HANDHELD RF remote and applies it
@@ -368,39 +376,44 @@ void loop() {
 	
 	case RUN:
 
+		boolean blnRunDone = adjust_run(get_imuorientation_x(), get_imuorientation_y());
+		if (blnRunDone) {		
+			state = IDLE;			
+		}
+
 		//allow for manual adjustments while running
 		//apply_manual_command();
 
-		if (!blnReadyToRun) {
-			//adjust until trim achieved 
-			boolean blnDepthTrim = adjust_depth_2();
-			//boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y()); 
-			// 
-			if (blnDepthTrim) {
-				blnReadyToRun = true;
-				command_pushrod("REVERSE", 0);
-				delay(200);
-				command_pump("DEFLATE", 0);
+		//if (!blnReadyToRun) {
+		//	//adjust until trim achieved 
+		//	boolean blnDepthTrim = adjust_depth_2();
+		//	//boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y()); 
+		//	// 
+		//	if (blnDepthTrim) {
+		//		blnReadyToRun = true;
+		//		command_pushrod("REVERSE", 0);
+		//		delay(200);
+		//		command_pump("DEFLATE", 0);
 
-				run_start_2(get_imuorientation_x());
-			}
-		}
-		else {
-			boolean blnRunDone = adjust_run_2(get_imuorientation_x(), get_imuorientation_y());
-			if (blnRunDone) {
-				
-				//just inflate and go into manual state
-				//command_pump("INFLATE", 255);
-				state = IDLE;
-				blnReadyToRun = false;
-				
-				//when run is complete - maintain depth and pitch until state is changed
-				//static_trim_reset();
-				//adjust_depth_2();
-				//adjust_pitch_2(get_imuorientation_y());
-				
-			}
-		}
+		//		run_start_2(get_imuorientation_x());
+		//	}
+		//}
+		//else {
+		//	boolean blnRunDone = adjust_run_2(get_imuorientation_x(), get_imuorientation_y());
+		//	if (blnRunDone) {
+		//		
+		//		//just inflate and go into manual state
+		//		//command_pump("INFLATE", 255);
+		//		state = IDLE;
+		//		blnReadyToRun = false;
+		//		
+		//		//when run is complete - maintain depth and pitch until state is changed
+		//		//static_trim_reset();
+		//		//adjust_depth_2();
+		//		//adjust_pitch_2(get_imuorientation_y());
+		//		
+		//	}
+		//}
 
 		//clear_rf_command();
 

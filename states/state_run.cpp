@@ -21,12 +21,12 @@ double m_dblFwdDivePlaneSetpoint, m_dblFwdDivePlaneInput, m_dblFwdDivePlaneOutpu
 PID m_PIDFwdDivePlane(&m_dblFwdDivePlaneInput, &m_dblFwdDivePlaneOutput, &m_dblFwdDivePlaneSetpoint, 2, 5, 1, DIRECT);
 
 //dive aft pitch plane PID
-double m_dblAftPitchSetpoint, m_dblAftPitchPlaneInput, m_dblAftPitchPlaneOutput;
-PID m_PIDAftPitchPlane(&m_dblAftPitchPlaneInput, &m_dblAftPitchPlaneOutput, &m_dblAftPitchSetpoint, 2, 5, 1, DIRECT);
+//double m_dblAftPitchSetpoint, m_dblAftPitchPlaneInput, m_dblAftPitchPlaneOutput;
+//PID m_PIDAftPitchPlane(&m_dblAftPitchPlaneInput, &m_dblAftPitchPlaneOutput, &m_dblAftPitchSetpoint, 2, 5, 1, DIRECT);
 
 //rudder PID
-double m_dblAftRudderSetpoint, m_dblAftRudderInput, m_dblAftRudderOutput;
-PID m_PIDAftRudder(&m_dblAftRudderInput, &m_dblAftRudderOutput, &m_dblAftRudderSetpoint, 2, 5, 1, DIRECT);
+//double m_dblAftRudderSetpoint, m_dblAftRudderInput, m_dblAftRudderOutput;
+//PID m_PIDAftRudder(&m_dblAftRudderInput, &m_dblAftRudderOutput, &m_dblAftRudderSetpoint, 2, 5, 1, DIRECT);
 
 int m_intFwdDiveServo0Pos, m_intAftPitchServo0Pos, m_intAftRudderServo0Pos;
 
@@ -35,10 +35,10 @@ unsigned long m_lngRunTime,m_lngStartTime;
 
 void init_run(String strParams) {
 
-	m_dblAftPitchSetpoint = 0;
+	//m_dblAftPitchSetpoint = 0;
 	
 	m_dblFwdDivePlaneSetpoint = get_sep_part_dbl(strParams, '|', 0);
-	m_dblAftRudderSetpoint = get_sep_part_dbl(strParams, '|', 1);
+	//m_dblAftRudderSetpoint = get_sep_part_dbl(strParams, '|', 1);
 	m_intRunThrottle = get_sep_part(strParams, '|', 2);
 	int intRunTime = get_sep_part(strParams, '|', 3);
 	m_lngRunTime = (unsigned long)intRunTime * 1000;
@@ -53,7 +53,7 @@ void init_run(String strParams) {
 	delay(200);
 	command_servo("SERVOAFTRUDDER", m_intAftRudderServo0Pos, 0);
 
-	init_static_trim_2(m_dblFwdDivePlaneSetpoint,0);
+	//init_static_trim_2(m_dblFwdDivePlaneSetpoint,0);
 
 }
 
@@ -66,12 +66,12 @@ void run_start() {
 	m_PIDFwdDivePlane.SetMode(AUTOMATIC);
 
 	//turn the aft pitch PID on
-	m_PIDAftPitchPlane.SetOutputLimits(-40, 40);
-	m_PIDAftPitchPlane.SetMode(AUTOMATIC);
+	//m_PIDAftPitchPlane.SetOutputLimits(-40, 40);
+	//m_PIDAftPitchPlane.SetMode(AUTOMATIC);
 
 	//turn the rudder PID on
-	m_PIDAftRudder.SetOutputLimits(-45, 45);
-	m_PIDAftRudder.SetMode(AUTOMATIC);
+	//m_PIDAftRudder.SetOutputLimits(-45, 45);
+	//m_PIDAftRudder.SetMode(AUTOMATIC);
 
 	//turn main motor on
 	commmand_main_motor(m_intRunThrottle);
@@ -93,21 +93,21 @@ boolean adjust_run(float fltHeading,float fltPitch) {
 		command_servo("SERVOFWDDIVE", intOutput, intOutput - m_intFwdDiveServo0Pos);
 
 		//adjust aft pitch PID using current pitch
-		m_dblAftPitchPlaneInput = fltPitch;
-		m_PIDAftPitchPlane.Compute();
-		intOutput = round(m_dblAftPitchPlaneOutput);
-		intOutput = intOutput + m_intAftPitchServo0Pos; //105
-		command_servo("SERVOAFTDIVE", intOutput, intOutput - m_intAftPitchServo0Pos);
+		//m_dblAftPitchPlaneInput = fltPitch;
+		//m_PIDAftPitchPlane.Compute();
+		//intOutput = round(m_dblAftPitchPlaneOutput);
+		//intOutput = intOutput + m_intAftPitchServo0Pos; //105
+		//command_servo("SERVOAFTDIVE", intOutput, intOutput - m_intAftPitchServo0Pos);
 
 		//adjust rudder PID using heading
 		//convert heading to direction -180 - +180
-		float fltDirection = fltHeading;
-		if (fltDirection > 180) {fltDirection = fltDirection - 360;}
-		m_dblAftRudderInput = -fltDirection; //negative sign untested
-		m_PIDAftRudder.Compute();
-		intOutput = round(m_dblAftRudderOutput);
-		intOutput = intOutput + m_intAftRudderServo0Pos; //135
-		command_servo("SERVOAFTRUDDER", intOutput, intOutput - m_intAftRudderServo0Pos);
+		//float fltDirection = fltHeading;
+		//if (fltDirection > 180) {fltDirection = fltDirection - 360;}
+		//m_dblAftRudderInput = -fltDirection; //negative sign untested
+		//m_PIDAftRudder.Compute();
+		//intOutput = round(m_dblAftRudderOutput);
+		//intOutput = intOutput + m_intAftRudderServo0Pos; //135
+		//command_servo("SERVOAFTRUDDER", intOutput, intOutput - m_intAftRudderServo0Pos);
 
 		return false;
 

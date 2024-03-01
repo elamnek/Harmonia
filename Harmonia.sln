@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32228.343
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Harmonia", "Harmonia.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Arduino-PID-Library-master-1.2.1", "Libraries\Arduino-PID-Library-master\1.2.1\Arduino-PID-Library-master\Arduino-PID-Library-master-1.2.1.vcxitems", "{C96CC080-E5C0-44D8-9B90-CC00CEB7BBDA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,5 +23,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {98D3138E-44AF-4D10-9228-806B67DBD0E8}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Libraries\Arduino-PID-Library-master\1.2.1\Arduino-PID-Library-master\Arduino-PID-Library-master-1.2.1.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		Libraries\Arduino-PID-Library-master\1.2.1\Arduino-PID-Library-master\Arduino-PID-Library-master-1.2.1.vcxitems*{c96cc080-e5c0-44d8-9b90-cc00ceb7bbda}*SharedItemsImports = 9
 	EndGlobalSection
 EndGlobal
