@@ -50,13 +50,17 @@ auto timer4Hz = timer_create_default();
 
 unsigned long m_lngTestTimeStart, m_lngTestLogTime, m_lngCalTimerStart;
 
+unsigned long m_lngCycleTimerStart;
+
+
+
 //FSM states
-enum { IDLE, REMOTE, STATIC_TRIM, CALIBRATE_IMU, RUN, SERVO_TEST, ALARM, UPLOAD } state; //CALIBRATE_IMU, 
+enum { IDLE, REMOTE, MANL,STATIC_TRIM, CALIBRATE_IMU, RUN, SERVO_TEST, ALARM, UPLOAD,CYCLE } state;
 //function used to return text description of current state
 String  get_state() {
 	switch (state) {
 	case IDLE: return "IDLE";
-	//case MANUAL: return "MANUAL";
+	case MANL: return "MANL";
 	case REMOTE: return "REMOTE";
 	case STATIC_TRIM: return "STATIC_TRIM";
 	case CALIBRATE_IMU: return "CALIBRATE_IMU";
@@ -64,6 +68,7 @@ String  get_state() {
 	case SERVO_TEST: return "SERVO_TEST";
 	case ALARM: return "ALARM";
 	case UPLOAD: return "UPLOAD";
+	case CYCLE: return "CYCLE";
 	}
 }
 
@@ -270,7 +275,7 @@ void loop() {
 		
 		orange_led_off();
 		if (strRemoteCommand == "IDLE") { state = IDLE; }
-		//if (strRemoteCommand == "MANUAL") { state = MANUAL; }
+		if (strRemoteCommand == "MANL") { state = MANL; }
 		if (strRemoteCommand == "REMOTE") { state = REMOTE; }
 		if (strRemoteCommand == "CALIBRATE_IMU") { 
 			state = CALIBRATE_IMU;
@@ -308,6 +313,12 @@ void loop() {
 			//clear_rf_command();
 
 		}
+		if (strRemoteCommand == "CYCLE") {
+			state = CYCLE;
+			m_lngCycleTimerStart = millis();
+			clear_rf_command();
+			send_rf_comm("CYCLE INIT");
+		}
 
 		if (strRemoteCommand == "SERVO_TEST") { 
 			state = SERVO_TEST;
@@ -335,14 +346,50 @@ void loop() {
 		commmand_main_motor(0);
 
 		break;
-	//case MANUAL:
+	case MANL:
 
-	//	//this checks for a manual command from RF remote and applies it
-	//	apply_manual_command();
-	//	check_pushrod(); //adjusts position of pushrod based on latest setpoint command
-	//	clear_rf_command();
+		//this checks for a manual command from RF remote and applies it
+		apply_manual_command();
+		check_pushrod(); //adjusts position of pushrod based on latest setpoint command
+		clear_rf_command();
 
-	//	break;
+		break;
+	case CYCLE:
+
+		check_pushrod(); //adjusts position of pushrod based on latest setpoint command
+
+		unsigned long lngElapsedTime = millis() - m_lngCycleTimerStart;
+		if (lngElapsedTime <= 15000) {
+			commmand_main_motor(15);
+			command_pump("INFLATE", 255);
+			command_pushrod_position(0);	
+		}
+		else if (lngElapsedTime > 15000 && lngElapsedTime <= 35000) {
+			command_pushrod_position(20);
+		}
+		else if (lngElapsedTime > 35000 && lngElapsedTime <= 45000) {
+			command_pushrod_position(40);
+		}
+		else if (lngElapsedTime > 45000 && lngElapsedTime <= 55000) {
+			command_pushrod_position(60);
+			command_pump("DEFLATE", 255);
+			commmand_main_motor(0);
+		}
+		else if (lngElapsedTime > 55000 && lngElapsedTime <= 65000) {
+			command_pushrod_position(80);
+		}
+		else if (lngElapsedTime > 65000 && lngElapsedTime <= 75000) {
+			command_pushrod_position(100);
+		}
+		else {
+			command_pump("DEFLATE", 0);
+			commmand_main_motor(0);
+			command_pushrod_position(0);
+			m_lngCycleTimerStart = millis();
+			send_rf_comm("repeating");
+		}
+
+		break;
 	case REMOTE:
 
 		//this checks for a manual command from HANDHELD RF remote and applies it
