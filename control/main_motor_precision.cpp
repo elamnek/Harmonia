@@ -12,7 +12,7 @@ MotoronI2C mc;
 int m_intThrottlePrecision = 0;
 
 void init_main_motor_precision() {
-
+	
 	mc.reinitialize();    // Bytes: 0x96 0x74
 	mc.disableCrc();      // Bytes: 0x8B 0x04 0x7B 0x43
 	mc.clearResetFlag();  // Bytes: 0xA9 0x00 0x04

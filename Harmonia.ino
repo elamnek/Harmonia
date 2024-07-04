@@ -5,6 +5,8 @@
 */
 
 //installed libraries
+#include <Motoron.h>
+#include <motoron_protocol.h>
 #include <PID_v1.h>
 #include <DFRobot_INA219.h>
 #include <SPI.h>
@@ -27,18 +29,18 @@
 #include "states\state_run.h"
 #include "states\state_run_2.h"
 #include "control\pumps.h"
-#include "control\main_motor.h"
+#include "control\main_motor_precision.h"
 #include "control\servos.h"
 #include "control\pushrod.h"
 #include "sensors\water_sensors.h"
 #include "sensors\RTC.h"
-#include "sensors\IMU.h"
-#include "sensors\leonardo_sensors.h"
-#include "sensors\pressure_sensor.h"
+//#include "sensors\IMU.h"
+//#include "sensors\leonardo_sensors.h"
+//#include "sensors\pressure_sensor.h"
 #include "sensors\power_sensor.h"
 #include "comms\rf_comms.h"
 #include "comms\LEDs.h"
-#include "data\sdcard.h"
+//#include "data\sdcard.h"
 #include "helpers.h"
 
 int m_intCounter = 0;
@@ -85,33 +87,33 @@ void setup() {
 	init_servos();
 	init_pumps();
 	init_pushrod();
-	init_main_motor();
+	init_main_motor_precision();
 	init_watersensors();
-	init_leonardo_sensors();
+	//init_leonardo_sensors();
 
-	String msg = init_sdcard();
+	/*String msg = init_sdcard();
 	if (msg.length() > 0) {
 		send_rf_comm(msg);
 	}
 	else {
 		send_rf_comm("SDCard OK!!");
-	}
+	}*/
 
-	msg = init_imu();
+	/*msg = init_imu();
 	if (msg.length() > 0) {
 		send_rf_comm(msg);
 	}
 	else {
 		send_rf_comm("IMU sensor OK!!");
-	}
+	}*/
 	
-	msg = init_presssuresensor(997);
+	/*msg = init_presssuresensor(997);
 	if (msg.length() > 0) {
 		send_rf_comm(msg);
 	}
 	else {
 		send_rf_comm("water pressure sensor OK!!");
-	}
+	}*/
 
 	//this scan reports on addresses of all connected I2C devices
 	//I had issues with connecting multiple pressure sensors
@@ -145,32 +147,32 @@ bool timer2Hz_interrupt(void*) {
 	////send_rf_comm(String(m_fltOrientation_x) + "," + String(m_fltOrientation_y) + "," + String(m_fltOrientation_z));
 	//unsigned long lngStart = millis();
 
-	read_imu();
+	//read_imu();
 
 	String strData = "{13|" + get_rtc_time() + "," +
-						"4|" + get_state() + "," +
+		               "4|" + get_state() + "," +
 						"2|" + String(fwd_leak_detected()) + "," +
 						"3|" + String(aft_leak_detected()) + "," +
-						"1|" + String(get_depth()) + ","
-						"38|" + get_leonardo_rpm_str() + "," +
+						//"1|" + String(get_depth()) + ","
+						/*"38|" + get_leonardo_rpm_str() + "," +
 						"10|" + get_leonardo_pressure_str() + "," +
-						"11|" + get_leonardo_temp_str() + "," +
-						"14|" + String(get_imuorientation_x()) + "," + //heading
-						"15|" + String(get_imuorientation_y()) + "," + //pitch
-						"16|" + String(get_imuorientation_z()) + "," + //roll
-		                "32|" + String(get_imuacceleration_x()) + "," + 
-		                "33|" + String(get_imuacceleration_y()) + "," + 
-		                "34|" + String(get_imuacceleration_z()) + "," +
-		                "45|" + String(get_imucal()) + "," +
+						"11|" + get_leonardo_temp_str() + "," +*/
+						//"14|" + String(get_imuorientation_x()) + "," + //heading
+						//"15|" + String(get_imuorientation_y()) + "," + //pitch
+						//"16|" + String(get_imuorientation_z()) + "," + //roll
+		    //            "32|" + String(get_imuacceleration_x()) + "," + 
+		    //            "33|" + String(get_imuacceleration_y()) + "," + 
+		    //            "34|" + String(get_imuacceleration_z()) + "," +
+		    //            "45|" + String(get_imucal()) + "," +
 						"17|" + String(get_pushrod_pos()) + "," +
-						"19|" + String(get_waterpressure()) + "," +
-						"18|" + get_leonardo_bag_pressure_str() + "," +
+						//"19|" + String(get_waterpressure()) + "," +
+						//"18|" + get_leonardo_bag_pressure_str() + "," +
 						"21|" + String(get_pump_status()) + "," +
-						"22|" + String(get_main_motor_throttle()) + "," +
-		                "23|" + get_leonardo_bus_voltage_str() + "," +
+						"22|" + String(get_main_motor_precision_throttle()) + "," +
+		                /*"23|" + get_leonardo_bus_voltage_str() + "," +
 		                "24|" + get_leonardo_shunt_voltage_str() + "," +
 		                "25|" + get_leonardo_current_str() + "," +
-		                "26|" + get_leonardo_power_str() + "," +
+		                "26|" + get_leonardo_power_str() + "," +*/
 		                "27|" + String(get_dive_rate_2()) + "," + 
 		                "28|" + String(get_depth_setpoint_2()) + "," +
 		                "35|" + String(millis()) + //milliseconds that uC has been running for
@@ -199,7 +201,7 @@ bool timer2Hz_interrupt(void*) {
 	send_rf_comm(strData);
 
 	//save to sdcard
-	sdcard_save_data_1(strData);
+	//sdcard_save_data_1(strData);
 
 	return true;
 }
@@ -213,7 +215,7 @@ bool timer4Hz_interrupt(void*) {
 		String strData = "{4|" + get_state() + "," +
 			"2|" + String(fwd_leak_detected()) + "," +
 			"3|" + String(aft_leak_detected()) + "," +
-			"22|" + String(get_main_motor_throttle()) + "," +
+			"22|" + String(get_main_motor_precision_throttle()) + "," +
 			//"23|" + get_leonardo_bus_voltage_str() + "," +
 			"29|" + get_fwddiveplane_pos() + "," +
 			"31|" + get_aftrudder_pos() +
@@ -238,7 +240,7 @@ bool timer4Hz_interrupt(void*) {
 	//send_rf_comm(strData);
 
 	//save to sdcard
-	sdcard_save_data_2(strData);
+	//sdcard_save_data_2(strData);
 
 	return true;
 }
@@ -256,7 +258,7 @@ void loop() {
 	else {
 		//ignore these if leak detected
 		if (state != REMOTE) {
-			read_leonardo(); //this updates sensor data coming from leonardo - don't need this data in remote state	
+			//read_leonardo(); //this updates sensor data coming from leonardo - don't need this data in remote state	
 		}
 	}
 
@@ -264,7 +266,7 @@ void loop() {
 	check_rf_comms(); 
 
 	//set state using commands from remote
-	String strRemoteCommand = get_remote_command();
+	String strRemoteCommand = get_remote_command();	
 	if (state == ALARM) {
 		//system in alarm state - can only be changed by command to go to idle state
 		if (strRemoteCommand == "IDLE") { state = IDLE; }
@@ -275,7 +277,7 @@ void loop() {
 		
 		orange_led_off();
 		if (strRemoteCommand == "IDLE") { state = IDLE; }
-		if (strRemoteCommand == "MANL") { state = MANL; }
+		if (strRemoteCommand == "MANL") {state = MANL; }
 		if (strRemoteCommand == "REMOTE") { state = REMOTE; }
 		if (strRemoteCommand == "CALIBRATE_IMU") { 
 			state = CALIBRATE_IMU;
@@ -343,7 +345,7 @@ void loop() {
 
 		//in idle state need to stop any active operation
 		command_pump("INFLATE", 0);
-		commmand_main_motor(0);
+		commmand_main_motor_precision(0);
 
 		break;
 	case MANL:
@@ -360,30 +362,36 @@ void loop() {
 
 		unsigned long lngElapsedTime = millis() - m_lngCycleTimerStart;
 		if (lngElapsedTime <= 15000) {
-			commmand_main_motor(15);
+			commmand_main_motor_precision(10);
 			command_pump("INFLATE", 255);
-			command_pushrod_position(0);	
+			command_pushrod_position(0);
+			command_servo("SERVOFWDDIVE", 40, 40);
 		}
 		else if (lngElapsedTime > 15000 && lngElapsedTime <= 35000) {
 			command_pushrod_position(20);
+			command_servo("SERVOFWDDIVE", 90, 90);
 		}
 		else if (lngElapsedTime > 35000 && lngElapsedTime <= 45000) {
 			command_pushrod_position(40);
+			command_servo("SERVOFWDDIVE", 140, 140);
 		}
 		else if (lngElapsedTime > 45000 && lngElapsedTime <= 55000) {
 			command_pushrod_position(60);
 			command_pump("DEFLATE", 255);
-			commmand_main_motor(0);
+			commmand_main_motor_precision(0);
+			command_servo("SERVOFWDDIVE", 0, 0);
 		}
 		else if (lngElapsedTime > 55000 && lngElapsedTime <= 65000) {
 			command_pushrod_position(80);
+			command_servo("SERVOFWDDIVE", 70, 70);
 		}
 		else if (lngElapsedTime > 65000 && lngElapsedTime <= 75000) {
 			command_pushrod_position(100);
+			command_servo("SERVOFWDDIVE", 120, 120);
 		}
 		else {
 			command_pump("DEFLATE", 0);
-			commmand_main_motor(0);
+			commmand_main_motor_precision(0);
 			command_pushrod_position(0);
 			m_lngCycleTimerStart = millis();
 			send_rf_comm("repeating");
@@ -401,7 +409,7 @@ void loop() {
 	case CALIBRATE_IMU:
 
 		send_rf_comm("checking IMU calibration");
-		check_imu_calibration();
+		//check_imu_calibration();
 		delay(200);
 		
 		//check IMU status every second and send the result back to remote
@@ -417,16 +425,16 @@ void loop() {
 	case STATIC_TRIM:
 	
 		adjust_depth_2();
-		adjust_pitch_2(get_imuorientation_y());
+		//adjust_pitch_2(get_imuorientation_y());
 
 		break;
 	
 	case RUN:
 
-		boolean blnRunDone = adjust_run(get_imuorientation_x(), get_imuorientation_y());
-		if (blnRunDone) {		
+		//boolean blnRunDone = adjust_run(get_imuorientation_x(), get_imuorientation_y());
+		/*if (blnRunDone) {		
 			state = IDLE;			
-		}
+		}*/
 
 		//allow for manual adjustments while running
 		//apply_manual_command();
@@ -490,14 +498,14 @@ void loop() {
 	case UPLOAD:
 		//in upload state need to stop any active operation
 		command_pump("INFLATE", 0);
-		commmand_main_motor(0);
+		commmand_main_motor_precision(0);
 
 		//send record count to remote:
-		sdcard_record_count();
+		//sdcard_record_count();
 
 		//run the upload which reads all data in the log and sends it line by line to the remote
 		//send_rf_comm("in UPLOAD state");
-		sdcard_upload_data();
+		//sdcard_upload_data();
 
 		//send completion message to remote
 		send_rf_comm("upload|done");
