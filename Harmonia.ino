@@ -5,6 +5,7 @@
 */
 
 //installed libraries
+#include <Adafruit_MPRLS.h>
 #include <Motoron.h>
 #include <motoron_protocol.h>
 #include <PID_v1.h>
@@ -35,8 +36,8 @@
 #include "sensors\water_sensors.h"
 #include "sensors\RTC.h"
 //#include "sensors\IMU.h"
-//#include "sensors\leonardo_sensors.h"
-//#include "sensors\pressure_sensor.h"
+#include "sensors\depth_sensor.h"
+#include "sensors\bag_pressure_sensor.h"
 #include "sensors\power_sensor.h"
 #include "comms\rf_comms.h"
 #include "comms\LEDs.h"
@@ -53,8 +54,6 @@ auto timer4Hz = timer_create_default();
 unsigned long m_lngTestTimeStart, m_lngTestLogTime, m_lngCalTimerStart;
 
 unsigned long m_lngCycleTimerStart;
-
-
 
 //FSM states
 enum { IDLE, REMOTE, MANL,STATIC_TRIM, CALIBRATE_IMU, RUN, SERVO_TEST, ALARM, UPLOAD,CYCLE } state;
@@ -89,7 +88,14 @@ void setup() {
 	init_pushrod();
 	init_main_motor_precision();
 	init_watersensors();
-	//init_leonardo_sensors();
+
+	String msg = init_powersensor();
+	if (msg.length() > 0) {
+		send_rf_comm(msg);
+	}
+	else {
+		send_rf_comm("Power sensor OK!!");
+	}
 
 	/*String msg = init_sdcard();
 	if (msg.length() > 0) {
@@ -107,13 +113,21 @@ void setup() {
 		send_rf_comm("IMU sensor OK!!");
 	}*/
 	
-	/*msg = init_presssuresensor(997);
+	msg = init_depthsensor(997);
 	if (msg.length() > 0) {
 		send_rf_comm(msg);
 	}
 	else {
-		send_rf_comm("water pressure sensor OK!!");
-	}*/
+		send_rf_comm("water depth sensor OK!!");
+	}
+
+	msg = init_bagpressuresensor();
+	if (msg.length() > 0) {
+		send_rf_comm(msg);
+	}
+	else {
+		send_rf_comm("bag pressure sensor OK!!");
+	}
 
 	//this scan reports on addresses of all connected I2C devices
 	//I had issues with connecting multiple pressure sensors
@@ -153,7 +167,7 @@ bool timer2Hz_interrupt(void*) {
 		               "4|" + get_state() + "," +
 						"2|" + String(fwd_leak_detected()) + "," +
 						"3|" + String(aft_leak_detected()) + "," +
-						//"1|" + String(get_depth()) + ","
+						"1|" + String(get_depth()) + ","
 						/*"38|" + get_leonardo_rpm_str() + "," +
 						"10|" + get_leonardo_pressure_str() + "," +
 						"11|" + get_leonardo_temp_str() + "," +*/
@@ -165,14 +179,14 @@ bool timer2Hz_interrupt(void*) {
 		    //            "34|" + String(get_imuacceleration_z()) + "," +
 		    //            "45|" + String(get_imucal()) + "," +
 						"17|" + String(get_pushrod_pos()) + "," +
-						//"19|" + String(get_waterpressure()) + "," +
-						//"18|" + get_leonardo_bag_pressure_str() + "," +
+						"19|" + String(get_waterpressure()) + "," +
+						"18|" + String(get_bagpressure()) + "," +
 						"21|" + String(get_pump_status()) + "," +
 						"22|" + String(get_main_motor_precision_throttle()) + "," +
-		                /*"23|" + get_leonardo_bus_voltage_str() + "," +
-		                "24|" + get_leonardo_shunt_voltage_str() + "," +
-		                "25|" + get_leonardo_current_str() + "," +
-		                "26|" + get_leonardo_power_str() + "," +*/
+		                "23|" + String(get_bus_voltage()) + "," +
+		                "24|" + String(get_shunt_voltage()) + "," +
+		                "25|" + String(get_current_mA()) + "," +
+		                "26|" + String(get_power_mW()) + "," +
 		                "27|" + String(get_dive_rate_2()) + "," + 
 		                "28|" + String(get_depth_setpoint_2()) + "," +
 		                "35|" + String(millis()) + //milliseconds that uC has been running for
@@ -216,7 +230,7 @@ bool timer4Hz_interrupt(void*) {
 			"2|" + String(fwd_leak_detected()) + "," +
 			"3|" + String(aft_leak_detected()) + "," +
 			"22|" + String(get_main_motor_precision_throttle()) + "," +
-			//"23|" + get_leonardo_bus_voltage_str() + "," +
+			"23|" + String(get_bus_voltage()) + "," +
 			"29|" + get_fwddiveplane_pos() + "," +
 			"31|" + get_aftrudder_pos() +
 			"}";

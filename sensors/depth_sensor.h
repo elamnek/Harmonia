@@ -1,7 +1,7 @@
-// pressure_sensor.h
+// depth_sensor.h
 
-#ifndef _PRESSURE_SENSOR_h
-#define _PRESSURE_SENSOR_h
+#ifndef _DEPTH_SENSOR_h
+#define _DEPTH_SENSOR_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
@@ -9,7 +9,7 @@
 	#include "WProgram.h"
 #endif
 
-String init_presssuresensor(int intFluidDensity);
+String init_depthsensor(int intFluidDensity);
 
 float get_depth();
 

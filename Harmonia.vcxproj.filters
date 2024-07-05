@@ -30,7 +30,7 @@
     <ClInclude Include="control\pumps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sensors\pressure_sensor.h">
+    <ClInclude Include="sensors\depth_sensor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sensors\leonardo_sensors.h">
@@ -81,6 +81,9 @@
     <ClInclude Include="control\main_motor_precision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sensors\bag_pressure_sensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sensors\RTC.cpp">
@@ -95,7 +98,7 @@
     <ClCompile Include="control\pumps.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sensors\pressure_sensor.cpp">
+    <ClCompile Include="sensors\depth_sensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sensors\leonardo_sensors.cpp">
@@ -145,6 +148,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="control\main_motor_precision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sensors\bag_pressure_sensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

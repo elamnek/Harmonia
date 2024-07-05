@@ -1,15 +1,13 @@
-// 
-// 
-// 
 
-#include "pressure_sensor.h"
+
+#include "depth_sensor.h"
 #include <MS5837.h>
 
 MS5837 sensor;
 
 float m_fltCachedDepth;
 
-String init_presssuresensor(int intFluidDensity) {
+String init_depthsensor(int intFluidDensity) {
 
     while (!sensor.init()) {
         return "ERROR: bluerobotics pressure sensor failed to initialise";

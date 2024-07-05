@@ -19,8 +19,5 @@ float get_current_mA();
 
 float get_power_mW();
 
-
-
-
 #endif
 

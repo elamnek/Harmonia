@@ -17,7 +17,7 @@ String init_powersensor() {
 
     delay(1000);
 
-    if (ina219.begin() != true) {
+    if (!ina219.begin()) {
         return "ERROR: ina219 power sensor failed to initialise";
     }
     ina219.linearCalibrate(ina219Reading_mA, extMeterReading_mA);
