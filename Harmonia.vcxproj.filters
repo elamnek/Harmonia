@@ -84,6 +84,9 @@
     <ClInclude Include="sensors\bag_pressure_sensor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sensors\RPM_sensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sensors\RTC.cpp">
@@ -151,6 +154,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sensors\bag_pressure_sensor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sensors\RPM_sensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

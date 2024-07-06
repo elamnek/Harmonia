@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "motoron-arduino-master-1.3.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Adafruit_MPRLS-master-1.2.0", "Libraries\Adafruit_MPRLS-master\1.2.0\Adafruit_MPRLS-master\Adafruit_MPRLS-master-1.2.0.vcxitems", "{2DCCC041-6357-4419-BC7B-FA0362660C80}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Wire-1.0", "Libraries\Wire\1.0\Wire\Wire-1.0.vcxitems", "{FED381A6-25BA-437D-8988-E2DC511844A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -34,6 +36,8 @@ Global
 		Libraries\Adafruit_MPRLS-master\1.2.0\Adafruit_MPRLS-master\Adafruit_MPRLS-master-1.2.0.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		Libraries\Arduino-PID-Library-master\1.2.1\Arduino-PID-Library-master\Arduino-PID-Library-master-1.2.1.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		Libraries\motoron-arduino-master\1.3.0\motoron-arduino-master\motoron-arduino-master-1.3.0.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
+		Libraries\Wire\1.0\Wire\Wire-1.0.vcxitems*{c5f80730-f44f-4478-bdae-6634efc2ca88}*SharedItemsImports = 4
 		Libraries\Arduino-PID-Library-master\1.2.1\Arduino-PID-Library-master\Arduino-PID-Library-master-1.2.1.vcxitems*{c96cc080-e5c0-44d8-9b90-cc00ceb7bbda}*SharedItemsImports = 9
+		Libraries\Wire\1.0\Wire\Wire-1.0.vcxitems*{fed381a6-25ba-437d-8988-e2dc511844a3}*SharedItemsImports = 9
 	EndGlobalSection
 EndGlobal

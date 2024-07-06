@@ -5,6 +5,7 @@
 */
 
 //installed libraries
+#include <Servo.h>
 #include <Adafruit_MPRLS.h>
 #include <Motoron.h>
 #include <motoron_protocol.h>
@@ -18,8 +19,8 @@
 #include <MS5837.h>
 #include <arduino-timer.h>
 #include <GravityRtc.h>
-#include "Wire.h"
-#include <Servo.h>
+//#include "Wire.h"
+
 
 
 //harmonia libraries
@@ -34,6 +35,7 @@
 #include "control\servos.h"
 #include "control\pushrod.h"
 #include "sensors\water_sensors.h"
+#include "sensors\RPM_sensor.h"
 #include "sensors\RTC.h"
 //#include "sensors\IMU.h"
 #include "sensors\depth_sensor.h"
@@ -94,7 +96,7 @@ void setup() {
 		send_rf_comm(msg);
 	}
 	else {
-		send_rf_comm("Power sensor OK!!");
+		send_rf_comm("power sensor OK!!");
 	}
 
 	/*String msg = init_sdcard();
@@ -139,7 +141,7 @@ void setup() {
 	//start interupts
 	timer2Hz.every(500, timer2Hz_interrupt);
 	timer4Hz.every(250, timer4Hz_interrupt);
-				
+			
 }
 
 bool timer2Hz_interrupt(void*) {
@@ -168,9 +170,9 @@ bool timer2Hz_interrupt(void*) {
 						"2|" + String(fwd_leak_detected()) + "," +
 						"3|" + String(aft_leak_detected()) + "," +
 						"1|" + String(get_depth()) + ","
-						/*"38|" + get_leonardo_rpm_str() + "," +
-						"10|" + get_leonardo_pressure_str() + "," +
-						"11|" + get_leonardo_temp_str() + "," +*/
+						"38|" + String(get_rpm(get_main_motor_precision_throttle())) + "," +
+						//"10|" + get_leonardo_pressure_str() + "," +
+						//"11|" + get_leonardo_temp_str() + "," +*/
 						//"14|" + String(get_imuorientation_x()) + "," + //heading
 						//"15|" + String(get_imuorientation_y()) + "," + //pitch
 						//"16|" + String(get_imuorientation_z()) + "," + //roll
