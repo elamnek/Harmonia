@@ -5,7 +5,7 @@
 #include "DVL.h"
 #include "..\helpers.h"
 
-#define serialDVL Serial1
+#define serialDVL Serial2
 
 //variables for dead reckoning report
 char m_bufWRPChecksum[3];
@@ -72,7 +72,6 @@ String init_dvl() {
 
 	serialDVL.begin(115200, SERIAL_8N1);
     
-
 	//serialDVL.print("wcp,3"); //set serial output - all output excluding the deprecated wrx and wrt sentences
 	//serialDVL.println("wcw\n"); //get protocal version
 

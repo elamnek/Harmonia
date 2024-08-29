@@ -37,7 +37,8 @@
 #include "sensors\water_sensors.h"
 #include "sensors\RPM_sensor.h"
 #include "sensors\RTC.h"
-//#include "sensors\IMU.h"
+#include "sensors\IMU.h"
+#include "sensors\DVL.h"
 #include "sensors\depth_sensor.h"
 #include "sensors\bag_pressure_sensor.h"
 #include "sensors\power_sensor.h"
@@ -56,6 +57,8 @@ auto timer4Hz = timer_create_default();
 unsigned long m_lngTestTimeStart, m_lngTestLogTime, m_lngCalTimerStart;
 
 unsigned long m_lngCycleTimerStart;
+
+String m_strDVLData;
 
 //FSM states
 enum { IDLE, REMOTE, MANL,STATIC_TRIM, CALIBRATE_IMU, RUN, SERVO_TEST, ALARM, UPLOAD,CYCLE } state;
@@ -90,6 +93,7 @@ void setup() {
 	init_pushrod();
 	init_main_motor_precision();
 	init_watersensors();
+	init_dvl();
 
 	String msg = init_powersensor();
 	if (msg.length() > 0) {
@@ -165,12 +169,41 @@ bool timer2Hz_interrupt(void*) {
 
 	//read_imu();
 
+
+	//check for command failure
+	String strMsg = CheckMessage();
+	if (strMsg.length() == 0) {
+		if (strtoul(get_wrp_checksum(), 0, 16) == get_wrp_crc8_result() && strtoul(get_wrz_checksum(), 0, 16) == get_wrz_crc8_result()) {
+			
+			m_strDVLData = "10|" + String(get_dvldeadreckoning_x()) + "," +
+				"10|" + String(get_dvldeadreckoning_y()) + "," +
+				"10|" + String(get_dvldeadreckoning_z()) + "," +
+				"10|" + String(get_dvldeadreckoning_roll()) + "," +
+				"10|" + String(get_dvldeadreckoning_pitch()) + "," +
+				"10|" + String(get_dvldeadreckoning_yaw()) + "," +
+				"10|" + String(get_dvldeadreckoning_stdDev()) + "," +
+				"10|" + String(get_dvldeadreckoning_status()) + "," +
+				"10|" + String(get_dvlvelocity_x()) + "," +
+				"10|" + String(get_dvlvelocity_y()) + "," +
+				"10|" + String(get_dvlvelocity_z()) + "," +
+				"10|" + String(get_dvlvelocity_alt());
+
+		}
+		else {
+			send_rf_comm("DVL CRC Error!");
+		}
+	} 
+	else {
+		send_rf_comm(strMsg);
+	}
+
 	String strData = "{13|" + get_rtc_time() + "," +
 		               "4|" + get_state() + "," +
 						"2|" + String(fwd_leak_detected()) + "," +
 						"3|" + String(aft_leak_detected()) + "," +
 						"1|" + String(get_depth()) + ","
 						"38|" + String(get_rpm(get_main_motor_precision_throttle())) + "," +
+		                m_strDVLData + "," +
 						//"10|" + get_leonardo_pressure_str() + "," +
 						//"11|" + get_leonardo_temp_str() + "," +*/
 						//"14|" + String(get_imuorientation_x()) + "," + //heading
@@ -266,6 +299,8 @@ void loop() {
 	
 	timer2Hz.tick();
 	timer4Hz.tick();
+
+	read_dvl();
 
 	//check leak sensors and override any state that has been set
 	if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
