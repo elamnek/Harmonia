@@ -111,6 +111,7 @@
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="sensors\DVL.cpp" />
     <ClCompile Include="sensors\RPM_sensor.cpp" />
     <ClCompile Include="sensors\bag_pressure_sensor.cpp" />
     <ClCompile Include="Harmonia.ino">
@@ -121,6 +122,7 @@
     <ClCompile Include="states\state_run_2.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="sensors\DVL.h" />
     <ClInclude Include="sensors\RPM_sensor.h" />
     <ClInclude Include="sensors\bag_pressure_sensor.h" />
     <ClInclude Include="comms\rf_comms.h" />

@@ -4,7 +4,6 @@
 
 #include "state_run_2.h"
 
-#include "..\sensors\pressure_sensor.h"
 #include "..\sensors\IMU.h"
 #include "..\control\pumps.h"
 #include "..\control\pushrod.h"

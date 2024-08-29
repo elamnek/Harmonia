@@ -4,7 +4,7 @@
 
 #include "state_static_trim_2.h"
 
-#include "..\sensors\pressure_sensor.h"
+#include "..\sensors\depth_sensor.h"
 #include "..\sensors\leonardo_sensors.h"
 #include "..\control\pumps.h"
 #include "..\control\pushrod.h"

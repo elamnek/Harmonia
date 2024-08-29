@@ -4,7 +4,6 @@
 
 #include "state_dynamic_trim.h"
 
-#include "..\sensors\pressure_sensor.h"
 #include "..\sensors\IMU.h"
 #include "..\control\pumps.h"
 #include "..\control\pushrod.h"

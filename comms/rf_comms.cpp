@@ -7,7 +7,6 @@
 #include "..\sensors\RTC.h"
 #include "..\sensors\IMU.h"
 #include "..\sensors\leonardo_sensors.h"
-#include "..\sensors\pressure_sensor.h"
 #include "..\control\pushrod.h"
 #include "..\control\pumps.h"
 
