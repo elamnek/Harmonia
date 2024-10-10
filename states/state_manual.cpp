@@ -8,6 +8,7 @@
 #include "..\control\pushrod.h"
 #include "..\control\servos.h"
 #include "..\control\main_motor_precision.h"
+#include "..\sensors\DVL.h"
 
 
 void apply_manual_command() {
@@ -53,6 +54,23 @@ void apply_manual_command() {
 		}
 		else if (strRemoteCommand == "RUDDER") {
 			command_servo_relative(strRemoteCommand, strRemoteParam.toInt());
+		}
+
+		else if (strRemoteCommand == "DVLON") {
+			//send_rf_comm("DVLON");
+			enable_acoustic_dvl();
+		}
+		else if (strRemoteCommand == "DVLOFF") {
+			//send_rf_comm("DVLOFF");
+			disable_acoustic_dvl();
+		}
+		else if (strRemoteCommand == "DVLCALIBRATE") {
+			//send_rf_comm("DVLCALIBRATE");
+			calibrate_dvl();
+		}
+		else if (strRemoteCommand == "DVLDEADRECKON") {
+			//send_rf_comm("DVLDEADRECKON");
+			start_dvl_deadreckoning();
 		}
 			
 	}

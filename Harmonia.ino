@@ -47,6 +47,8 @@
 //#include "data\sdcard.h"
 #include "helpers.h"
 
+#define serialDVL Serial2
+
 int m_intCounter = 0;
 
 boolean blnReadyToRun = false;
@@ -93,7 +95,9 @@ void setup() {
 	init_pushrod();
 	init_main_motor_precision();
 	init_watersensors();
-	init_dvl();
+	//init_dvl();
+
+	serialDVL.begin(115200, SERIAL_8N1);
 
 	String msg = init_powersensor();
 	if (msg.length() > 0) {
@@ -175,18 +179,18 @@ bool timer2Hz_interrupt(void*) {
 	if (strMsg.length() == 0) {
 		if (strtoul(get_wrp_checksum(), 0, 16) == get_wrp_crc8_result() && strtoul(get_wrz_checksum(), 0, 16) == get_wrz_crc8_result()) {
 			
-			m_strDVLData = "10|" + String(get_dvldeadreckoning_x()) + "," +
-				"10|" + String(get_dvldeadreckoning_y()) + "," +
-				"10|" + String(get_dvldeadreckoning_z()) + "," +
-				"10|" + String(get_dvldeadreckoning_roll()) + "," +
-				"10|" + String(get_dvldeadreckoning_pitch()) + "," +
-				"10|" + String(get_dvldeadreckoning_yaw()) + "," +
-				"10|" + String(get_dvldeadreckoning_stdDev()) + "," +
-				"10|" + String(get_dvldeadreckoning_status()) + "," +
-				"10|" + String(get_dvlvelocity_x()) + "," +
-				"10|" + String(get_dvlvelocity_y()) + "," +
-				"10|" + String(get_dvlvelocity_z()) + "," +
-				"10|" + String(get_dvlvelocity_alt());
+			m_strDVLData = "46|" + String(get_dvldeadreckoning_x()) + "," +
+				"47|" + String(get_dvldeadreckoning_y()) + "," +
+				"48|" + String(get_dvldeadreckoning_z()) + "," +
+				"49|" + String(get_dvldeadreckoning_roll()) + "," +
+				"50|" + String(get_dvldeadreckoning_pitch()) + "," +
+				"51|" + String(get_dvldeadreckoning_yaw()) + "," +
+				"52|" + String(get_dvldeadreckoning_stdDev()) + "," +
+				"53|" + String(get_dvldeadreckoning_status()) + "," +
+				"54|" + String(get_dvlvelocity_x()) + "," +
+				"55|" + String(get_dvlvelocity_y()) + "," +
+				"56|" + String(get_dvlvelocity_z()) + "," +
+				"57|" + String(get_dvlvelocity_alt());
 
 		}
 		else {
@@ -209,10 +213,10 @@ bool timer2Hz_interrupt(void*) {
 						//"14|" + String(get_imuorientation_x()) + "," + //heading
 						//"15|" + String(get_imuorientation_y()) + "," + //pitch
 						//"16|" + String(get_imuorientation_z()) + "," + //roll
-		    //            "32|" + String(get_imuacceleration_x()) + "," + 
-		    //            "33|" + String(get_imuacceleration_y()) + "," + 
-		    //            "34|" + String(get_imuacceleration_z()) + "," +
-		    //            "45|" + String(get_imucal()) + "," +
+		                //"32|" + String(get_imuacceleration_x()) + "," + 
+		                //"33|" + String(get_imuacceleration_y()) + "," + 
+		                //"34|" + String(get_imuacceleration_z()) + "," +
+		                //"45|" + String(get_imucal()) + "," +
 						"17|" + String(get_pushrod_pos()) + "," +
 						"19|" + String(get_waterpressure()) + "," +
 						"18|" + String(get_bagpressure()) + "," +

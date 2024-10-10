@@ -70,7 +70,7 @@ String m_strMessage;
 
 String init_dvl() {
 
-	serialDVL.begin(115200, SERIAL_8N1);
+	
     
 	//serialDVL.print("wcp,3"); //set serial output - all output excluding the deprecated wrx and wrt sentences
 	//serialDVL.println("wcw\n"); //get protocal version
@@ -79,7 +79,7 @@ String init_dvl() {
 	//serialDVL.print("wcs,,,,,0<=1,");
 
 	//serialDVL.println("wcv\n");
-    delay(3000);
+    //delay(3000);
 
     //m_strMessage = "";
 

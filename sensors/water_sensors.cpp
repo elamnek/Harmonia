@@ -13,9 +13,9 @@ void init_watersensors() {
 }
 
 int fwd_leak_detected() {
-	//old blue sensor board
-	//normal state of pins = 1 changes to 0 if water touches sensor  track
-	if (digitalRead(m_intFwdWaterSensorPin) == 0){
+	//new red sensor board
+	//normal state of pins = 0 changes to 1 if water touches sensor  track
+	if (digitalRead(m_intFwdWaterSensorPin) == 1){
 		return 1;	
 	}
 	return 0;
