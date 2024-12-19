@@ -7,16 +7,12 @@
 #include "..\helpers.h"
 
 
-double m_dblAftPitchSP, m_intFwdThrottle, m_intRevThrottle, m_dblDirectionSP;
+double m_dblAftPitchSP, m_intFwdThrottle, m_intRevThrottle, m_dblDirectionSP, m_dblK_Y, m_dblK_Z;
 int m_intFwdDive0Pos, m_intAftRudder0Pos;
 unsigned long m_lngRunLength, m_lngTrimEndTP, m_lngFwdEndTP, m_lngRevEndTP, m_lngTimeStart;
 boolean blnThrottleZeroed = false;
 boolean blnServosZeroed = false;
-
 double m_dblStartX = 0;
-
-double m_dblK_Y = 50;
-double m_dblK_Z = 75;
 
 void init_run_3(String strParams) {
 
@@ -25,6 +21,8 @@ void init_run_3(String strParams) {
 	m_intFwdDive0Pos = get_sep_part_dbl(strParams, '|', 1);
 	m_intAftRudder0Pos = get_sep_part_dbl(strParams, '|', 2);
 	m_intFwdThrottle = get_sep_part_dbl(strParams, '|', 3);
+	m_dblK_Y = get_sep_part_dbl(strParams, '|', 4);
+	m_dblK_Z = get_sep_part_dbl(strParams, '|', 5);
 	
 	//set 0 positions of control planes at start of run
 	command_servo("SERVOFWDDIVE", m_intFwdDive0Pos, 0);
@@ -57,21 +55,21 @@ boolean adjust_run_3(double dblX, double dblY,double dblZ) {
 		commmand_main_motor_precision(0);
 		return true;
 	}
-
 	//still in run
+	
 	//adjust rudder
 	double dblYError = dblY;
-	int intRudderOutput = -round(dblYError * m_dblK_Y);
+	int intRudderOutput = round(dblYError * m_dblK_Y);
 	if (intRudderOutput > 30) { intRudderOutput = 30; }
 	if (intRudderOutput < -30) { intRudderOutput = -30; }
 	command_servo("SERVOAFTRUDDER", m_intAftRudder0Pos + intRudderOutput, intRudderOutput);
 
 	//adjust dive
 	double dblZError = dblZ;
-	int intDiveOutput = -round(dblZError * m_dblK_Z);
+	int intDiveOutput = round(dblZError * m_dblK_Z);
 	if (intDiveOutput > 30) { intDiveOutput = 30; }
 	if (intDiveOutput < -30) { intDiveOutput = -30; }
-	command_servo("SERVOFWDDIVE", m_intAftRudder0Pos + intDiveOutput, intDiveOutput);
+	command_servo("SERVOFWDDIVE", m_intFwdDive0Pos + intDiveOutput, intDiveOutput);
 
 	return false;
 

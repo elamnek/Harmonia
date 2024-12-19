@@ -474,47 +474,11 @@ void loop() {
 	
 	case RUN:
 
-		boolean blnRunDone = adjust_run_3(get_dvldeadreckoning_x(), get_dvldeadreckoning_y(), get_dvlvelocity_z());
+		boolean blnRunDone = adjust_run_3(get_dvldeadreckoning_x(), get_dvldeadreckoning_y(), get_dvldeadreckoning_z());
 		if (blnRunDone) {		
 			state = MANL;
 			command_pump("INFLATE", 255);
 		}
-
-		//allow for manual adjustments while running
-		//apply_manual_command();
-
-		//if (!blnReadyToRun) {
-		//	//adjust until trim achieved 
-		//	boolean blnDepthTrim = adjust_depth_2();
-		//	//boolean blnPitchTrim = adjust_pitch_2(get_imuorientation_y()); 
-		//	// 
-		//	if (blnDepthTrim) {
-		//		blnReadyToRun = true;
-		//		command_pushrod("REVERSE", 0);
-		//		delay(200);
-		//		command_pump("DEFLATE", 0);
-
-		//		run_start_2(get_imuorientation_x());
-		//	}
-		//}
-		//else {
-		//	boolean blnRunDone = adjust_run_2(get_imuorientation_x(), get_imuorientation_y());
-		//	if (blnRunDone) {
-		//		
-		//		//just inflate and go into manual state
-		//		//command_pump("INFLATE", 255);
-		//		state = IDLE;
-		//		blnReadyToRun = false;
-		//		
-		//		//when run is complete - maintain depth and pitch until state is changed
-		//		//static_trim_reset();
-		//		//adjust_depth_2();
-		//		//adjust_pitch_2(get_imuorientation_y());
-		//		
-		//	}
-		//}
-
-		//clear_rf_command();
 
 		break;
 	case SERVO_TEST:

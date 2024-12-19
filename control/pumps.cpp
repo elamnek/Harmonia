@@ -27,7 +27,6 @@ void command_pump(String strCommand, int intValue) {
 		return; 
 	}
 
-
 	//default to both LEDs off
 	//red_led_off(); //red for deflate
 	//yellow_led_off(); //yellow for inflate
