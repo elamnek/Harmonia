@@ -476,7 +476,8 @@ void loop() {
 
 		boolean blnRunDone = adjust_run_3(get_dvldeadreckoning_x(), get_dvldeadreckoning_y(), get_dvlvelocity_z());
 		if (blnRunDone) {		
-			state = IDLE;			
+			state = MANL;
+			command_pump("INFLATE", 255);
 		}
 
 		//allow for manual adjustments while running
