@@ -90,6 +90,9 @@
     <ClInclude Include="sensors\DVL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="states\state_run_3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sensors\RTC.cpp">
@@ -163,6 +166,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="sensors\DVL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="states\state_run_3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

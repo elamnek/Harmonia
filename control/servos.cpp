@@ -8,7 +8,7 @@
 
 int m_intFwdDiveServoPin = 13;
 int m_intAftDiveServoPin = 4;
-int m_intAftRudderServoPin = 5;
+int m_intAftRudderServoPin = 4; //this was pin 5 but rudder is now using dive plane servo
 
 Servo m_servoFwdDive;
 Servo m_servoAftDive;

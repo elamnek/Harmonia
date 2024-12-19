@@ -25,11 +25,12 @@
 
 //harmonia libraries
 #include "states\state_manual.h"
-#include "states\state_static_trim.h"
+//#include "states\state_static_trim.h"
 #include "states\state_static_trim_2.h"
 #include "states\state_dynamic_trim.h"
 #include "states\state_run.h"
 #include "states\state_run_2.h"
+#include "states\state_run_3.h"
 #include "control\pumps.h"
 #include "control\main_motor_precision.h"
 #include "control\servos.h"
@@ -89,13 +90,13 @@ void setup() {
 	init_rf_comms();
 	send_rf_comm("Harmonia is awake - stored time is: " + get_rtc_time());
 
-	init_leds();
+	//init_leds();
 	init_servos();
 	init_pumps();
 	init_pushrod();
 	init_main_motor_precision();
 	init_watersensors();
-	//init_dvl();
+	init_dvl();
 
 	serialDVL.begin(115200, SERIAL_8N1);
 
@@ -235,7 +236,7 @@ bool timer2Hz_interrupt(void*) {
 	strData = strData + String(lngElapsed);*/
 
 	//if in alarm state need to flash orange light
-	if (state == ALARM) { toggle_orange_led(); }
+	//if (state == ALARM) { toggle_orange_led(); }
 
 	m_intCounter = m_intCounter + 1;
 	if (m_intCounter < 2) {
@@ -307,15 +308,15 @@ void loop() {
 	read_dvl();
 
 	//check leak sensors and override any state that has been set
-	if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
-		state = ALARM;		
-	}
-	else {
-		//ignore these if leak detected
-		if (state != REMOTE) {
-			//read_leonardo(); //this updates sensor data coming from leonardo - don't need this data in remote state	
-		}
-	}
+	//if (fwd_leak_detected() == 1 || aft_leak_detected() == 1) { 
+	//	state = ALARM;		
+	//}
+	//else {
+	//	//ignore these if leak detected
+	//	if (state != REMOTE) {
+	//		//read_leonardo(); //this updates sensor data coming from leonardo - don't need this data in remote state	
+	//	}
+	//}
 
 	//check for new commands coming from desktop remote
 	check_rf_comms(); 
@@ -342,13 +343,14 @@ void loop() {
 		if (strRemoteCommand == "STATIC_TRIM") {
 			state = STATIC_TRIM;
 			init_static_trim_2(get_remote_param().toFloat(),0);
+			send_rf_comm("STATIC_TRIM INIT");
 			clear_rf_command();
 		}
 		if (strRemoteCommand == "RUN") { 	
 			
 			state = RUN;
-			init_run(get_remote_param());
-			run_start();
+			init_run_3(get_remote_param());
+			run_start_3(get_dvldeadreckoning_x());
 			clear_rf_command();
 			
 			//String strError = init_imu(); //this will reset heading to 0 so sub needs to be correct direction when run starts
@@ -486,10 +488,10 @@ void loop() {
 	
 	case RUN:
 
-		//boolean blnRunDone = adjust_run(get_imuorientation_x(), get_imuorientation_y());
-		/*if (blnRunDone) {		
+		boolean blnRunDone = adjust_run_3(get_dvldeadreckoning_y(), get_dvlvelocity_alt());
+		if (blnRunDone) {		
 			state = IDLE;			
-		}*/
+		}
 
 		//allow for manual adjustments while running
 		//apply_manual_command();

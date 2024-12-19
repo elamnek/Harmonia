@@ -4,6 +4,7 @@
 
 #include "pumps.h"
 #include "..\comms\LEDs.h"
+#include "..\sensors\bag_pressure_sensor.h"
 
 int m_intPumpPinDir = 3;
 int m_intPumpPinPWM = 2;
@@ -19,17 +20,25 @@ void init_pumps() {
 void command_pump(String strCommand, int intValue) {
 
 	
+	//safety
+	if (get_bagpressure() > 1045) { 
+		digitalWrite(m_intPumpPinDir, HIGH);
+		analogWrite(m_intPumpPinPWM, 0);
+		return; 
+	}
+
+
 	//default to both LEDs off
-	red_led_off(); //red for deflate
-	yellow_led_off(); //yellow for inflate
+	//red_led_off(); //red for deflate
+	//yellow_led_off(); //yellow for inflate
 
 	if (strCommand == "INFLATE") {
 		digitalWrite(m_intPumpPinDir, HIGH);
 		analogWrite(m_intPumpPinPWM, intValue);
 		m_intStatus = intValue;
 		if (intValue > 0) {
-			yellow_led_on();
-			red_led_off();
+			//yellow_led_on();
+			//red_led_off();
 		}	
 	}
 	else if (strCommand == "DEFLATE") {
@@ -37,8 +46,8 @@ void command_pump(String strCommand, int intValue) {
 		analogWrite(m_intPumpPinPWM, intValue);
 		m_intStatus = -intValue;
 		if (intValue > 0) {
-			yellow_led_off();
-			red_led_on();
+			//yellow_led_off();
+			//red_led_on();
 		}	
 	}
 }

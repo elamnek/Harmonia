@@ -72,6 +72,10 @@ void apply_manual_command() {
 			//send_rf_comm("DVLDEADRECKON");
 			start_dvl_deadreckoning();
 		}
+		else if (strRemoteCommand == "MOTORINIT") {
+			send_rf_comm("MOTORINIT");
+			init_main_motor_precision();
+		}
 			
 	}
 

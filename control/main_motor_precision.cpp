@@ -13,6 +13,8 @@ int m_intThrottlePrecision = 0;
 
 void init_main_motor_precision() {
 	
+	delay(1000);
+
 	mc.reinitialize();    // Bytes: 0x96 0x74
 	mc.disableCrc();      // Bytes: 0x8B 0x04 0x7B 0x43
 	mc.clearResetFlag();  // Bytes: 0xA9 0x00 0x04
@@ -27,6 +29,8 @@ void init_main_motor_precision() {
 	//Configure motor 1
 	mc.setMaxAcceleration(1, 300);
 	mc.setMaxDeceleration(1, 300);
+
+	delay(1000);
 }
 
 void commmand_main_motor_precision(int intValue) {
