@@ -349,28 +349,14 @@ void loop() {
 		if (strRemoteCommand == "RUN") { 	
 			
 			state = RUN;
+
+			//make sure pump is switched of when run starts
+			command_pump("INFLATE", 0);
+
 			init_run_3(get_remote_param());
 			run_start_3(get_dvldeadreckoning_x());
 			clear_rf_command();
 			
-			//String strError = init_imu(); //this will reset heading to 0 so sub needs to be correct direction when run starts
-			//if (strError.length() > 0) {
-			//	state = IDLE;
-			//	send_rf_comm(strError + " RUN aborted");
-			//}
-			//else {
-			//	send_rf_comm("IMU re-started successfully - going into RUN state");
-			//state = RUN;
-			//	blnReadyToRun = false;
-			//init_run(get_remote_param());
-			//clear_rf_command();
-			//}	
-
-			//state = RUN;
-			//blnReadyToRun = false;
-			//init_run_2(get_remote_param());
-			//clear_rf_command();
-
 		}
 		if (strRemoteCommand == "CYCLE") {
 			state = CYCLE;
@@ -488,7 +474,7 @@ void loop() {
 	
 	case RUN:
 
-		boolean blnRunDone = adjust_run_3(get_dvldeadreckoning_y(), get_dvlvelocity_alt());
+		boolean blnRunDone = adjust_run_3(get_dvldeadreckoning_x(), get_dvldeadreckoning_y(), get_dvlvelocity_z());
 		if (blnRunDone) {		
 			state = IDLE;			
 		}

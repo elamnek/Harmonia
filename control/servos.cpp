@@ -7,7 +7,7 @@
 #include "..\helpers.h"
 
 int m_intFwdDiveServoPin = 13;
-int m_intAftDiveServoPin = 4;
+//int m_intAftDiveServoPin = 5;
 int m_intAftRudderServoPin = 4; //this was pin 5 but rudder is now using dive plane servo
 
 Servo m_servoFwdDive;
@@ -23,11 +23,11 @@ int m_intCurrentRudder = 148;
 void init_servos() {
 	
 	m_servoFwdDive.attach(m_intFwdDiveServoPin);
-	m_servoAftDive.attach(m_intAftDiveServoPin);
+	//m_servoAftDive.attach(m_intAftDiveServoPin);
 	m_servoAftRudder.attach(m_intAftRudderServoPin);
 
-	m_servoFwdDive.write(120);
-	m_servoAftDive.write(120);
+	m_servoFwdDive.write(130);
+	//m_servoAftDive.write(120);
 	m_servoAftRudder.write(120);
 	
 }
@@ -38,10 +38,10 @@ void command_servo(String strCommand,int intValue,int intPos) {
 		m_servoFwdDive.write(intValue);
 		m_intFwdDiveServoPos = intPos;
 	}
-	else if (strCommand == "SERVOAFTDIVE"){
-		m_servoAftDive.write(intValue);
-		m_intAftDiveServoPos = intPos;
-	}
+	//else if (strCommand == "SERVOAFTDIVE"){
+	//	m_servoAftDive.write(intValue);
+	//	m_intAftDiveServoPos = intPos;
+	//}
 	else if (strCommand == "SERVOAFTRUDDER"){
 		m_servoAftRudder.write(intValue);
 		m_intAftRudderServoPos = intPos;

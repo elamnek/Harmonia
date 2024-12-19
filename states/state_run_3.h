@@ -14,7 +14,7 @@ void init_run_3(String strParams);
 
 void run_start_3(double dblX);
 
-boolean adjust_run_3(double dblX,double dblY,double dblAlt);
+boolean adjust_run_3(double dblX,double dblY,double dblZ);
 
 #endif
 
