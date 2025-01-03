@@ -17,15 +17,22 @@ void init_pumps() {
 
 }
 
+//pump safety
+boolean pressure_maxed() {
+	
+	if (get_bagpressure() > 2000.00) {
+		digitalWrite(m_intPumpPinDir, HIGH);
+		analogWrite(m_intPumpPinPWM, 0);
+
+		return true;
+	}
+	return false;
+}
+
 void command_pump(String strCommand, int intValue) {
 
 	
-	//safety
-	if (get_bagpressure() > 1045) { 
-		digitalWrite(m_intPumpPinDir, HIGH);
-		analogWrite(m_intPumpPinPWM, 0);
-		return; 
-	}
+	
 
 	//default to both LEDs off
 	//red_led_off(); //red for deflate

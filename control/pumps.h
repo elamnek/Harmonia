@@ -12,6 +12,8 @@
 
 void init_pumps();
 
+boolean pressure_maxed();
+
 void command_pump(String strCommand, int intValue);
 
 int get_pump_status();

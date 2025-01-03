@@ -14,7 +14,12 @@ void init_run_3(String strParams);
 
 void run_start_3(double dblX);
 
-boolean adjust_run_3(double dblX,double dblY,double dblZ);
+boolean adjust_run_3(double dblX,double dblVelocityX);
+
+double get_maxdvlvelocity();
+double get_dvlacceleration();
+double get_maxdvlacceleration();
+double get_dvlcrashstopdist();
 
 #endif
 

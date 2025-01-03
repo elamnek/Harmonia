@@ -11,7 +11,7 @@ String init_rpmsensor() {
 	//nothing to do here - wire has already been initialised
 }
 
-//returns bag pressure in hPa
+//rpm
 int32_t get_rpm(int intThrottle) {
 
 	if (intThrottle == 0) { return 0; }
